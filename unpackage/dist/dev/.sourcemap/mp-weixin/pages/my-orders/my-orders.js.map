@@ -1,0 +1,1 @@
+{"version":3,"file":"my-orders.js","sources":["../../../HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvbXktb3JkZXJzL215LW9yZGVycy52dWU"],"sourcesContent":["import MiniProgramPage from 'E:/uni-app/uniapp-cursor/MilkTest/pages/my-orders/my-orders.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;;;;;;;;;AACA,GAAG,WAAW,eAAe;"}
