@@ -1,37 +1,50 @@
-# MilkStore
+# 奶茶点单小程序
 
-#### 介绍
-MilkStore是一个专注于存储管理的开源项目，提供高效的数据存取与管理方案，适用于各类应用的数据存储需求。
+## 项目介绍
+这是一个基于uni-app开发的奶茶点单微信小程序，提供奶茶店线上点单、外卖配送等功能，让用户随时随地享受美味奶茶。
 
-#### 软件架构
-软件架构说明
+## 功能特点
+- 精美首页：展示热门产品、优惠活动和会员福利
+- 便捷点单：分类浏览奶茶产品，自定义口味和配料
+- 订单管理：查看历史订单，追踪配送状态
+- 会员系统：会员积分、优惠券和专属活动
 
+## 技术架构
+- 前端框架：uni-app
+- 开发语言：Vue 3 (组合式API)
+- 样式处理：SCSS
+- 状态管理：Vuex/Pinia
+- 部署平台：微信小程序
 
-#### 安装教程
+## 页面结构
+- 首页：展示轮播图、活动推广和功能入口
+- 点单页：奶茶产品列表和详情
+- 订单页：订单列表和详情
+- 我的页面：用户信息和会员功能
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 安装和运行
+1. 克隆仓库
+```bash
+git clone https://gitee.com/team-615/milk-store.git
+```
 
-#### 使用说明
+2. 安装依赖
+```bash
+npm install
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+3. 运行项目
+```bash
+npm run dev:mp-weixin
+```
 
-#### 参与贡献
+4. 使用微信开发者工具打开项目目录下的`dist/dev/mp-weixin`文件夹
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+## 项目截图
+(项目截图将在开发完成后添加)
 
+## 贡献指南
+欢迎提交Issue和Pull Request，一起完善这个项目！
 
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+## 许可证
+MIT License
