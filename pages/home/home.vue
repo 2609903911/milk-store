@@ -22,7 +22,7 @@
             <swiper
                 class="banner-swiper"
                 circular
-                indicator-dots
+                :indicator-dots="false"
                 autoplay
                 :interval="3000"
                 @change="swiperChange"
@@ -58,13 +58,26 @@
                     </view>
                 </swiper-item>
             </swiper>
+
+            <!-- 自定义进度条指示器 -->
+            <view class="custom-indicator">
+                <view
+                    v-for="(item, index) in bannerList"
+                    :key="index"
+                    class="indicator-dot"
+                    :class="{ active: currentSwiper === index }"
+                ></view>
+            </view>
         </view>
 
         <!-- 顶部用户信息栏 -->
         <view class="user-info-wrapper">
             <view class="user-info">
                 <view class="avatar-container">
-                    <image class="avatar" src="/static/logo.png"></image>
+                    <image
+                        class="avatar"
+                        src="/static/images/avatar.png"
+                    ></image>
                 </view>
                 <view class="user-greeting">
                     <text>Hi~醇厚的生椰西瓜</text>
@@ -78,44 +91,50 @@
         <!-- 服务选择区 -->
         <view class="service-container">
             <view class="service-item" @click="navigateToOrder">
-                <image class="service-icon" src="/static/logo.png"></image>
-                <view class="service-title">
-                    <text>到店取餐</text>
-                </view>
-                <view class="service-desc">
-                    <text>在线点，到店取</text>
-                </view>
+                <image
+                    class="service-full-image"
+                    src="/static/images/tostore.png"
+                    mode="widthFix"
+                ></image>
             </view>
+            <view class="service-divider"></view>
             <view class="service-item">
-                <image class="service-icon" src="/static/logo.png"></image>
-                <view class="service-title">
-                    <text>外卖配送</text>
-                </view>
-                <view class="service-desc">
-                    <text>在线点，超快达</text>
-                </view>
-                <view class="service-tag">
-                    <text>最高享免配</text>
-                </view>
+                <image
+                    class="service-full-image"
+                    src="/static/images/takeout.png"
+                    mode="widthFix"
+                ></image>
             </view>
         </view>
 
         <!-- 功能区 -->
         <view class="function-container">
             <view class="function-item">
-                <image class="function-icon" src="/static/logo.png"></image>
+                <image
+                    class="function-icon"
+                    src="/static/images/panda-store.png"
+                ></image>
                 <text>熊猫币商城</text>
             </view>
             <view class="function-item">
-                <image class="function-icon" src="/static/logo.png"></image>
+                <image
+                    class="function-icon"
+                    src="/static/images/student-card.png"
+                ></image>
                 <text>学子卡</text>
             </view>
             <view class="function-item">
-                <image class="function-icon" src="/static/logo.png"></image>
+                <image
+                    class="function-icon"
+                    src="/static/images/double-cups.png"
+                ></image>
                 <text>一起喝</text>
             </view>
             <view class="function-item">
-                <image class="function-icon" src="/static/logo.png"></image>
+                <image
+                    class="function-icon"
+                    src="/static/images/position.png"
+                ></image>
                 <text>签到</text>
             </view>
         </view>
@@ -239,7 +258,7 @@ const navigateToOrder = () => {
 .banner-wrapper {
     position: relative;
     width: 100%;
-    height: 650rpx;
+    height: 550rpx;
     overflow: hidden;
     margin-top: 0;
 }
@@ -269,15 +288,35 @@ const navigateToOrder = () => {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60%;
+    height: 70%;
     background: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0),
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.05) 20%,
         rgba(0, 0, 0, 0.1) 30%,
-        rgba(0, 0, 0, 0.3) 70%,
-        rgba(0, 0, 0, 0.5)
+        rgba(0, 0, 0, 0.2) 50%,
+        rgba(0, 0, 0, 0.4) 70%,
+        rgba(0, 0, 0, 0.6) 100%
     );
-    z-index: 2;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.banner-bg::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.3) 70%,
+        rgba(0, 0, 0, 0.5) 100%
+    );
+    z-index: 4;
+    pointer-events: none;
 }
 
 // 轮播图区域
@@ -305,13 +344,34 @@ const navigateToOrder = () => {
 .banner-tag {
     display: inline-block;
     padding: 5rpx 20rpx;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 30rpx;
     font-size: 24rpx;
     margin-bottom: 20rpx;
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.2);
-    max-width: 300rpx;
+    color: #333;
+    background-color: transparent;
+    position: relative;
+    width: fit-content;
+}
+
+.banner-tag::before,
+.banner-tag::after {
+    content: '';
+    position: absolute;
+    width: 10rpx;
+    height: 10rpx;
+    border-color: #333;
+    border-style: solid;
+}
+
+.banner-tag::before {
+    top: 0;
+    left: 0;
+    border-width: 1px 0 0 1px;
+}
+
+.banner-tag::after {
+    bottom: 0;
+    right: 0;
+    border-width: 0 1px 1px 0;
 }
 
 .banner-title {
@@ -319,8 +379,9 @@ const navigateToOrder = () => {
     font-weight: bold;
     line-height: 1.3;
     margin-bottom: 20rpx;
-    color: #fff;
-    text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+    color: #333;
+    font-family: cursive, 'PingFang SC', 'Microsoft YaHei', serif;
+    text-shadow: none;
 
     text {
         display: block;
@@ -330,8 +391,8 @@ const navigateToOrder = () => {
 .banner-desc {
     font-size: 24rpx;
     margin-bottom: 30rpx;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.2);
+    color: #333;
+    text-shadow: none;
 
     text {
         display: block;
@@ -341,13 +402,14 @@ const navigateToOrder = () => {
 
 .order-btn {
     display: inline-block;
-    padding: 15rpx 40rpx;
-    background-color: rgba(255, 255, 255, 0.3);
+    padding: 10rpx 30rpx;
+    background-color: rgba(0, 0, 0, 0.2);
     color: #fff;
-    border-radius: 40rpx;
-    font-size: 28rpx;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    max-width: 200rpx;
+    border-radius: 30rpx;
+    font-size: 26rpx;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    max-width: 160rpx;
+    text-align: center;
 }
 
 // 顶部用户信息栏
@@ -357,7 +419,7 @@ const navigateToOrder = () => {
     justify-content: center;
     margin-top: -50rpx;
     z-index: 10;
-    padding: 0 20rpx;
+    padding: 0 0.85rem;
 }
 
 .user-info {
@@ -387,15 +449,15 @@ const navigateToOrder = () => {
     flex: 1;
     margin-left: 20rpx;
     font-size: 32rpx;
-    font-weight: bold;
+    font-weight: 500;
     color: #333;
 }
 
 .coupon-btn {
-    padding: 10rpx 30rpx;
+    padding: 18rpx 30rpx;
     background-color: #1296db;
     color: #fff;
-    border-radius: 30rpx;
+    border-radius: 10rpx;
     font-size: 28rpx;
 }
 
@@ -403,36 +465,23 @@ const navigateToOrder = () => {
 .service-container {
     display: flex;
     margin: 20rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    padding: 0;
+    overflow: hidden;
 }
 
 .service-item {
     flex: 1;
-    background-color: #fff;
-    border-radius: 20rpx;
-    padding: 30rpx;
-    margin: 0 10rpx;
     position: relative;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
 }
 
-.service-icon {
-    width: 120rpx;
-    height: 120rpx;
-    margin-bottom: 20rpx;
-}
-
-.service-title {
-    font-size: 36rpx;
-    font-weight: bold;
-    color: #a67c52;
-    margin-bottom: 10rpx;
-}
-
-.service-desc {
-    font-size: 24rpx;
-    color: #999;
+.service-full-image {
+    width: 100%;
+    height: auto;
 }
 
 .service-tag {
@@ -444,6 +493,13 @@ const navigateToOrder = () => {
     font-size: 20rpx;
     padding: 5rpx 10rpx;
     border-radius: 10rpx;
+}
+
+.service-divider {
+    width: 1rpx;
+    height: 70%;
+    background-color: #ddd;
+    align-self: center;
 }
 
 // 功能区
@@ -460,7 +516,7 @@ const navigateToOrder = () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 24rpx;
+    font-size: 20rpx;
 }
 
 .function-icon {
@@ -556,4 +612,29 @@ const navigateToOrder = () => {
 
 // 会员福利区
 // 已移至优惠活动区右下方
+
+// 自定义进度条指示器
+.custom-indicator {
+    position: absolute;
+    bottom: 120rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: space-between;
+    width: 160rpx;
+    height: 6rpx;
+    z-index: 30;
+}
+
+.indicator-dot {
+    width: 30rpx;
+    height: 6rpx;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3rpx;
+    transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+    background-color: #ffffff;
+}
 </style> 

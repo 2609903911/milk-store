@@ -7,7 +7,7 @@ const _sfc_main = {
     common_vendor.ref("我的");
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0
+        a: common_assets._imports_0$1
       };
     };
   }

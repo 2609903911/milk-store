@@ -78,15 +78,21 @@ const _sfc_main = {
         }),
         c: common_vendor.o(swiperChange),
         d: common_vendor.o(navigateToOrder),
-        e: common_assets._imports_0,
+        e: common_vendor.f(bannerList.value, (item, index, i0) => {
+          return {
+            a: index,
+            b: currentSwiper.value === index ? 1 : ""
+          };
+        }),
         f: common_assets._imports_0,
-        g: common_vendor.o(navigateToOrder),
-        h: common_assets._imports_0,
-        i: common_assets._imports_0,
-        j: common_assets._imports_0,
-        k: common_assets._imports_0,
-        l: common_assets._imports_0,
-        m: common_assets._imports_0
+        g: common_assets._imports_1,
+        h: common_vendor.o(navigateToOrder),
+        i: common_assets._imports_2,
+        j: common_assets._imports_3,
+        k: common_assets._imports_4,
+        l: common_assets._imports_5,
+        m: common_assets._imports_6,
+        n: common_assets._imports_0$1
       };
     };
   }
