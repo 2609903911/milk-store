@@ -1,4 +1,5 @@
 {
-  "navigationBarTitleText": "奶茶店",
+  "navigationBarTitleText": "",
+  "navigationStyle": "custom",
   "usingComponents": {}
 }

@@ -3,13 +3,15 @@
 		{
 			"path": "pages/home/home",
 			"style": {
-				"navigationBarTitleText": "奶茶店"
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/order/order",
 			"style": {
-				"navigationBarTitleText": "点单"
+				"navigationBarTitleText": "点单",
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -62,6 +64,12 @@
 				"text": "我的"
 			}
 		]
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^uni-(.*)": "@/uni_modules/uni-$1/components/uni-$1/uni-$1.vue"
+		}
 	},
 	"uniIdRouter": {}
 }

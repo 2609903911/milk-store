@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "点单",
+  "navigationStyle": "custom",
   "usingComponents": {}
 }

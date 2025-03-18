@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sources":["../../../HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvaWNvbi1leGFtcGxlcy9pbmRleC52dWU"],"sourcesContent":["import MiniProgramPage from 'E:/uni-app/uniapp-cursor/MilkTest/pages/icon-examples/index.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,WAAW,eAAe;"}
