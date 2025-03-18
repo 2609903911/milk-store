@@ -155,7 +155,10 @@
                     </view>
                 </view>
                 <view class="promo-image">
-                    <image src="/static/logo.png" mode="aspectFit"></image>
+                    <image
+                        src="/static/images/promo-image.png"
+                        mode="aspectFit"
+                    ></image>
                 </view>
             </view>
 
@@ -190,6 +193,46 @@
                         </view>
                     </view>
                 </view>
+            </view>
+        </view>
+
+        <!-- 会员新鲜事 -->
+        <view class="member-news">
+            <image
+                class="member-bg-image"
+                src="/static/images/news-background.png"
+                mode="aspectFill"
+            ></image>
+            <view class="member-tag">
+                <text>会员新鲜事</text>
+            </view>
+            <view class="member-content">
+                <view class="news-content">
+                    <view class="news-badge"
+                        >条件温馨提醒：会员白金包积极外卡专享</view
+                    >
+                    <view class="news-title">周一对口令抢免单</view>
+                    <view class="news-subtitle">(限量10000份)</view>
+                    <view class="news-time">活动时间：周一 10:00-23:59</view>
+                    <view class="action-btn">立即参与</view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 品牌动态 -->
+        <view class="brand-news">
+            <view class="brand-header">
+                <view class="brand-label-box">
+                    <text class="brand-label">品牌动态</text>
+                </view>
+                <text class="brand-more">点击了解></text>
+            </view>
+            <view class="brand-content">
+                <view class="brand-title">
+                    <text class="brand-name">茶百道诚邀</text>
+                    <text class="brand-highlight">加盟</text>
+                </view>
+                <view class="brand-desc">招商热线：投资有风险</view>
             </view>
         </view>
 
@@ -251,7 +294,7 @@ const navigateToOrder = () => {
 <style lang="scss" scoped>
 .container {
     background-color: #f5f5f5;
-    padding-bottom: 100rpx;
+    padding-bottom: 30rpx;
 }
 
 // 轮播图包装器
@@ -448,15 +491,15 @@ const navigateToOrder = () => {
 .user-greeting {
     flex: 1;
     margin-left: 20rpx;
-    font-size: 32rpx;
+    font-size: 25rpx;
     font-weight: 500;
     color: #333;
 }
 
 .coupon-btn {
     padding: 18rpx 30rpx;
-    background-color: #1296db;
-    color: #fff;
+    background-color: #ebc93a;
+    color: #7c592b;
     border-radius: 10rpx;
     font-size: 28rpx;
 }
@@ -469,6 +512,7 @@ const navigateToOrder = () => {
     border-radius: 20rpx;
     padding: 0;
     overflow: hidden;
+    position: relative;
 }
 
 .service-item {
@@ -496,10 +540,13 @@ const navigateToOrder = () => {
 }
 
 .service-divider {
-    width: 1rpx;
-    height: 70%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    height: 65%;
     background-color: #ddd;
-    align-self: center;
 }
 
 // 功能区
@@ -520,23 +567,23 @@ const navigateToOrder = () => {
 }
 
 .function-icon {
-    width: 80rpx;
-    height: 80rpx;
+    width: 65rpx;
+    height: 65rpx;
     margin-bottom: 10rpx;
 }
 
 // 优惠活动区
 .promo-container {
     display: flex;
-    margin: 0 20rpx 100rpx 20rpx;
-    height: 450rpx;
+    margin: 0 20rpx 0 20rpx;
+    height: 11.125rem;
 }
 
 .promo-left {
     width: 50%;
     background-color: #fff;
     border-radius: 20rpx;
-    padding: 30rpx;
+    padding: 25rpx;
     margin-right: 10rpx;
     position: relative;
     height: 100%;
@@ -556,7 +603,7 @@ const navigateToOrder = () => {
     flex: 1;
     background-color: #fff;
     border-radius: 20rpx;
-    padding: 30rpx;
+    padding: 25rpx;
     margin-bottom: 20rpx;
     position: relative;
 }
@@ -565,7 +612,7 @@ const navigateToOrder = () => {
     flex: 1;
     background-color: #fff;
     border-radius: 20rpx;
-    padding: 30rpx;
+    padding: 25rpx;
     position: relative;
 }
 
@@ -576,33 +623,42 @@ const navigateToOrder = () => {
 }
 
 .promo-title {
-    font-size: 32rpx;
-    font-weight: bold;
-    margin-bottom: 10rpx;
+    font-size: 0.875rem;
+    font-weight: bolder;
+    font-family: fangsong;
+    margin-bottom: 0.25rem;
 }
 
 .promo-desc {
-    font-size: 24rpx;
+    font-size: 22rpx;
     color: #a67c52;
-    margin-bottom: 20rpx;
+    margin-bottom: 16rpx;
 }
 
 .promo-btn {
     display: inline-block;
-    padding: 10rpx 20rpx;
-    background-color: #a67c52;
+    padding: 8rpx 16rpx;
+    background-color: #c4ae87;
     color: #fff;
     border-radius: 30rpx;
-    font-size: 24rpx;
+    font-size: 22rpx;
     width: fit-content;
+}
+
+.promo-right .promo-btn {
+    background-color: transparent;
+    color: #c6b28d;
+    padding: 0;
+    border-radius: 0;
 }
 
 .promo-image {
     position: absolute;
-    bottom: 20rpx;
-    right: 20rpx;
-    width: 150rpx;
-    height: 150rpx;
+    bottom: 38%;
+    right: 50%;
+    transform: translate(50%, 50%);
+    width: 160rpx;
+    height: 160rpx;
 
     image {
         width: 100%;
@@ -610,8 +666,11 @@ const navigateToOrder = () => {
     }
 }
 
-// 会员福利区
-// 已移至优惠活动区右下方
+.promo-left .promo-image {
+    bottom: 30%;
+    right: 30%;
+    transform: translateY(50%);
+}
 
 // 自定义进度条指示器
 .custom-indicator {
@@ -636,5 +695,158 @@ const navigateToOrder = () => {
 
 .indicator-dot.active {
     background-color: #ffffff;
+}
+
+// 会员新鲜事
+.member-news {
+    margin: 20rpx 20rpx 0 20rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    padding: 0;
+    height: 280rpx;
+    position: relative;
+    overflow: hidden;
+}
+
+.member-bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.member-content {
+    position: relative;
+    z-index: 2;
+    padding: 20rpx 25rpx;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.news-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.news-badge {
+    font-size: 20rpx;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 5rpx 0;
+    margin-bottom: 15rpx;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.news-title {
+    font-size: 1.2rem;
+    font-family: serif;
+    font-weight: bold;
+    margin-bottom: 0.15625rem;
+    color: #d4d819;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.news-subtitle {
+    font-size: 24rpx;
+    font-weight: bold;
+    color: #fff;
+    color: #d4d819;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.news-time {
+    font-size: 20rpx;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 10rpx;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn {
+    display: inline-block;
+    padding: 8rpx 20rpx;
+    background-color: #fff;
+    color: #8e72a0;
+    border-radius: 30rpx;
+    font-size: 22rpx;
+    margin-top: 15rpx;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// 品牌动态
+.brand-news {
+    margin: 20rpx 20rpx 0rpx 20rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    padding: 20rpx;
+}
+
+.brand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20rpx;
+}
+
+.brand-label-box {
+    display: inline-block;
+    padding: 5rpx 10rpx;
+    background-color: #0065b0;
+    border-radius: 5rpx;
+}
+
+.brand-label {
+    font-size: 22rpx;
+    font-weight: normal;
+    color: #fff;
+}
+
+.brand-more {
+    color: #c6b28d;
+    font-size: 22rpx;
+}
+
+.brand-content {
+    display: flex;
+    flex-direction: column;
+    padding: 10rpx 0;
+}
+
+.brand-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    margin-bottom: 10rpx;
+}
+
+.brand-name {
+    color: #333;
+}
+
+.brand-highlight {
+    color: #c6b28d;
+}
+
+.brand-desc {
+    font-size: 22rpx;
+    color: #999;
+}
+
+.member-tag {
+    position: absolute;
+    top: 15rpx;
+    right: 15rpx;
+    background-color: rgba(86, 149, 249, 0.9);
+    color: #fff;
+    font-size: 22rpx;
+    padding: 6rpx 12rpx;
+    border-radius: 8rpx;
+    z-index: 3;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style> 
