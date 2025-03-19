@@ -1,6 +1,14 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const _sfc_main = {
+if (!Math) {
+  OrderDetail();
+}
+const OrderDetail = () => "../components/order-detail.js";
+const _sfc_main = /* @__PURE__ */ Object.assign({
+  components: {
+    OrderDetail
+  }
+}, {
   __name: "order",
   setup(__props) {
     const deliveryType = common_vendor.ref("self");
@@ -246,6 +254,40 @@ const _sfc_main = {
     };
     common_vendor.ref(1);
     common_vendor.ref(0);
+    const productDetailVisible = common_vendor.ref(false);
+    const selectedProduct = common_vendor.ref({});
+    const openProductDetail = (category, product) => {
+      common_vendor.index.__f__("log", "at pages/order/order.vue:607", "打开商品详情", category.name, product.name);
+      selectedProduct.value = { ...product, category: category.name };
+      common_vendor.nextTick$1(() => {
+        setTimeout(() => {
+          productDetailVisible.value = true;
+          common_vendor.index.__f__("log", "at pages/order/order.vue:614", "弹框状态已设置为显示");
+        }, 100);
+      });
+    };
+    const updateDetailVisible = (val) => {
+      common_vendor.index.__f__("log", "at pages/order/order.vue:621", "更新弹框可见状态:", val);
+      productDetailVisible.value = val;
+    };
+    const handleAddToCart = (item) => {
+      common_vendor.index.__f__("log", "at pages/order/order.vue:627", "添加到购物车", item);
+    };
+    const openPromoDetail = (item) => {
+      const product = findProductByTitle(item.title);
+      if (product) {
+        selectedProduct.value = product;
+        productDetailVisible.value = true;
+      }
+    };
+    const findProductByTitle = (title) => {
+      for (const category of categories.value) {
+        const product = category.products.find((p) => p.name === title);
+        if (product)
+          return product;
+      }
+      return null;
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: deliveryType.value === "self" ? 1 : "",
@@ -261,7 +303,8 @@ const _sfc_main = {
         f: common_vendor.f(promoList.value, (item, index, i0) => {
           return {
             a: item.image,
-            b: index
+            b: index,
+            c: common_vendor.o(($event) => openPromoDetail(item), index)
           };
         }),
         g: common_vendor.o(onScroll),
@@ -291,7 +334,8 @@ const _sfc_main = {
                 b: common_vendor.t(product.name),
                 c: common_vendor.t(product.desc),
                 d: common_vendor.t(product.price),
-                e: pIndex
+                e: common_vendor.o(($event) => openProductDetail(category, product), pIndex),
+                f: pIndex
               };
             }),
             c: index,
@@ -317,11 +361,17 @@ const _sfc_main = {
           };
         })
       }, {
-        t: isPromoHidden.value ? 1 : ""
+        t: isPromoHidden.value ? 1 : "",
+        v: common_vendor.o(updateDetailVisible),
+        w: common_vendor.o(handleAddToCart),
+        x: common_vendor.p({
+          visible: productDetailVisible.value,
+          product: selectedProduct.value
+        })
       });
     };
   }
-};
+});
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-93207a4f"]]);
 _sfc_main.__runtimeHooks = 1;
 wx.createPage(MiniProgramPage);

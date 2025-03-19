@@ -104,6 +104,7 @@
                         class="promo-item"
                         v-for="(item, index) in promoList"
                         :key="index"
+                        @click="openPromoDetail(item)"
                     >
                         <image
                             class="promo-image"
@@ -196,7 +197,16 @@
                                         <text class="product-price"
                                             >¥{{ product.price }}</text
                                         >
-                                        <view class="add-to-cart">+</view>
+                                        <view
+                                            class="add-to-cart"
+                                            @click.stop="
+                                                openProductDetail(
+                                                    category,
+                                                    product
+                                                )
+                                            "
+                                            >+</view
+                                        >
                                     </view>
                                 </view>
                             </view>
@@ -251,11 +261,31 @@
                 </view>
             </view>
         </view>
+
+        <!-- 商品详情弹框 -->
+        <OrderDetail
+            :visible="productDetailVisible"
+            @update:visible="updateDetailVisible"
+            :product="selectedProduct"
+            @add-to-cart="handleAddToCart"
+        ></OrderDetail>
     </view>
 </template>
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
+// 使用easycom自动注册组件，不需要手动导入
+// 组件名称已在pages.json中注册
+
+// 显式导入order-detail组件以确保微信小程序能正确加载
+import OrderDetail from '../components/order-detail.vue'
+
+// 组件注册
+defineOptions({
+    components: {
+        OrderDetail
+    }
+})
 
 // 配送方式
 const deliveryType = ref('self') // 'self' 自取, 'delivery' 外卖
@@ -568,8 +598,56 @@ function onPageScroll(e) {
     }
 }
 
+// 商品详情弹框相关
+const productDetailVisible = ref(false)
+const selectedProduct = ref({})
+
+// 打开商品详情弹框
+const openProductDetail = (category, product) => {
+    console.log('打开商品详情', category.name, product.name)
+    selectedProduct.value = { ...product, category: category.name }
+
+    // 使用nextTick确保数据已更新
+    nextTick(() => {
+        setTimeout(() => {
+            productDetailVisible.value = true
+            console.log('弹框状态已设置为显示')
+        }, 100)
+    })
+}
+
+// 更新弹框可见状态
+const updateDetailVisible = (val) => {
+    console.log('更新弹框可见状态:', val)
+    productDetailVisible.value = val
+}
+
+// 处理添加到购物车
+const handleAddToCart = (item) => {
+    console.log('添加到购物车', item)
+    // 这里可以添加购物车逻辑
+}
+
 // 在uni-app中，onPageScroll是页面生命周期函数，不需要显式调用
 // uni-app会自动调用页面的onPageScroll方法
+
+// 在 script setup 部分添加新的方法
+const openPromoDetail = (item) => {
+    // 根据促销图片的标题找到对应的商品
+    const product = findProductByTitle(item.title)
+    if (product) {
+        selectedProduct.value = product
+        productDetailVisible.value = true
+    }
+}
+
+const findProductByTitle = (title) => {
+    for (const category of categories.value) {
+        const product = category.products.find((p) => p.name === title)
+        if (product) return product
+    }
+    return null
+}
 </script>
 
 <style lang="scss" scoped>
