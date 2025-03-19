@@ -1,244 +1,251 @@
 <template>
-    <view class="container">
-        <!-- 轮播图区域 -->
-        <view class="banner-wrapper">
-            <!-- 轮播图背景 -->
-            <view class="banner-bg">
-                <image
-                    v-for="(item, index) in bannerList"
-                    :key="index"
-                    class="banner-bg-image"
-                    :src="item.image"
-                    mode="aspectFill"
-                    :style="{
-                        opacity: currentSwiper === index ? 1 : 0,
-                        backgroundColor: item.bgColor
-                    }"
-                ></image>
-                <view class="banner-bg-mask"></view>
-            </view>
-
-            <!-- 轮播图内容 -->
-            <swiper
-                class="banner-swiper"
-                circular
-                :indicator-dots="false"
-                autoplay
-                :interval="3000"
-                @change="swiperChange"
-                @click="navigateToOrder"
-            >
-                <swiper-item v-for="(item, index) in bannerList" :key="index">
-                    <view class="banner-item">
-                        <view class="banner-content">
-                            <view class="banner-tag">
-                                <text>{{ item.tag }}</text>
-                            </view>
-                            <view class="banner-title">
-                                <text
-                                    v-for="(line, idx) in item.title"
-                                    :key="idx"
-                                    >{{ line }}</text
-                                >
-                            </view>
-                            <view class="banner-desc">
-                                <text
-                                    v-for="(line, idx) in item.desc"
-                                    :key="idx"
-                                    >{{ line }}</text
-                                >
-                            </view>
-                            <view
-                                class="order-btn"
-                                @click.stop="navigateToOrder"
-                            >
-                                <text>立即下单></text>
-                            </view>
-                        </view>
-                    </view>
-                </swiper-item>
-            </swiper>
-
-            <!-- 自定义进度条指示器 -->
-            <view class="custom-indicator">
-                <view
-                    v-for="(item, index) in bannerList"
-                    :key="index"
-                    class="indicator-dot"
-                    :class="{ active: currentSwiper === index }"
-                ></view>
-            </view>
-        </view>
-
-        <!-- 顶部用户信息栏 -->
-        <view class="user-info-wrapper">
-            <view class="user-info">
-                <view class="avatar-container">
+    <scroll-view class="scroll-container" scroll-y>
+        <view class="container">
+            <!-- 轮播图区域 -->
+            <view class="banner-wrapper">
+                <!-- 轮播图背景 -->
+                <view class="banner-bg">
                     <image
-                        class="avatar"
-                        src="/static/images/avatar.png"
+                        v-for="(item, index) in bannerList"
+                        :key="index"
+                        class="banner-bg-image"
+                        :src="item.image"
+                        mode="aspectFill"
+                        :style="{
+                            opacity: currentSwiper === index ? 1 : 0,
+                            backgroundColor: item.bgColor
+                        }"
                     ></image>
-                </view>
-                <view class="user-greeting">
-                    <text>Hi~醇厚的生椰西瓜</text>
-                </view>
-                <view class="coupon-btn">
-                    <text>优惠券 0</text>
-                </view>
-            </view>
-        </view>
-
-        <!-- 服务选择区 -->
-        <view class="service-container">
-            <view class="service-item" @click="navigateToOrder">
-                <image
-                    class="service-full-image"
-                    src="/static/images/tostore.png"
-                    mode="widthFix"
-                ></image>
-            </view>
-            <view class="service-divider"></view>
-            <view class="service-item">
-                <image
-                    class="service-full-image"
-                    src="/static/images/takeout.png"
-                    mode="widthFix"
-                ></image>
-            </view>
-        </view>
-
-        <!-- 功能区 -->
-        <view class="function-container">
-            <view class="function-item">
-                <image
-                    class="function-icon"
-                    src="/static/images/panda-store.png"
-                ></image>
-                <text>熊猫币商城</text>
-            </view>
-            <view class="function-item">
-                <image
-                    class="function-icon"
-                    src="/static/images/student-card.png"
-                ></image>
-                <text>学子卡</text>
-            </view>
-            <view class="function-item">
-                <image
-                    class="function-icon"
-                    src="/static/images/double-cups.png"
-                ></image>
-                <text>一起喝</text>
-            </view>
-            <view class="function-item">
-                <image
-                    class="function-icon"
-                    src="/static/images/position.png"
-                ></image>
-                <text>签到</text>
-            </view>
-        </view>
-
-        <!-- 优惠活动区 -->
-        <view class="promo-container">
-            <!-- 左侧 - 入社群享30元专属券包 -->
-            <view class="promo-left">
-                <view class="promo-content">
-                    <view class="promo-title">
-                        <text>入社群享30元专属券包</text>
-                    </view>
-                    <view class="promo-desc">
-                        <text>天天9.9元喝奶茶</text>
-                    </view>
-                    <view class="promo-btn">
-                        <text>点击入群</text>
-                    </view>
-                </view>
-                <view class="promo-image">
-                    <image
-                        src="/static/images/promo-image.png"
-                        mode="aspectFit"
-                    ></image>
-                </view>
-            </view>
-
-            <!-- 右侧 - 上下结构 -->
-            <view class="promo-right">
-                <!-- 上部分 - 周一天天9.9元喝 -->
-                <view class="promo-right-top">
-                    <view class="promo-content">
-                        <view class="promo-title">
-                            <text>周一天天9.9元喝</text>
-                        </view>
-                        <view class="promo-desc">
-                            <text>指定饮品9.9元券包</text>
-                        </view>
-                        <view class="promo-btn">
-                            <text>立即领券></text>
-                        </view>
-                    </view>
+                    <view class="banner-bg-mask"></view>
                 </view>
 
-                <!-- 下部分 - 会员邀新有礼 -->
-                <view class="promo-right-bottom">
-                    <view class="promo-content">
-                        <view class="promo-title">
-                            <text>会员邀新有礼</text>
-                        </view>
-                        <view class="promo-desc">
-                            <text>邀新友得苗条保温杯</text>
-                        </view>
-                        <view class="promo-btn">
-                            <text>立即邀请></text>
-                        </view>
-                    </view>
-                </view>
-            </view>
-        </view>
-
-        <!-- 会员新鲜事 -->
-        <view class="member-news">
-            <image
-                class="member-bg-image"
-                src="/static/images/news-background.png"
-                mode="aspectFill"
-            ></image>
-            <view class="member-tag">
-                <text>会员新鲜事</text>
-            </view>
-            <view class="member-content">
-                <view class="news-content">
-                    <view class="news-badge"
-                        >条件温馨提醒：会员白金包积极外卡专享</view
+                <!-- 轮播图内容 -->
+                <swiper
+                    class="banner-swiper"
+                    circular
+                    :indicator-dots="false"
+                    autoplay
+                    :interval="3000"
+                    @change="swiperChange"
+                    @click="navigateToOrder"
+                >
+                    <swiper-item
+                        v-for="(item, index) in bannerList"
+                        :key="index"
                     >
-                    <view class="news-title">周一对口令抢免单</view>
-                    <view class="news-subtitle">(限量10000份)</view>
-                    <view class="news-time">活动时间：周一 10:00-23:59</view>
-                    <view class="action-btn">立即参与</view>
-                </view>
-            </view>
-        </view>
+                        <view class="banner-item">
+                            <view class="banner-content">
+                                <view class="banner-tag">
+                                    <text>{{ item.tag }}</text>
+                                </view>
+                                <view class="banner-title">
+                                    <text
+                                        v-for="(line, idx) in item.title"
+                                        :key="idx"
+                                        >{{ line }}</text
+                                    >
+                                </view>
+                                <view class="banner-desc">
+                                    <text
+                                        v-for="(line, idx) in item.desc"
+                                        :key="idx"
+                                        >{{ line }}</text
+                                    >
+                                </view>
+                                <view
+                                    class="order-btn"
+                                    @click.stop="navigateToOrder"
+                                >
+                                    <text>立即下单></text>
+                                </view>
+                            </view>
+                        </view>
+                    </swiper-item>
+                </swiper>
 
-        <!-- 品牌动态 -->
-        <view class="brand-news">
-            <view class="brand-header">
-                <view class="brand-label-box">
-                    <text class="brand-label">品牌动态</text>
+                <!-- 自定义进度条指示器 -->
+                <view class="custom-indicator">
+                    <view
+                        v-for="(item, index) in bannerList"
+                        :key="index"
+                        class="indicator-dot"
+                        :class="{ active: currentSwiper === index }"
+                    ></view>
                 </view>
-                <text class="brand-more">点击了解></text>
             </view>
-            <view class="brand-content">
-                <view class="brand-title">
-                    <text class="brand-name">茶百道诚邀</text>
-                    <text class="brand-highlight">加盟</text>
-                </view>
-                <view class="brand-desc">招商热线：投资有风险</view>
-            </view>
-        </view>
 
-        <!-- 会员福利区 -->
-        <!-- 已移至优惠活动区右下方 -->
-    </view>
+            <!-- 顶部用户信息栏 -->
+            <view class="user-info-wrapper">
+                <view class="user-info">
+                    <view class="avatar-container">
+                        <image
+                            class="avatar"
+                            src="/static/images/avatar.png"
+                        ></image>
+                    </view>
+                    <view class="user-greeting">
+                        <text>Hi~醇厚的生椰西瓜</text>
+                    </view>
+                    <view class="coupon-btn">
+                        <text>优惠券 0</text>
+                    </view>
+                </view>
+            </view>
+
+            <!-- 服务选择区 -->
+            <view class="service-container">
+                <view class="service-item" @click="navigateToOrder">
+                    <image
+                        class="service-full-image"
+                        src="/static/images/tostore.png"
+                        mode="widthFix"
+                    ></image>
+                </view>
+                <view class="service-divider"></view>
+                <view class="service-item">
+                    <image
+                        class="service-full-image"
+                        src="/static/images/takeout.png"
+                        mode="widthFix"
+                    ></image>
+                </view>
+            </view>
+
+            <!-- 功能区 -->
+            <view class="function-container">
+                <view class="function-item">
+                    <image
+                        class="function-icon"
+                        src="/static/images/panda-store.png"
+                    ></image>
+                    <text>熊猫币商城</text>
+                </view>
+                <view class="function-item">
+                    <image
+                        class="function-icon"
+                        src="/static/images/student-card.png"
+                    ></image>
+                    <text>学子卡</text>
+                </view>
+                <view class="function-item">
+                    <image
+                        class="function-icon"
+                        src="/static/images/double-cups.png"
+                    ></image>
+                    <text>一起喝</text>
+                </view>
+                <view class="function-item">
+                    <image
+                        class="function-icon"
+                        src="/static/images/position.png"
+                    ></image>
+                    <text>签到</text>
+                </view>
+            </view>
+
+            <!-- 优惠活动区 -->
+            <view class="promo-container">
+                <!-- 左侧 - 入社群享30元专属券包 -->
+                <view class="promo-left">
+                    <view class="promo-content">
+                        <view class="promo-title">
+                            <text>入社群享30元专属券包</text>
+                        </view>
+                        <view class="promo-desc">
+                            <text>天天9.9元喝奶茶</text>
+                        </view>
+                        <view class="promo-btn">
+                            <text>点击入群</text>
+                        </view>
+                    </view>
+                    <view class="promo-image">
+                        <image
+                            src="/static/images/promo-image.png"
+                            mode="aspectFit"
+                        ></image>
+                    </view>
+                </view>
+
+                <!-- 右侧 - 上下结构 -->
+                <view class="promo-right">
+                    <!-- 上部分 - 周一天天9.9元喝 -->
+                    <view class="promo-right-top">
+                        <view class="promo-content">
+                            <view class="promo-title">
+                                <text>周一天天9.9元喝</text>
+                            </view>
+                            <view class="promo-desc">
+                                <text>指定饮品9.9元券包</text>
+                            </view>
+                            <view class="promo-btn">
+                                <text>立即领券></text>
+                            </view>
+                        </view>
+                    </view>
+
+                    <!-- 下部分 - 会员邀新有礼 -->
+                    <view class="promo-right-bottom">
+                        <view class="promo-content">
+                            <view class="promo-title">
+                                <text>会员邀新有礼</text>
+                            </view>
+                            <view class="promo-desc">
+                                <text>邀新友得苗条保温杯</text>
+                            </view>
+                            <view class="promo-btn">
+                                <text>立即邀请></text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+
+            <!-- 会员新鲜事 -->
+            <view class="member-news">
+                <image
+                    class="member-bg-image"
+                    src="/static/images/news-background.png"
+                    mode="aspectFill"
+                ></image>
+                <view class="member-tag">
+                    <text>会员新鲜事</text>
+                </view>
+                <view class="member-content">
+                    <view class="news-content">
+                        <view class="news-badge"
+                            >条件温馨提醒：会员白金包积极外卡专享</view
+                        >
+                        <view class="news-title">周一对口令抢免单</view>
+                        <view class="news-subtitle">(限量10000份)</view>
+                        <view class="news-time"
+                            >活动时间：周一 10:00-23:59</view
+                        >
+                        <view class="action-btn">立即参与</view>
+                    </view>
+                </view>
+            </view>
+
+            <!-- 品牌动态 -->
+            <view class="brand-news">
+                <view class="brand-header">
+                    <view class="brand-label-box">
+                        <text class="brand-label">品牌动态</text>
+                    </view>
+                    <text class="brand-more">点击了解></text>
+                </view>
+                <view class="brand-content">
+                    <view class="brand-title">
+                        <text class="brand-name">茶百道诚邀</text>
+                        <text class="brand-highlight">加盟</text>
+                    </view>
+                    <view class="brand-desc">招商热线：投资有风险</view>
+                </view>
+            </view>
+
+            <!-- 会员福利区 -->
+            <!-- 已移至优惠活动区右下方 -->
+        </view>
+    </scroll-view>
 </template>
 
 <script setup>
@@ -292,6 +299,11 @@ const navigateToOrder = () => {
 </script>
 
 <style lang="scss" scoped>
+.scroll-container {
+    height: 100vh;
+    width: 100%;
+}
+
 .container {
     background-color: #f5f5f5;
     padding-bottom: 30rpx;

@@ -1,77 +1,83 @@
 {
-	"pages": [
-		{
-			"path": "pages/home/home",
-			"style": {
-				"navigationBarTitleText": "",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/order/order",
-			"style": {
-				"navigationBarTitleText": "点单",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/my-orders/my-orders",
-			"style": {
-				"navigationBarTitleText": "订单"
-			}
-		},
-		{
-			"path": "pages/profile/profile",
-			"style": {
-				"navigationBarTitleText": "我的"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "奶茶店",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	},
-	"tabBar": {
-		"color": "#7A7E83",
-		"selectedColor": "#1296db",
-		"borderStyle": "black",
-		"backgroundColor": "#ffffff",
-		"list": [
-			{
-				"pagePath": "pages/home/home",
-				"iconPath": "/static/tabbar/home.png",
-				"selectedIconPath": "/static/tabbar/home-active.png",
-				"text": "首页"
-			},
-			{
-				"pagePath": "pages/order/order",
-				"iconPath": "/static/tabbar/order.png",
-				"selectedIconPath": "/static/tabbar/order-active.png",
-				"text": "点单"
-			},
-			{
-				"pagePath": "pages/my-orders/my-orders",
-				"iconPath": "/static/tabbar/my-orders.png",
-				"selectedIconPath": "/static/tabbar/my-orders-active.png",
-				"text": "订单"
-			},
-			{
-				"pagePath": "pages/profile/profile",
-				"iconPath": "/static/tabbar/profile.png",
-				"selectedIconPath": "/static/tabbar/profile-active.png",
-				"text": "我的"
-			}
-		]
-	},
-	"easycom": {
-		"autoscan": true,
-		"custom": {
-			"^uni-(.*)": "@/uni_modules/uni-$1/components/uni-$1/uni-$1.vue",
-			"order-detail": "@/pages/components/order-detail.vue",
-			"order-cart": "@/pages/components/order-cart.vue"
-		}
-	},
-	"uniIdRouter": {}
+    "pages" : [
+        {
+            "path" : "pages/home/home",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "navigationStyle" : "custom"
+            }
+        },
+        {
+            "path" : "pages/order/order",
+            "style" : {
+                "navigationBarTitleText" : "点单",
+                "navigationStyle" : "custom"
+            }
+        },
+        {
+            "path" : "pages/my-orders/my-orders",
+            "style" : {
+                "navigationBarTitleText" : "订单"
+            }
+        },
+        {
+            "path" : "pages/profile/profile",
+            "style" : {
+                "navigationBarTitleText" : "我的"
+            }
+        },
+        {
+            "path" : "pages/order-confirm/order-confirm",
+            "style" : {
+                "navigationBarTitleText" : "确认订单"
+            }
+        }
+    ],
+    "globalStyle" : {
+        "navigationBarTextStyle" : "black",
+        "navigationBarTitleText" : "奶茶店",
+        "navigationBarBackgroundColor" : "#F8F8F8",
+        "backgroundColor" : "#F8F8F8"
+    },
+    "tabBar" : {
+        "color" : "#7A7E83",
+        "selectedColor" : "#1296db",
+        "borderStyle" : "black",
+        "backgroundColor" : "#ffffff",
+        "list" : [
+            {
+                "pagePath" : "pages/home/home",
+                "iconPath" : "/static/tabbar/home.png",
+                "selectedIconPath" : "/static/tabbar/home-active.png",
+                "text" : "首页"
+            },
+            {
+                "pagePath" : "pages/order/order",
+                "iconPath" : "/static/tabbar/order.png",
+                "selectedIconPath" : "/static/tabbar/order-active.png",
+                "text" : "点单"
+            },
+            {
+                "pagePath" : "pages/my-orders/my-orders",
+                "iconPath" : "/static/tabbar/my-orders.png",
+                "selectedIconPath" : "/static/tabbar/my-orders-active.png",
+                "text" : "订单"
+            },
+            {
+                "pagePath" : "pages/profile/profile",
+                "iconPath" : "/static/tabbar/profile.png",
+                "selectedIconPath" : "/static/tabbar/profile-active.png",
+                "text" : "我的"
+            }
+        ]
+    },
+    "easycom" : {
+        "autoscan" : true,
+        "custom" : {
+            "^uni-(.*)" : "@/uni_modules/uni-$1/components/uni-$1/uni-$1.vue",
+            "order-detail" : "@/pages/components/order-detail.vue",
+            "order-cart" : "@/pages/components/order-cart.vue"
+        }
+    },
+    "uniIdRouter" : {}
 }

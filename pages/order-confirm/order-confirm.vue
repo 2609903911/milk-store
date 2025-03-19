@@ -1,0 +1,409 @@
+<template>
+    <view class="order-confirm">
+        <!-- 商店信息 -->
+        <view class="shop-info">
+            <view class="shop-name-container">
+                <view class="tag">自取</view>
+                <view class="shop-name">九江万达店 ></view>
+            </view>
+            <view class="shop-distance">距您 1.5km</view>
+            <view class="shop-address"
+                >江西省九江市濂溪区万达广场3F层3028A</view
+            >
+            <view class="shop-phone">
+                <text>联系电话</text>
+                <text class="phone-number">13027261672</text>
+                <text class="copy-icon">复制</text>
+            </view>
+        </view>
+
+        <!-- 订单商品列表 -->
+        <view class="order-items">
+            <view class="order-title">
+                <text>订单详情</text>
+                <view class="drink-category">清爽夏日饮品推荐</view>
+            </view>
+
+            <!-- 商品列表 -->
+            <view class="product-list">
+                <view class="product-item">
+                    <image
+                        class="product-image"
+                        src="/static/images/new01.png"
+                    ></image>
+                    <view class="product-info">
+                        <view class="product-name">竹蔗芒打椰</view>
+                        <view class="product-specs">中杯，5分糖，少冰</view>
+                        <view class="product-quantity">×1</view>
+                    </view>
+                    <view class="product-price">¥16</view>
+                </view>
+
+                <view class="product-item">
+                    <image
+                        class="product-image"
+                        src="/static/images/new02.png"
+                    ></image>
+                    <view class="product-info">
+                        <view class="product-name">羽衣甘蓝轻畅杯(轻盈版)</view>
+                        <view class="product-specs">中杯，全糖，正常冰</view>
+                        <view class="product-quantity">×1</view>
+                    </view>
+                    <view class="product-price">¥18</view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 价格详情 -->
+        <view class="price-detail">
+            <view class="price-title">价格明细</view>
+
+            <view class="coupon-section">
+                <view class="coupon-tag">
+                    <image
+                        class="coupon-icon"
+                        src="/static/images/coupon-icon.png"
+                    ></image>
+                    <text>优惠券</text>
+                </view>
+                <view class="coupon-action">
+                    <text>暂不可用</text>
+                    <text class="arrow">></text>
+                </view>
+            </view>
+
+            <view class="total-section">
+                <text>合计</text>
+                <text class="total-price">¥34</text>
+            </view>
+        </view>
+
+        <!-- 集杯活动 -->
+        <view class="cup-collection">
+            <view class="collection-title">集杯活动</view>
+            <view class="collection-item">
+                <text>喝茶集点兑竹蔗芒茶杯（第二波）</text>
+                <text class="collection-count">本单预计可+1</text>
+            </view>
+        </view>
+
+        <!-- 支付方式 -->
+        <view class="payment-method">
+            <view class="payment-title">支付方式</view>
+            <view class="payment-options">
+                <view class="payment-option selected">
+                    <image
+                        class="payment-icon"
+                        src="/static/images/wechat-pay.png"
+                    ></image>
+                    <text>微信支付</text>
+                    <view class="check-icon">✓</view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 底部支付栏 -->
+        <view class="payment-bar">
+            <view class="payment-amount">
+                <text>待支付：</text>
+                <text class="amount">¥34</text>
+            </view>
+            <view class="pay-button">支付</view>
+        </view>
+    </view>
+</template>
+
+<script setup>
+// 页面逻辑将在这里实现
+</script>
+
+<style>
+.order-confirm {
+    padding-bottom: 120rpx;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+/* 商店信息 */
+.shop-info {
+    background-color: #fff;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+    border-radius: 10rpx;
+}
+
+.shop-name-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15rpx;
+}
+
+.tag {
+    background-color: #333;
+    color: #fff;
+    font-size: 24rpx;
+    padding: 4rpx 10rpx;
+    border-radius: 4rpx;
+    margin-right: 10rpx;
+}
+
+.shop-name {
+    font-size: 32rpx;
+    font-weight: 500;
+    color: #333;
+}
+
+.shop-distance {
+    font-size: 26rpx;
+    color: #666;
+    text-align: right;
+    margin-bottom: 10rpx;
+}
+
+.shop-address {
+    font-size: 28rpx;
+    color: #666;
+    margin-bottom: 20rpx;
+}
+
+.shop-phone {
+    display: flex;
+    align-items: center;
+    font-size: 28rpx;
+    color: #666;
+}
+
+.phone-number {
+    margin: 0 20rpx;
+    color: #333;
+}
+
+.copy-icon {
+    color: #999;
+}
+
+/* 订单商品列表 */
+.order-items {
+    background-color: #fff;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+    border-radius: 10rpx;
+}
+
+.order-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30rpx;
+    font-size: 30rpx;
+    color: #333;
+}
+
+.drink-category {
+    font-size: 24rpx;
+    color: #999;
+    background-color: #f0f0f0;
+    padding: 4rpx 12rpx;
+    border-radius: 20rpx;
+}
+
+.product-list {
+    padding-bottom: 10rpx;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    padding: 20rpx 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-image {
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: 8rpx;
+    margin-right: 20rpx;
+}
+
+.product-info {
+    flex: 1;
+}
+
+.product-name {
+    font-size: 28rpx;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.product-specs {
+    font-size: 24rpx;
+    color: #999;
+    margin-bottom: 10rpx;
+}
+
+.product-quantity {
+    font-size: 24rpx;
+    color: #666;
+}
+
+.product-price {
+    font-size: 30rpx;
+    color: #333;
+    font-weight: 500;
+}
+
+/* 价格详情 */
+.price-detail {
+    background-color: #fff;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+    border-radius: 10rpx;
+}
+
+.price-title {
+    font-size: 30rpx;
+    color: #333;
+    margin-bottom: 30rpx;
+}
+
+.coupon-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20rpx 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.coupon-tag {
+    display: flex;
+    align-items: center;
+}
+
+.coupon-icon {
+    width: 40rpx;
+    height: 40rpx;
+    margin-right: 10rpx;
+}
+
+.coupon-action {
+    display: flex;
+    align-items: center;
+    color: #ff6a6a;
+    font-size: 28rpx;
+}
+
+.arrow {
+    margin-left: 10rpx;
+}
+
+.total-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30rpx 0 10rpx;
+    font-size: 28rpx;
+    color: #333;
+}
+
+.total-price {
+    font-size: 36rpx;
+    font-weight: bold;
+}
+
+/* 集杯活动 */
+.cup-collection {
+    background-color: #fff;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+    border-radius: 10rpx;
+}
+
+.collection-title {
+    font-size: 30rpx;
+    color: #333;
+    margin-bottom: 20rpx;
+}
+
+.collection-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 28rpx;
+    color: #666;
+}
+
+.collection-count {
+    color: #0066cc;
+}
+
+/* 支付方式 */
+.payment-method {
+    background-color: #fff;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+    border-radius: 10rpx;
+}
+
+.payment-title {
+    font-size: 30rpx;
+    color: #333;
+    margin-bottom: 20rpx;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 20rpx 0;
+}
+
+.payment-icon {
+    width: 44rpx;
+    height: 44rpx;
+    margin-right: 20rpx;
+}
+
+.check-icon {
+    margin-left: auto;
+    color: #0066cc;
+    font-size: 32rpx;
+}
+
+/* 底部支付栏 */
+.payment-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100rpx;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30rpx;
+    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+    z-index: 999;
+}
+
+.payment-amount {
+    font-size: 28rpx;
+    color: #333;
+}
+
+.amount {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333;
+}
+
+.pay-button {
+    background-color: #0066cc;
+    color: #fff;
+    font-size: 32rpx;
+    padding: 15rpx 60rpx;
+    border-radius: 100rpx;
+}
+</style>

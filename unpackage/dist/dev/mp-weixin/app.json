@@ -3,7 +3,8 @@
     "pages/home/home",
     "pages/order/order",
     "pages/my-orders/my-orders",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/order-confirm/order-confirm"
   ],
   "window": {
     "navigationBarTextStyle": "black",
