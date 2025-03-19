@@ -3,8 +3,9 @@
         class="popup-container"
         :class="{ 'popup-show': visible }"
         @tap.stop="onBackgroundTap"
+        id="popup-container"
     >
-        <view class="popup-content" @tap.stop>
+        <view class="popup-content" @tap.stop="contentTap">
             <!-- 商品详情内容 -->
             <view class="product-detail">
                 <!-- 商品图片 -->
@@ -124,7 +125,10 @@
                         >-</view
                     >
                     <view class="quantity-value">{{ quantity }}</view>
-                    <view class="quantity-btn plus" @tap="increaseQuantity"
+                    <view
+                        class="quantity-btn plus"
+                        @tap="increaseQuantity"
+                        style="background-color: #006de7; color: #fff"
                         >+</view
                     >
                 </view>
@@ -177,14 +181,29 @@ const props = defineProps({
 const emit = defineEmits(['update:visible', 'add-to-cart'])
 
 // 点击背景
-const onBackgroundTap = () => {
-    closePopup()
+const onBackgroundTap = (e) => {
+    // 判断是否点击的是背景区域
+    // 在微信小程序中，target和currentTarget相同时表示点击的是当前元素本身
+    if (
+        e &&
+        e.target &&
+        e.currentTarget &&
+        e.target.id === e.currentTarget.id
+    ) {
+        closePopup()
+    } else {
+    }
 }
 
 // 关闭弹窗
 const closePopup = () => {
-    console.log('关闭弹窗')
+    // 先触发动画，然后更新可见状态
     emit('update:visible', false)
+}
+
+// 内容区域点击，阻止冒泡
+const contentTap = (e) => {
+    e.stopPropagation()
 }
 
 // 温度选项
@@ -279,7 +298,6 @@ const addToCart = () => {
 watch(
     () => props.visible,
     (newVal) => {
-        console.log('弹框可见性变更:', newVal)
         if (newVal) {
             // 当弹窗显示时，重置所有选项到默认值
             selectedTemp.value = '正常冰'
@@ -287,6 +305,16 @@ watch(
             selectedToppings.value = []
             selectedCup.value = '中杯'
             quantity.value = 1
+
+            // #ifdef MP-WEIXIN
+            // 确保在微信小程序中正确显示弹窗
+            nextTick(() => {
+                // 使用延迟确保微信小程序中的动画能正常执行
+                setTimeout(() => {
+                    // 这里可以添加额外的动画控制
+                }, 50)
+            })
+            // #endif
 
             // #ifdef H5
             // 确保在下一个渲染周期DOM更新后添加背景点击事件
@@ -302,6 +330,11 @@ watch(
                     })
                 }
             })
+            // #endif
+        } else {
+            // 弹窗隐藏时的处理
+            // #ifdef MP-WEIXIN
+            // 这里可以添加额外的微信小程序特定处理
             // #endif
         }
     },
@@ -334,28 +367,32 @@ page {
     left: 0;
     width: 100vw !important;
     height: 100vh !important;
-    overflow: hidden;
     z-index: 99999;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     background-color: rgba(0, 0, 0, 0);
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    pointer-events: none; /* 默认不接收点击事件 */
+    opacity: 0;
 }
 
 .popup-container.popup-show {
     background-color: rgba(0, 0, 0, 0.5);
+    pointer-events: auto; /* 显示时接收点击事件 */
+    opacity: 1;
 }
 
 .popup-content {
     background-color: #fff;
     width: 100%;
     border-radius: 24rpx 24rpx 0 0;
-    transform: translateY(100%);
-    transition: transform 0.3s;
+    transition: all 0.3s ease;
     max-height: 85vh;
     overflow-y: auto;
     overflow-x: hidden;
+    pointer-events: auto; /* 内容区域始终接收点击事件 */
+    transform: translateY(100%);
 }
 
 .popup-container.popup-show .popup-content {
@@ -380,11 +417,13 @@ page {
     visibility: hidden;
     opacity: 0;
     transition: all 0.3s ease;
+    pointer-events: none; /* 默认不接收点击事件 */
 }
 
 .popup-show {
     visibility: visible;
     opacity: 1;
+    pointer-events: auto; /* 显示时接收点击事件 */
 }
 
 .popup-content {
@@ -396,6 +435,7 @@ page {
     max-height: 85vh;
     overflow-y: auto;
     transform: translateY(100%);
+    pointer-events: auto; /* 内容区域始终接收点击事件 */
 }
 
 .popup-show .popup-content {
@@ -491,7 +531,7 @@ page {
 }
 
 .option-selected {
-    background-color: #1296db;
+    background-color: #006de7;
     color: #fff;
 }
 
@@ -559,9 +599,62 @@ page {
 
 .add-to-cart-btn {
     padding: 20rpx 40rpx;
-    background-color: #1296db;
+    background-color: #006de7;
     color: #fff;
     font-size: 28rpx;
     border-radius: 100rpx;
+}
+
+/* 添加动画过渡类 */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.popup-container.popup-show {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.popup-container.popup-show .popup-content {
+    animation: slideUp 0.3s ease forwards;
+}
+
+.popup-container:not(.popup-show) {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+.popup-container:not(.popup-show) .popup-content {
+    animation: slideDown 0.3s ease forwards;
 }
 </style>

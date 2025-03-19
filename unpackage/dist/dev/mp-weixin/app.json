@@ -43,5 +43,8 @@
       }
     ]
   },
-  "usingComponents": {}
+  "usingComponents": {
+    "order-detail": "/pages/components/order-detail",
+    "order-cart": "/pages/components/order-cart"
+  }
 }

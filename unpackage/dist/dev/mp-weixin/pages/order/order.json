@@ -2,6 +2,7 @@
   "navigationBarTitleText": "点单",
   "navigationStyle": "custom",
   "usingComponents": {
-    "order-detail": "../components/order-detail"
+    "order-detail": "../components/order-detail",
+    "order-cart": "../components/order-cart"
   }
 }

@@ -27,12 +27,16 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
-    const onBackgroundTap = () => {
-      closePopup();
+    const onBackgroundTap = (e) => {
+      if (e && e.target && e.currentTarget && e.target.id === e.currentTarget.id) {
+        closePopup();
+      }
     };
     const closePopup = () => {
-      common_vendor.index.__f__("log", "at pages/components/order-detail.vue:186", "关闭弹窗");
       emit("update:visible", false);
+    };
+    const contentTap = (e) => {
+      e.stopPropagation();
     };
     const temperatures = common_vendor.ref(["正常冰", "少冰", "去冰", "温", "热"]);
     const selectedTemp = common_vendor.ref("正常冰");
@@ -98,19 +102,22 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
     common_vendor.watch(
       () => props.visible,
       (newVal) => {
-        common_vendor.index.__f__("log", "at pages/components/order-detail.vue:282", "弹框可见性变更:", newVal);
         if (newVal) {
           selectedTemp.value = "正常冰";
           selectedSugar.value = "全糖";
           selectedToppings.value = [];
           selectedCup.value = "中杯";
           quantity.value = 1;
+          common_vendor.nextTick$1(() => {
+            setTimeout(() => {
+            }, 50);
+          });
         }
       },
       { immediate: true }
     );
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/components/order-detail.vue:320", "微信小程序组件挂载完成");
+      common_vendor.index.__f__("log", "at pages/components/order-detail.vue:353", "微信小程序组件挂载完成");
     });
     return (_ctx, _cache) => {
       return {
@@ -161,8 +168,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         l: common_vendor.o(increaseQuantity),
         m: common_vendor.t(totalPrice.value),
         n: common_vendor.o(addToCart),
-        o: common_vendor.o(() => {
-        }),
+        o: common_vendor.o(contentTap),
         p: __props.visible ? 1 : "",
         q: common_vendor.o(onBackgroundTap)
       };

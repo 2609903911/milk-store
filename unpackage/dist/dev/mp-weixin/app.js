@@ -18,8 +18,12 @@ const _sfc_main = {
     common_vendor.index.__f__("log", "at App.vue:10", "App Hide");
   }
 };
+const OrderDetail = () => "./pages/components/order-detail.js";
+const OrderCart = () => "./pages/components/order-cart.js";
 function createApp() {
   const app = common_vendor.createSSRApp(_sfc_main);
+  app.component("order-detail", OrderDetail);
+  app.component("order-cart", OrderCart);
   return {
     app
   };

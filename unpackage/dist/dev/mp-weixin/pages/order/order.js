@@ -1,12 +1,14 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 if (!Math) {
-  OrderDetail();
+  (OrderDetail + OrderCart)();
 }
 const OrderDetail = () => "../components/order-detail.js";
+const OrderCart = () => "../components/order-cart.js";
 const _sfc_main = /* @__PURE__ */ Object.assign({
   components: {
-    OrderDetail
+    OrderDetail,
+    OrderCart
   }
 }, {
   __name: "order",
@@ -257,27 +259,55 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:607", "打开商品详情", category.name, product.name);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:615", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
-      common_vendor.nextTick$1(() => {
-        setTimeout(() => {
-          productDetailVisible.value = true;
-          common_vendor.index.__f__("log", "at pages/order/order.vue:614", "弹框状态已设置为显示");
-        }, 100);
-      });
+      setTimeout(() => {
+        productDetailVisible.value = true;
+      }, 50);
     };
     const updateDetailVisible = (val) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:621", "更新弹框可见状态:", val);
-      productDetailVisible.value = val;
+      if (val === false) {
+        setTimeout(() => {
+          productDetailVisible.value = val;
+        }, 300);
+      } else {
+        productDetailVisible.value = val;
+      }
     };
+    const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:627", "添加到购物车", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:642", "添加到购物车", item);
+      if (!item) {
+        common_vendor.index.__f__("error", "at pages/order/order.vue:645", "添加到购物车的商品数据为空");
+        return;
+      }
+      common_vendor.nextTick$1(() => {
+        if (orderCartRef.value) {
+          orderCartRef.value.addToCart(item);
+        } else {
+          common_vendor.index.__f__("warn", "at pages/order/order.vue:655", "orderCartRef不存在，尝试其他方式获取组件");
+          const pages = getCurrentPages();
+          if (pages && pages.length > 0) {
+            const currentPage = pages[pages.length - 1];
+            if (currentPage.$refs && currentPage.$refs.orderCartRef) {
+              currentPage.$refs.orderCartRef.addToCart(item);
+            } else {
+              common_vendor.index.__f__("error", "at pages/order/order.vue:663", "无法获取购物车组件引用");
+            }
+          } else {
+            common_vendor.index.__f__("error", "at pages/order/order.vue:666", "无法获取当前页面实例");
+          }
+        }
+      });
     };
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        selectedProduct.value = product;
-        productDetailVisible.value = true;
+        common_vendor.index.__f__("log", "at pages/order/order.vue:680", "打开促销商品详情", item.title);
+        selectedProduct.value = { ...product };
+        setTimeout(() => {
+          productDetailVisible.value = true;
+        }, 50);
       }
     };
     const findProductByTitle = (title) => {
@@ -362,11 +392,17 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
         })
       }, {
         t: isPromoHidden.value ? 1 : "",
-        v: common_vendor.o(updateDetailVisible),
-        w: common_vendor.o(handleAddToCart),
-        x: common_vendor.p({
+        v: productDetailVisible.value
+      }, productDetailVisible.value ? {
+        w: common_vendor.o(updateDetailVisible),
+        x: common_vendor.o(handleAddToCart),
+        y: common_vendor.p({
           visible: productDetailVisible.value,
           product: selectedProduct.value
+        })
+      } : {}, {
+        z: common_vendor.sr(orderCartRef, "93207a4f-1", {
+          "k": "orderCartRef"
         })
       });
     };

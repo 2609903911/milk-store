@@ -13,8 +13,13 @@ app.$mount()
 
 // #ifdef VUE3
 import { createSSRApp } from 'vue'
+import OrderDetail from './pages/components/order-detail.vue'
+import OrderCart from './pages/components/order-cart.vue'
+
 export function createApp() {
   const app = createSSRApp(App)
+  app.component('order-detail', OrderDetail)
+  app.component('order-cart', OrderCart)
   return {
     app
   }

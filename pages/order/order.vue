@@ -263,12 +263,16 @@
         </view>
 
         <!-- 商品详情弹框 -->
-        <OrderDetail
+        <order-detail
+            v-if="productDetailVisible"
             :visible="productDetailVisible"
-            @update:visible="updateDetailVisible"
             :product="selectedProduct"
+            @update:visible="updateDetailVisible"
             @add-to-cart="handleAddToCart"
-        ></OrderDetail>
+        />
+
+        <!-- 购物车组件 -->
+        <order-cart ref="orderCartRef" />
     </view>
 </template>
 
@@ -279,11 +283,15 @@ import { ref, nextTick, onMounted } from 'vue'
 
 // 显式导入order-detail组件以确保微信小程序能正确加载
 import OrderDetail from '../components/order-detail.vue'
+import OrderCart from '../components/order-cart.vue'
+// 引入 uni-icons 组件
+// import uniIcons from '@dcloudio/uni-ui/lib/uni-icons/uni-icons.vue'
 
 // 组件注册
 defineOptions({
     components: {
-        OrderDetail
+        OrderDetail,
+        OrderCart
     }
 })
 
@@ -607,25 +615,58 @@ const openProductDetail = (category, product) => {
     console.log('打开商品详情', category.name, product.name)
     selectedProduct.value = { ...product, category: category.name }
 
-    // 使用nextTick确保数据已更新
-    nextTick(() => {
-        setTimeout(() => {
-            productDetailVisible.value = true
-            console.log('弹框状态已设置为显示')
-        }, 100)
-    })
+    // 延迟设置弹框显示，确保数据已更新
+    setTimeout(() => {
+        productDetailVisible.value = true
+    }, 50)
 }
 
 // 更新弹框可见状态
 const updateDetailVisible = (val) => {
-    console.log('更新弹框可见状态:', val)
-    productDetailVisible.value = val
+    // 如果要隐藏弹框，先改变状态，然后等动画结束后再真正卸载组件
+    if (val === false) {
+        // 延迟卸载组件，等待动画完成
+        setTimeout(() => {
+            productDetailVisible.value = val
+        }, 300) // 动画时长为300ms
+    } else {
+        productDetailVisible.value = val
+    }
 }
+
+// 购物车引用
+const orderCartRef = ref(null)
 
 // 处理添加到购物车
 const handleAddToCart = (item) => {
     console.log('添加到购物车', item)
-    // 这里可以添加购物车逻辑
+    // 确保item包含必要的属性
+    if (!item) {
+        console.error('添加到购物车的商品数据为空')
+        return
+    }
+
+    // 使用nextTick确保DOM更新完成
+    nextTick(() => {
+        // 首先尝试使用ref
+        if (orderCartRef.value) {
+            orderCartRef.value.addToCart(item)
+        } else {
+            console.warn('orderCartRef不存在，尝试其他方式获取组件')
+            // 尝试从当前页面获取组件
+            const pages = getCurrentPages()
+            if (pages && pages.length > 0) {
+                const currentPage = pages[pages.length - 1]
+                if (currentPage.$refs && currentPage.$refs.orderCartRef) {
+                    currentPage.$refs.orderCartRef.addToCart(item)
+                } else {
+                    console.error('无法获取购物车组件引用')
+                }
+            } else {
+                console.error('无法获取当前页面实例')
+            }
+        }
+    })
 }
 
 // 在uni-app中，onPageScroll是页面生命周期函数，不需要显式调用
@@ -636,8 +677,13 @@ const openPromoDetail = (item) => {
     // 根据促销图片的标题找到对应的商品
     const product = findProductByTitle(item.title)
     if (product) {
-        selectedProduct.value = product
-        productDetailVisible.value = true
+        console.log('打开促销商品详情', item.title)
+        selectedProduct.value = { ...product }
+
+        // 延迟设置弹框显示，确保数据已更新
+        setTimeout(() => {
+            productDetailVisible.value = true
+        }, 50)
     }
 }
 
@@ -756,7 +802,7 @@ input {
 }
 
 .delivery-option.active {
-    background-color: #1296db;
+    background-color: #006de7;
     color: #fff;
 }
 
@@ -888,7 +934,7 @@ input {
 }
 
 .tab.active {
-    color: #1296db;
+    color: #006de7;
     font-weight: bold;
     position: relative;
 }
@@ -901,7 +947,7 @@ input {
     transform: translateX(-50%);
     width: 60rpx;
     height: 4rpx;
-    background-color: #1296db;
+    background-color: #006de7;
     border-radius: 2rpx;
 }
 
@@ -927,7 +973,7 @@ input {
 }
 
 .category-item.active {
-    color: #1296db;
+    color: #006de7;
     font-weight: bold;
     background-color: #fff;
 }
@@ -940,7 +986,7 @@ input {
     transform: translateY(-50%);
     width: 6rpx;
     height: 36rpx;
-    background-color: #1296db;
+    background-color: #006de7;
     border-radius: 3rpx;
 }
 
@@ -960,7 +1006,7 @@ input {
     color: #333;
     margin-bottom: 20rpx;
     padding-left: 10rpx;
-    border-left: 6rpx solid #1296db;
+    border-left: 6rpx solid #006de7;
 }
 
 .product-item {
@@ -1014,7 +1060,7 @@ input {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #1296db;
+    background-color: #006de7;
     color: #fff;
     font-size: 40rpx;
     border-radius: 40%;
