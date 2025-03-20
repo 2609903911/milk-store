@@ -1,0 +1,221 @@
+
+.store-selector {
+    background-color: #f8f8f8;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* 页面标题 */
+.header {
+    height: 90rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border-bottom: 1px solid #eee;
+}
+.title {
+    font-size: 34rpx;
+    font-weight: 500;
+    color: #333;
+}
+
+/* 搜索区域 */
+.search-area {
+    display: flex;
+    padding: 20rpx;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+}
+.location-selector {
+    display: flex;
+    align-items: center;
+    padding: 0 20rpx;
+    font-size: 28rpx;
+    color: #333;
+}
+.dropdown-icon {
+    font-size: 24rpx;
+    margin-left: 10rpx;
+    color: #999;
+}
+.search-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: #f5f5f5;
+    border-radius: 30rpx;
+    padding: 10rpx 20rpx;
+}
+.search-icon {
+    font-size: 28rpx;
+    color: #999;
+    margin-right: 10rpx;
+}
+.search-input {
+    flex: 1;
+    height: 60rpx;
+    font-size: 28rpx;
+    background-color: transparent;
+}
+
+/* 地图区域 */
+.map-container {
+    position: relative;
+    transition: height 0.3s ease;
+    overflow: hidden;
+}
+.map {
+    width: 100%;
+    height: 100%;
+}
+
+/* 收起/展开地图控制栏 */
+.map-toggle {
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15rpx 0;
+    border-bottom: 1px solid #eee;
+}
+.map-toggle-text {
+    font-size: 26rpx;
+    color: #666;
+}
+.selected-icon {
+    position: absolute;
+    top: 30rpx;
+    right: 30rpx;
+    width: 40rpx;
+    height: 40rpx;
+    background-color: #07c160;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24rpx;
+}
+
+/* 门店列表容器 */
+.store-list-container {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+.list-header {
+    padding: 20rpx 30rpx;
+    font-size: 30rpx;
+    color: #333;
+    font-weight: 500;
+    border-bottom: 1px solid #f5f5f5;
+    flex-shrink: 0;
+}
+
+/* 带滚动的门店列表 */
+.store-list {
+    flex: 1;
+    height: calc(100vh - 200rpx - var(--map-height, 400rpx));
+}
+.store-item {
+    display: flex;
+    padding: 30rpx;
+    border-bottom: 1px solid #f5f5f5;
+    position: relative;
+}
+.store-item.selected {
+    background-color: #f2f7f2;
+}
+.store-item-left {
+    flex: 1;
+    display: flex;
+}
+.store-star {
+    margin-right: 20rpx;
+    color: #ffc107;
+    font-size: 40rpx;
+    line-height: 1;
+}
+.store-info {
+    flex: 1;
+}
+.store-name {
+    font-size: 30rpx;
+    color: #333;
+    margin-bottom: 10rpx;
+    font-weight: 500;
+}
+.store-status {
+    display: inline-block;
+    font-size: 24rpx;
+    color: #999;
+    padding: 6rpx 12rpx;
+    background-color: #f5f5f5;
+    border-radius: 6rpx;
+    margin-bottom: 10rpx;
+}
+.store-status.operating {
+    color: #07c160;
+    background-color: #eaf8ef;
+}
+.store-address {
+    font-size: 26rpx;
+    color: #666;
+    margin-bottom: 10rpx;
+    line-height: 1.4;
+}
+.store-hours {
+    font-size: 26rpx;
+    color: #999;
+}
+.store-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: 20rpx;
+    padding-right: 50rpx;
+}
+.store-distance {
+    font-size: 28rpx;
+    color: #666;
+    margin-bottom: 20rpx;
+}
+.store-actions {
+    display: flex;
+    margin-top: auto;
+}
+.action-icon {
+    width: 50rpx;
+    height: 50rpx;
+    margin-left: 20rpx;
+    font-size: 40rpx;
+    color: #666;
+}
+.panda-image {
+    position: absolute;
+    right: 60rpx;
+    bottom: 20rpx;
+    width: 100rpx;
+    height: 100rpx;
+}
+
+/* 底部确认按钮 */
+.confirm-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    padding: 20rpx;
+    border-top: 1px solid #eee;
+}
+.confirm-btn {
+    background-color: #07c160;
+    color: #fff;
+    font-size: 30rpx;
+    font-weight: 500;
+    padding: 20rpx 40rpx;
+    border-radius: 30rpx;
+    text-align: center;
+}

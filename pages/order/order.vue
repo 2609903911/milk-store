@@ -36,9 +36,9 @@
 
         <!-- 店铺信息和配送方式 -->
         <view class="shop-info">
-            <view class="shop-location">
-                <view class="shop-name">九江学院四食堂店 ></view>
-                <view class="shop-distance">距离您0.41km</view>
+            <view class="shop-location" @click="navigateToMap">
+                <view class="shop-name">{{ shopName }} ></view>
+                <view class="shop-distance">距离您{{ shopDistance }}</view>
             </view>
             <view class="delivery-options">
                 <view
@@ -295,6 +295,10 @@ defineOptions({
     }
 })
 
+// 门店相关信息
+const shopName = ref('九江学院四食堂店')
+const shopDistance = ref('0.41km')
+
 // 配送方式
 const deliveryType = ref('self') // 'self' 自取, 'delivery' 外卖
 
@@ -505,6 +509,17 @@ const calculateHeights = () => {
 
 onMounted(() => {
     calculateHeights()
+
+    // 获取存储的门店信息
+    const selectedStore = uni.getStorageSync('selectedStore')
+    if (selectedStore) {
+        if (selectedStore.name) {
+            shopName.value = selectedStore.name
+        }
+        if (selectedStore.distance) {
+            shopDistance.value = selectedStore.distance
+        }
+    }
 })
 
 // 选择分类
@@ -693,6 +708,14 @@ const findProductByTitle = (title) => {
         if (product) return product
     }
     return null
+}
+
+// 新增的导航到地图的逻辑
+const navigateToMap = () => {
+    // 导航到地图页面
+    uni.navigateTo({
+        url: '/pages/map/map'
+    })
 }
 </script>
 

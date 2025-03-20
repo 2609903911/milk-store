@@ -13,6 +13,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
 }, {
   __name: "order",
   setup(__props) {
+    const shopName = common_vendor.ref("九江学院四食堂店");
+    const shopDistance = common_vendor.ref("0.41km");
     const deliveryType = common_vendor.ref("self");
     const noticeList = common_vendor.ref([
       "周一现场下单立减5元，仅限堂食",
@@ -203,6 +205,15 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     common_vendor.onMounted(() => {
       calculateHeights();
+      const selectedStore = common_vendor.index.getStorageSync("selectedStore");
+      if (selectedStore) {
+        if (selectedStore.name) {
+          shopName.value = selectedStore.name;
+        }
+        if (selectedStore.distance) {
+          shopDistance.value = selectedStore.distance;
+        }
+      }
     });
     const selectCategory = (index) => {
       activeCategoryIndex.value = index;
@@ -259,7 +270,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:615", "打开商品详情", category.name, product.name);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:630", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
       setTimeout(() => {
         productDetailVisible.value = true;
@@ -276,26 +287,26 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:642", "添加到购物车", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:657", "添加到购物车", item);
       if (!item) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:645", "添加到购物车的商品数据为空");
+        common_vendor.index.__f__("error", "at pages/order/order.vue:660", "添加到购物车的商品数据为空");
         return;
       }
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.addToCart(item);
         } else {
-          common_vendor.index.__f__("warn", "at pages/order/order.vue:655", "orderCartRef不存在，尝试其他方式获取组件");
+          common_vendor.index.__f__("warn", "at pages/order/order.vue:670", "orderCartRef不存在，尝试其他方式获取组件");
           const pages = getCurrentPages();
           if (pages && pages.length > 0) {
             const currentPage = pages[pages.length - 1];
             if (currentPage.$refs && currentPage.$refs.orderCartRef) {
               currentPage.$refs.orderCartRef.addToCart(item);
             } else {
-              common_vendor.index.__f__("error", "at pages/order/order.vue:663", "无法获取购物车组件引用");
+              common_vendor.index.__f__("error", "at pages/order/order.vue:678", "无法获取购物车组件引用");
             }
           } else {
-            common_vendor.index.__f__("error", "at pages/order/order.vue:666", "无法获取当前页面实例");
+            common_vendor.index.__f__("error", "at pages/order/order.vue:681", "无法获取当前页面实例");
           }
         }
       });
@@ -303,7 +314,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:680", "打开促销商品详情", item.title);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:695", "打开促销商品详情", item.title);
         selectedProduct.value = { ...product };
         setTimeout(() => {
           productDetailVisible.value = true;
@@ -318,34 +329,42 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       }
       return null;
     };
+    const navigateToMap = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/map/map"
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: deliveryType.value === "self" ? 1 : "",
-        b: common_vendor.o(($event) => deliveryType.value = "self"),
-        c: deliveryType.value === "delivery" ? 1 : "",
-        d: common_vendor.o(($event) => deliveryType.value = "delivery"),
-        e: common_vendor.f(noticeList.value, (item, index, i0) => {
+        a: common_vendor.t(shopName.value),
+        b: common_vendor.t(shopDistance.value),
+        c: common_vendor.o(navigateToMap),
+        d: deliveryType.value === "self" ? 1 : "",
+        e: common_vendor.o(($event) => deliveryType.value = "self"),
+        f: deliveryType.value === "delivery" ? 1 : "",
+        g: common_vendor.o(($event) => deliveryType.value = "delivery"),
+        h: common_vendor.f(noticeList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        f: common_vendor.f(promoList.value, (item, index, i0) => {
+        i: common_vendor.f(promoList.value, (item, index, i0) => {
           return {
             a: item.image,
             b: index,
             c: common_vendor.o(($event) => openPromoDetail(item), index)
           };
         }),
-        g: common_vendor.o(onScroll),
-        h: isPromoHidden.value ? 1 : "",
-        i: activeTab.value === "menu" ? 1 : "",
-        j: common_vendor.o(($event) => activeTab.value = "menu"),
-        k: activeTab.value === "coupon" ? 1 : "",
-        l: common_vendor.o(($event) => activeTab.value = "coupon"),
-        m: activeTab.value === "menu"
+        j: common_vendor.o(onScroll),
+        k: isPromoHidden.value ? 1 : "",
+        l: activeTab.value === "menu" ? 1 : "",
+        m: common_vendor.o(($event) => activeTab.value = "menu"),
+        n: activeTab.value === "coupon" ? 1 : "",
+        o: common_vendor.o(($event) => activeTab.value = "coupon"),
+        p: activeTab.value === "menu"
       }, activeTab.value === "menu" ? {
-        n: common_vendor.f(categories.value, (category, index, i0) => {
+        q: common_vendor.f(categories.value, (category, index, i0) => {
           return {
             a: common_vendor.t(category.name),
             b: activeCategoryIndex.value === index ? 1 : "",
@@ -354,8 +373,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             e: common_vendor.o(($event) => selectCategory(index), index)
           };
         }),
-        o: "cate-" + activeCategoryIndex.value,
-        p: common_vendor.f(categories.value, (category, index, i0) => {
+        r: "cate-" + activeCategoryIndex.value,
+        s: common_vendor.f(categories.value, (category, index, i0) => {
           return {
             a: common_vendor.t(category.name),
             b: common_vendor.f(category.products, (product, pIndex, i1) => {
@@ -372,10 +391,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             d: "product-" + index
           };
         }),
-        q: currentCategoryId.value,
-        r: common_vendor.o(onProductScroll)
+        t: currentCategoryId.value,
+        v: common_vendor.o(onProductScroll)
       } : {
-        s: common_vendor.f(coupons.value, (coupon, index, i0) => {
+        w: common_vendor.f(coupons.value, (coupon, index, i0) => {
           return {
             a: common_vendor.t(coupon.discount),
             b: common_vendor.t(coupon.unit),
@@ -391,17 +410,17 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
           };
         })
       }, {
-        t: isPromoHidden.value ? 1 : "",
-        v: productDetailVisible.value
+        x: isPromoHidden.value ? 1 : "",
+        y: productDetailVisible.value
       }, productDetailVisible.value ? {
-        w: common_vendor.o(updateDetailVisible),
-        x: common_vendor.o(handleAddToCart),
-        y: common_vendor.p({
+        z: common_vendor.o(updateDetailVisible),
+        A: common_vendor.o(handleAddToCart),
+        B: common_vendor.p({
           visible: productDetailVisible.value,
           product: selectedProduct.value
         })
       } : {}, {
-        z: common_vendor.sr(orderCartRef, "93207a4f-1", {
+        C: common_vendor.sr(orderCartRef, "93207a4f-1", {
           "k": "orderCartRef"
         })
       });
