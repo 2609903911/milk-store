@@ -94,16 +94,30 @@ const _sfc_main = {
     };
     const confirmSelection = () => {
       if (selectedStoreId.value) {
-        getApp();
-        const distance = "0.41km";
+        const selectedStoreInfo = storeList.value.find(
+          (store) => store.id === selectedStoreId.value
+        );
+        const distance = selectedStoreInfo ? selectedStoreInfo.distance : "0.41km";
         common_vendor.index.setStorageSync("selectedStore", {
+          id: selectedStoreId.value,
+          name: selectedStoreName.value,
+          distance
+        });
+        common_vendor.index.$emit("store-selected", {
           id: selectedStoreId.value,
           name: selectedStoreName.value,
           distance
         });
         const pages = getCurrentPages();
         if (pages.length > 1 && pages[pages.length - 2].route.includes("order")) {
-          common_vendor.index.navigateBack();
+          common_vendor.index.navigateBack({
+            delta: 1,
+            success: function() {
+              setTimeout(() => {
+                common_vendor.index.$emit("refresh-order-page");
+              }, 100);
+            }
+          });
         } else {
           common_vendor.index.navigateTo({
             url: "/pages/order/order"
@@ -158,7 +172,6 @@ const _sfc_main = {
         }
       }
       common_vendor.index.$on("citySelected", function(data) {
-        common_vendor.index.__f__("log", "at pages/map/map.vue:304", "选择城市:", data);
         if (data && data.name) {
           selectedCityName.value = data.name;
           if (data.latitude && data.longitude) {
@@ -175,7 +188,6 @@ const _sfc_main = {
       common_vendor.index.$off("citySelected");
     });
     const loadStoresByCity = (cityName, latitude, longitude) => {
-      common_vendor.index.__f__("log", "at pages/map/map.vue:329", `加载${cityName}的门店数据, 坐标: ${latitude}, ${longitude}`);
       if (cityName === "北京") {
         storeList.value = [
           {

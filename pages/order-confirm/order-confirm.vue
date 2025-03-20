@@ -4,17 +4,17 @@
             <!-- 商店信息 -->
             <view class="shop-info">
                 <view class="shop-name-container">
-                    <view class="tag">自取</view>
-                    <view class="shop-name">九江万达店 ></view>
+                    <view class="tag">{{
+                        deliveryType === 'self' ? '自取' : '外卖'
+                    }}</view>
+                    <view class="shop-name">{{ storeInfo.name }} ></view>
                 </view>
-                <view class="shop-distance">距您 1.5km</view>
-                <view class="shop-address"
-                    >江西省九江市濂溪区万达广场3F层3028A</view
-                >
+                <view class="shop-distance">距您 {{ storeInfo.distance }}</view>
+                <view class="shop-address">{{ storeInfo.address }}</view>
                 <view class="shop-phone">
                     <text>联系电话</text>
                     <text class="phone-number">13027261672</text>
-                    <text class="copy-icon">复制</text>
+                    <text class="copy-icon" @tap="copyPhoneNumber">复制</text>
                 </view>
             </view>
 
@@ -27,36 +27,28 @@
 
                 <!-- 商品列表 -->
                 <view class="product-list">
-                    <view class="product-item">
+                    <view
+                        class="product-item"
+                        v-for="(item, index) in orderItems"
+                        :key="index"
+                    >
                         <image
                             class="product-image"
-                            src="/static/images/new01.png"
+                            :src="item.image"
                             mode="aspectFill"
                         ></image>
                         <view class="product-info">
-                            <view class="product-name">竹蔗芒打椰</view>
-                            <view class="product-specs">中杯，5分糖，少冰</view>
-                            <view class="product-quantity">×1</view>
-                        </view>
-                        <view class="product-price">¥16</view>
-                    </view>
-
-                    <view class="product-item">
-                        <image
-                            class="product-image"
-                            src="/static/images/new02.png"
-                            mode="aspectFill"
-                        ></image>
-                        <view class="product-info">
-                            <view class="product-name"
-                                >羽衣甘蓝轻畅杯(轻盈版)</view
+                            <view class="product-name">{{ item.name }}</view>
+                            <view class="product-specs">{{
+                                item.specs || '常规'
+                            }}</view>
+                            <view class="product-quantity"
+                                >×{{ item.quantity }}</view
                             >
-                            <view class="product-specs"
-                                >中杯，全糖，正常冰</view
-                            >
-                            <view class="product-quantity">×1</view>
                         </view>
-                        <view class="product-price">¥18</view>
+                        <view class="product-price"
+                            >¥{{ item.price.toFixed(2) }}</view
+                        >
                     </view>
                 </view>
             </view>
@@ -81,7 +73,7 @@
 
                 <view class="total-section">
                     <text>合计</text>
-                    <text class="total-price">¥34</text>
+                    <text class="total-price">¥{{ totalPrice }}</text>
                 </view>
             </view>
 
@@ -90,7 +82,9 @@
                 <view class="collection-title">集杯活动</view>
                 <view class="collection-item">
                     <text>喝茶集点兑竹蔗芒茶杯（第二波）</text>
-                    <text class="collection-count">本单预计可+1</text>
+                    <text class="collection-count"
+                        >本单预计可+{{ orderItems.length }}</text
+                    >
                 </view>
             </view>
 
@@ -113,16 +107,87 @@
             <view class="payment-bar">
                 <view class="payment-amount">
                     <text>待支付：</text>
-                    <text class="amount">¥34</text>
+                    <text class="amount">¥{{ totalPrice }}</text>
                 </view>
-                <view class="pay-button">支付</view>
+                <view class="pay-button" @tap="handlePayment">支付</view>
             </view>
         </view>
     </scroll-view>
 </template>
 
 <script setup>
-// 页面逻辑将在这里实现
+import { ref, onMounted } from 'vue'
+
+// 定义数据
+const orderItems = ref([])
+const totalPrice = ref('0.00')
+const storeInfo = ref({
+    name: '九江中心店',
+    distance: '0.97km',
+    address: '九江市中心区繁华路88号',
+    phone: '13027261672'
+})
+const deliveryType = ref('self') // 'self'自取, 'delivery'外卖
+
+// 获取传递的数据
+onMounted(() => {
+    try {
+        // 从本地存储中获取订单数据
+        const orderData = uni.getStorageSync('orderConfirmData')
+
+        if (orderData) {
+            console.log('从本地存储获取订单数据:', orderData)
+            orderItems.value = orderData.items || []
+            totalPrice.value = orderData.totalPrice || '0.00'
+
+            if (orderData.store) {
+                storeInfo.value = orderData.store
+            }
+
+            if (orderData.deliveryType) {
+                deliveryType.value = orderData.deliveryType
+            }
+
+            // 可以选择性地清除本地存储
+            // uni.removeStorageSync('orderConfirmData')
+        }
+    } catch (error) {
+        console.error('获取订单数据失败', error)
+        uni.showToast({
+            title: '获取订单数据失败',
+            icon: 'none'
+        })
+    }
+})
+
+// 复制电话号码
+const copyPhoneNumber = () => {
+    uni.setClipboardData({
+        data: storeInfo.value.phone,
+        success: () => {
+            uni.showToast({
+                title: '电话已复制',
+                icon: 'success'
+            })
+        }
+    })
+}
+
+// 处理支付
+const handlePayment = () => {
+    uni.showToast({
+        title: '模拟支付成功',
+        icon: 'success',
+        success: () => {
+            setTimeout(() => {
+                // 支付成功后跳转到订单列表
+                uni.redirectTo({
+                    url: '/pages/my-orders/my-orders'
+                })
+            }, 1500)
+        }
+    })
+}
 </script>
 
 <style>
@@ -420,5 +485,6 @@
     font-size: 32rpx;
     padding: 15rpx 60rpx;
     border-radius: 100rpx;
+    margin-right: 40rpx;
 }
 </style>

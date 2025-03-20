@@ -51,17 +51,21 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         count: 1
       };
       if (item.product) {
+        const itemPrice = item.totalPrice !== void 0 ? item.totalPrice / item.quantity : item.product.price;
         productData = {
           id: item.product.id || Date.now().toString(),
           name: item.product.name,
-          price: item.product.price,
+          // 使用每件商品的单价，而不是原始价格
+          price: itemPrice,
           size: item.cupType || "中杯",
           sugar: item.sugar || "无糖",
           ice: item.temperature || "正常冰",
           image: item.product.image,
           category: item.product.category,
           count: item.quantity || 1,
-          toppings: item.toppings || []
+          toppings: item.toppings || [],
+          // 存储原始商品信息，方便后续使用
+          originalProduct: item.product
         };
       } else {
         productData = {
@@ -77,7 +81,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         };
       }
       if (!productData.name || !productData.price) {
-        common_vendor.index.__f__("error", "at pages/components/order-cart.vue:216", "处理后的商品数据不完整:", productData);
+        common_vendor.index.__f__("error", "at pages/components/order-cart.vue:225", "处理后的商品数据不完整:", productData);
         return;
       }
       const areArraysEqual = (arr1 = [], arr2 = []) => {
@@ -108,20 +112,20 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       });
       common_vendor.index.__f__(
         "log",
-        "at pages/components/order-cart.vue:269",
+        "at pages/components/order-cart.vue:278",
         "查找结果:",
         existingItemIndex,
         existingItemIndex !== -1 ? "找到相同商品" : "未找到相同商品"
       );
       if (existingItemIndex !== -1) {
         cartItems.value[existingItemIndex].count += productData.count;
-        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:278", "更新后的商品:", cartItems.value[existingItemIndex]);
+        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:287", "更新后的商品:", cartItems.value[existingItemIndex]);
       } else {
         cartItems.value.push(productData);
         selectedItems.value.add(productData.id);
-        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:284", "添加新商品:", productData);
+        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:293", "添加新商品:", productData);
       }
-      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:287", "当前购物车商品:", cartItems.value);
+      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:296", "当前购物车商品:", cartItems.value);
     };
     const increaseItem = (index) => {
       cartItems.value[index].count += 1;
@@ -141,10 +145,38 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       hideCartDetail();
     };
     const goCheckout = () => {
-      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:312", "去结算，商品列表:", cartItems.value);
-      common_vendor.index.showToast({
-        title: "正在开发中...",
-        icon: "none"
+      const selectedCartItems = cartItems.value.filter(
+        (item) => selectedItems.value.has(item.id) || selectedItems.value.size === 0
+      ).map((item) => {
+        return {
+          ...item,
+          quantity: item.count
+        };
+      });
+      if (selectedCartItems.length === 0) {
+        common_vendor.index.showToast({
+          title: "请选择商品",
+          icon: "none"
+        });
+        return;
+      }
+      const totalPrice2 = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+      const storeInfo = common_vendor.index.getStorageSync("selectedStore") || {
+        name: "九江中心店",
+        distance: "0.97km",
+        address: "九江市中心区繁华路88号",
+        phone: "13027261672"
+      };
+      const deliveryType = common_vendor.index.getStorageSync("deliveryType") || "self";
+      const orderData = {
+        items: selectedCartItems,
+        totalPrice: totalPrice2,
+        store: storeInfo,
+        deliveryType
+      };
+      common_vendor.index.setStorageSync("orderConfirmData", orderData);
+      common_vendor.index.navigateTo({
+        url: "/pages/order-confirm/order-confirm"
       });
     };
     const toggleItemSelection = (itemId) => {

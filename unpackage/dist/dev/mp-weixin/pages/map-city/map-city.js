@@ -865,13 +865,10 @@ const _sfc_main = {
             return firstLetter === letter;
           });
         });
-        common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:951", "城市数据加载完成");
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/map-city/map-city.vue:953", "获取城市数据失败", error);
       }
     };
     const selectCity = (city) => {
-      common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:959", "选择城市:", city);
       common_vendor.index.setStorageSync("selectedCity", city);
       common_vendor.index.$emit("citySelected", {
         name: city.name,

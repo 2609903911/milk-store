@@ -947,16 +947,13 @@ const fetchCityData = async () => {
                 return firstLetter === letter
             })
         })
-
-        console.log('城市数据加载完成')
     } catch (error) {
-        console.error('获取城市数据失败', error)
+        // 静默处理错误
     }
 }
 
 // 选择城市
 const selectCity = (city) => {
-    console.log('选择城市:', city)
     uni.setStorageSync('selectedCity', city)
 
     // 使用全局事件总线

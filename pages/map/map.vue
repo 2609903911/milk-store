@@ -214,14 +214,25 @@ const selectStore = (store) => {
 // 确认选择
 const confirmSelection = () => {
     if (selectedStoreId.value) {
-        // 获取全局数据
-        const app = getApp()
+        // 查找选中的门店信息
+        const selectedStoreInfo = storeList.value.find(
+            (store) => store.id === selectedStoreId.value
+        )
 
-        // 计算距离，这里简化为固定值，实际应用中应该根据用户位置计算
-        const distance = '0.41km'
+        // 获取距离
+        const distance = selectedStoreInfo
+            ? selectedStoreInfo.distance
+            : '0.41km'
 
-        // 可以将选择的门店信息保存到全局数据或本地存储
+        // 保存到本地存储
         uni.setStorageSync('selectedStore', {
+            id: selectedStoreId.value,
+            name: selectedStoreName.value,
+            distance: distance
+        })
+
+        // 使用事件通知方式通知页面更新
+        uni.$emit('store-selected', {
             id: selectedStoreId.value,
             name: selectedStoreName.value,
             distance: distance
@@ -234,7 +245,15 @@ const confirmSelection = () => {
             pages[pages.length - 2].route.includes('order')
         ) {
             // 如果上一页是订单页面，则返回
-            uni.navigateBack()
+            uni.navigateBack({
+                delta: 1,
+                success: function () {
+                    // 延迟发送刷新事件，确保导航完成后触发
+                    setTimeout(() => {
+                        uni.$emit('refresh-order-page')
+                    }, 100)
+                }
+            })
         } else {
             // 否则跳转到订单页面
             uni.navigateTo({
@@ -301,7 +320,6 @@ onMounted(() => {
 
     // 监听自定义事件
     uni.$on('citySelected', function (data) {
-        console.log('选择城市:', data)
         if (data && data.name) {
             selectedCityName.value = data.name
             // 更新地图位置
@@ -326,7 +344,6 @@ onUnmounted(() => {
 const loadStoresByCity = (cityName, latitude, longitude) => {
     // 这里可以调用API获取特定城市的门店数据
     // 目前使用模拟数据
-    console.log(`加载${cityName}的门店数据, 坐标: ${latitude}, ${longitude}`)
 
     // 模拟不同城市的门店数据
     if (cityName === '北京') {

@@ -7,8 +7,8 @@
   "setting": {
     "urlCheck": false,
     "es6": true,
-    "postcss": false,
-    "minified": false,
+    "postcss": true,
+    "minified": true,
     "newFeature": true,
     "bigPackageSizeSupport": true,
     "babelSetting": {
@@ -18,29 +18,14 @@
     }
   },
   "compileType": "miniprogram",
-  "libVersion": "3.7.9",
-  "appid": "touristappid",
-  "projectname": "MilkTest",
-  "condition": {
-    "search": {
-      "current": -1,
-      "list": []
-    },
-    "conversation": {
-      "current": -1,
-      "list": []
-    },
-    "game": {
-      "current": -1,
-      "list": []
-    },
-    "miniprogram": {
-      "current": -1,
-      "list": []
-    }
-  },
+  "condition": {},
   "editorSetting": {
-    "tabIndent": "insertSpaces",
+    "tabIndent": "auto",
     "tabSize": 2
-  }
+  },
+  "libVersion": "3.0.0",
+  "packNpmManually": false,
+  "packNpmRelationList": [],
+  "appid": "touristappid",
+  "projectname": "MilkTest"
 }

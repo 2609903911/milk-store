@@ -184,17 +184,26 @@ const addToCart = (item) => {
 
     // 如果是从order-detail传来的数据
     if (item.product) {
+        // 使用从order-detail传递过来的totalPrice作为商品价格
+        const itemPrice =
+            item.totalPrice !== undefined
+                ? item.totalPrice / item.quantity
+                : item.product.price
+
         productData = {
             id: item.product.id || Date.now().toString(),
             name: item.product.name,
-            price: item.product.price,
+            // 使用每件商品的单价，而不是原始价格
+            price: itemPrice,
             size: item.cupType || '中杯',
             sugar: item.sugar || '无糖',
             ice: item.temperature || '正常冰',
             image: item.product.image,
             category: item.product.category,
             count: item.quantity || 1,
-            toppings: item.toppings || []
+            toppings: item.toppings || [],
+            // 存储原始商品信息，方便后续使用
+            originalProduct: item.product
         }
     } else {
         // 直接传入的商品数据
@@ -309,11 +318,59 @@ const clearCart = () => {
 
 // 结算方法
 const goCheckout = () => {
-    console.log('去结算，商品列表:', cartItems.value)
-    // TODO: 这里可以跳转到结算页面
-    uni.showToast({
-        title: '正在开发中...',
-        icon: 'none'
+    // 获取选择的商品
+    const selectedCartItems = cartItems.value
+        .filter(
+            (item) =>
+                selectedItems.value.has(item.id) ||
+                selectedItems.value.size === 0
+        )
+        .map((item) => {
+            // 确保属性名称一致，将count转换为quantity
+            return {
+                ...item,
+                quantity: item.count
+            }
+        })
+
+    if (selectedCartItems.length === 0) {
+        uni.showToast({
+            title: '请选择商品',
+            icon: 'none'
+        })
+        return
+    }
+
+    // 计算总价
+    const totalPrice = selectedCartItems
+        .reduce((sum, item) => sum + item.price * item.quantity, 0)
+        .toFixed(2)
+
+    // 获取当前选择的门店信息
+    const storeInfo = uni.getStorageSync('selectedStore') || {
+        name: '九江中心店',
+        distance: '0.97km',
+        address: '九江市中心区繁华路88号',
+        phone: '13027261672'
+    }
+
+    // 获取配送方式（默认为自取）
+    const deliveryType = uni.getStorageSync('deliveryType') || 'self'
+
+    // 使用本地存储传递数据
+    const orderData = {
+        items: selectedCartItems,
+        totalPrice: totalPrice,
+        store: storeInfo,
+        deliveryType: deliveryType
+    }
+
+    // 存储订单数据到本地
+    uni.setStorageSync('orderConfirmData', orderData)
+
+    // 跳转到确认订单页面
+    uni.navigateTo({
+        url: '/pages/order-confirm/order-confirm'
     })
 }
 

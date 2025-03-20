@@ -277,7 +277,8 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 // 使用easycom自动注册组件，不需要手动导入
 // 组件名称已在pages.json中注册
 
@@ -511,16 +512,79 @@ onMounted(() => {
     calculateHeights()
 
     // 获取存储的门店信息
+    updateStoreInfo()
+
+    // 监听门店选择事件
+    uni.$on('store-selected', handleStoreSelected)
+
+    // 监听页面刷新事件
+    uni.$on('refresh-order-page', refreshPage)
+})
+
+// 添加onShow生命周期钩子，确保页面每次显示时都更新数据
+onShow(() => {
+    // 更新门店信息
+    updateStoreInfo()
+})
+
+// 在组件卸载时取消监听事件
+onUnmounted(() => {
+    uni.$off('store-selected', handleStoreSelected)
+    uni.$off('refresh-order-page', refreshPage)
+})
+
+// 处理门店选择事件
+const handleStoreSelected = (data) => {
+    console.log('收到门店选择事件:', data)
+    if (data) {
+        if (data.name) {
+            shopName.value = data.name
+        }
+        if (data.distance) {
+            shopDistance.value = data.distance
+        }
+
+        // 强制更新界面
+        nextTick(() => {
+            // 触发UI更新
+            const temp = shopName.value
+            shopName.value = temp + ' '
+            setTimeout(() => {
+                shopName.value = temp
+            }, 10)
+        })
+    }
+}
+
+// 提取更新门店信息的函数
+const updateStoreInfo = () => {
+    console.log('更新门店信息')
     const selectedStore = uni.getStorageSync('selectedStore')
     if (selectedStore) {
-        if (selectedStore.name) {
+        console.log('从存储中获取到的门店信息:', selectedStore)
+        let updated = false
+
+        if (selectedStore.name && selectedStore.name !== shopName.value) {
             shopName.value = selectedStore.name
+            updated = true
         }
-        if (selectedStore.distance) {
+        if (
+            selectedStore.distance &&
+            selectedStore.distance !== shopDistance.value
+        ) {
             shopDistance.value = selectedStore.distance
+            updated = true
+        }
+
+        // 如果数据有更新，强制刷新UI
+        if (updated) {
+            // 使用nextTick确保数据更新后再触发UI更新
+            nextTick(() => {
+                console.log('强制刷新UI')
+            })
         }
     }
-})
+}
 
 // 选择分类
 const selectCategory = (index) => {
@@ -716,6 +780,13 @@ const navigateToMap = () => {
     uni.navigateTo({
         url: '/pages/map/map'
     })
+}
+
+// 刷新页面数据
+const refreshPage = () => {
+    console.log('执行页面刷新')
+    updateStoreInfo()
+    // 这里可以添加其他需要刷新的数据
 }
 </script>
 

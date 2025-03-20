@@ -255,4 +255,5 @@
     font-size: 32rpx;
     padding: 15rpx 60rpx;
     border-radius: 100rpx;
+    margin-right: 40rpx;
 }
