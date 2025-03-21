@@ -76,6 +76,7 @@ input.data-v-93207a4f {
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 30rpx;
+  margin-top: 20rpx;
   background-color: #fff;
   border-bottom: 1rpx solid #f0f0f0;
 }
@@ -91,6 +92,11 @@ input.data-v-93207a4f {
 .shop-distance.data-v-93207a4f {
   font-size: 24rpx;
   color: #999;
+}
+.shop-address.data-v-93207a4f {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
 }
 .delivery-options.data-v-93207a4f {
   display: flex;

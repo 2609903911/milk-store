@@ -6,7 +6,8 @@
     "pages/profile/profile",
     "pages/order-confirm/order-confirm",
     "pages/map/map",
-    "pages/map-city/map-city"
+    "pages/map-city/map-city",
+    "pages/order-detail/order-detail"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -46,5 +47,15 @@
       }
     ]
   },
-  "usingComponents": {}
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于奶茶店定位"
+    }
+  },
+  "requiredBackgroundModes": [],
+  "usingComponents": {
+    "shop-detail": "/pages/components/shop-detail",
+    "order-cart": "/pages/components/order-cart"
+  }
 }

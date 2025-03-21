@@ -181,7 +181,8 @@ const handlePayment = () => {
         success: () => {
             setTimeout(() => {
                 // 支付成功后跳转到订单列表
-                uni.redirectTo({
+                // 跳转至tabBar
+                uni.switchTab({
                     url: '/pages/my-orders/my-orders'
                 })
             }, 1500)

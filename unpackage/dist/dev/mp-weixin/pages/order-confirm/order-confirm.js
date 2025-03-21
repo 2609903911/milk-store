@@ -52,7 +52,7 @@ const _sfc_main = {
         icon: "success",
         success: () => {
           setTimeout(() => {
-            common_vendor.index.redirectTo({
+            common_vendor.index.switchTab({
               url: "/pages/my-orders/my-orders"
             });
           }, 1500);
@@ -76,7 +76,7 @@ const _sfc_main = {
             f: index
           };
         }),
-        g: common_assets._imports_0$3,
+        g: common_assets._imports_0$4,
         h: common_vendor.t(totalPrice.value),
         i: common_vendor.t(orderItems.value.length),
         j: common_assets._imports_1$1,

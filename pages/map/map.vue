@@ -224,18 +224,25 @@ const confirmSelection = () => {
             ? selectedStoreInfo.distance
             : '0.41km'
 
+        // 获取地址
+        const address = selectedStoreInfo
+            ? selectedStoreInfo.address
+            : '九江市中心区繁华路88号'
+
         // 保存到本地存储
         uni.setStorageSync('selectedStore', {
             id: selectedStoreId.value,
             name: selectedStoreName.value,
-            distance: distance
+            distance: distance,
+            address: address
         })
 
         // 使用事件通知方式通知页面更新
         uni.$emit('store-selected', {
             id: selectedStoreId.value,
             name: selectedStoreName.value,
-            distance: distance
+            distance: distance,
+            address: address
         })
 
         // 判断是否有上一页

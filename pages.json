@@ -43,6 +43,13 @@
             "style" : {
                 "navigationBarTitleText" : "选择城市"
             }
+        },
+        {
+            "path" : "pages/order-detail/order-detail",
+            "style" : {
+                "navigationBarTitleText" : "订单详情",
+                 "navigationStyle" : "custom"
+            }
         }
     ],
     "globalStyle" : {
@@ -87,7 +94,7 @@
         "autoscan" : true,
         "custom" : {
             "^uni-(.*)" : "@/uni_modules/uni-$1/components/uni-$1/uni-$1.vue",
-            "order-detail" : "@/pages/components/order-detail.vue",
+            "shop-detail" : "@/pages/components/shop-detail.vue",
             "order-cart" : "@/pages/components/order-cart.vue"
         }
     },

@@ -125,12 +125,26 @@ export default {
 
 <script setup>
 // 引入 uni-icons 组件
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 // 状态
 const showDetail = ref(false)
 const cartItems = ref([])
 const selectedItems = ref(new Set())
+
+// 检测平台并适当调整
+onMounted(() => {
+    // 检查是否是H5环境
+    // #ifdef H5
+    console.log('当前运行在H5环境中')
+    // 在H5环境下可能需要额外调整
+    // #endif
+
+    // 检查是否是微信小程序环境
+    // #ifdef MP-WEIXIN
+    console.log('当前运行在微信小程序环境中')
+    // #endif
+})
 
 // 计算属性
 const totalCount = computed(() => {
@@ -182,9 +196,9 @@ const addToCart = (item) => {
         count: 1
     }
 
-    // 如果是从order-detail传来的数据
+    // 如果是从shop-detail传来的数据
     if (item.product) {
-        // 使用从order-detail传递过来的totalPrice作为商品价格
+        // 使用从shop-detail传递过来的totalPrice作为商品价格
         const itemPrice =
             item.totalPrice !== undefined
                 ? item.totalPrice / item.quantity
@@ -329,7 +343,8 @@ const goCheckout = () => {
             // 确保属性名称一致，将count转换为quantity
             return {
                 ...item,
-                quantity: item.count
+                quantity: item.count,
+                specs: `${item.size}, ${item.sugar}, ${item.ice}` // 添加规格信息，方便在订单详情页显示
             }
         })
 
@@ -357,16 +372,44 @@ const goCheckout = () => {
     // 获取配送方式（默认为自取）
     const deliveryType = uni.getStorageSync('deliveryType') || 'self'
 
-    // 使用本地存储传递数据
-    const orderData = {
+    // 从购物车中删除已选择的商品
+    const selectedIds = new Set([...selectedItems.value])
+    // 删除选中的商品
+    cartItems.value = cartItems.value.filter(
+        (item) => !selectedIds.has(item.id)
+    )
+    // 清空选中状态
+    selectedItems.value.clear()
+
+    // 如果购物车为空，隐藏详情弹窗
+    if (cartItems.value.length === 0) {
+        hideCartDetail()
+    }
+
+    // 创建完整的订单数据，准备传递给订单详情页
+    const orderDetailData = {
+        id: 'ORD' + Date.now().toString().slice(-8), // 生成订单编号
+        items: selectedCartItems,
+        totalPrice: totalPrice,
+        storeName: storeInfo.name,
+        storeAddress: storeInfo.address,
+        storePhone: storeInfo.phone,
+        deliveryType: deliveryType,
+        status: 'pending', // 初始状态为进行中
+        time: Date.now(), // 下单时间戳
+        remark: uni.getStorageSync('orderRemark') || '' // 订单备注
+    }
+
+    // 存储订单数据到本地
+    uni.setStorageSync('orderConfirmData', {
         items: selectedCartItems,
         totalPrice: totalPrice,
         store: storeInfo,
         deliveryType: deliveryType
-    }
+    })
 
-    // 存储订单数据到本地
-    uni.setStorageSync('orderConfirmData', orderData)
+    // 同时存储订单详情数据
+    uni.setStorageSync('currentOrderDetail', orderDetailData)
 
     // 跳转到确认订单页面
     uni.navigateTo({

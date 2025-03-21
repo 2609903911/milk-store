@@ -117,7 +117,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       { immediate: true }
     );
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/components/order-detail.vue:353", "微信小程序组件挂载完成");
+      common_vendor.index.__f__("log", "at pages/components/shop-detail.vue:353", "微信小程序组件挂载完成");
     });
     return (_ctx, _cache) => {
       return {
@@ -176,4 +176,4 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
   }
 });
 wx.createComponent(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/components/order-detail.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/components/shop-detail.js.map

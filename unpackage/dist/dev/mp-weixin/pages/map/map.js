@@ -98,15 +98,18 @@ const _sfc_main = {
           (store) => store.id === selectedStoreId.value
         );
         const distance = selectedStoreInfo ? selectedStoreInfo.distance : "0.41km";
+        const address = selectedStoreInfo ? selectedStoreInfo.address : "九江市中心区繁华路88号";
         common_vendor.index.setStorageSync("selectedStore", {
           id: selectedStoreId.value,
           name: selectedStoreName.value,
-          distance
+          distance,
+          address
         });
         common_vendor.index.$emit("store-selected", {
           id: selectedStoreId.value,
           name: selectedStoreName.value,
-          distance
+          distance,
+          address
         });
         const pages = getCurrentPages();
         if (pages.length > 1 && pages[pages.length - 2].route.includes("order")) {

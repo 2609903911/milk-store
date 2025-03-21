@@ -38,6 +38,7 @@
         <view class="shop-info">
             <view class="shop-location" @click="navigateToMap">
                 <view class="shop-name">{{ shopName }} ></view>
+                <view class="shop-address">{{ shopAddress }}</view>
                 <view class="shop-distance">距离您{{ shopDistance }}</view>
             </view>
             <view class="delivery-options">
@@ -263,7 +264,7 @@
         </view>
 
         <!-- 商品详情弹框 -->
-        <order-detail
+        <shop-detail
             v-if="productDetailVisible"
             :visible="productDetailVisible"
             :product="selectedProduct"
@@ -282,8 +283,8 @@ import { onShow } from '@dcloudio/uni-app'
 // 使用easycom自动注册组件，不需要手动导入
 // 组件名称已在pages.json中注册
 
-// 显式导入order-detail组件以确保微信小程序能正确加载
-import OrderDetail from '../components/order-detail.vue'
+// 显式导入shop-detail组件以确保微信小程序能正确加载
+import OrderDetail from '../components/shop-detail.vue'
 import OrderCart from '../components/order-cart.vue'
 // 引入 uni-icons 组件
 // import uniIcons from '@dcloudio/uni-ui/lib/uni-icons/uni-icons.vue'
@@ -299,6 +300,7 @@ defineOptions({
 // 门店相关信息
 const shopName = ref('九江学院四食堂店')
 const shopDistance = ref('0.41km')
+const shopAddress = ref('九江市中心区繁华路88号')
 
 // 配送方式
 const deliveryType = ref('self') // 'self' 自取, 'delivery' 外卖
@@ -536,12 +538,16 @@ onUnmounted(() => {
 // 处理门店选择事件
 const handleStoreSelected = (data) => {
     console.log('收到门店选择事件:', data)
+    console.log(data)
     if (data) {
         if (data.name) {
             shopName.value = data.name
         }
         if (data.distance) {
             shopDistance.value = data.distance
+        }
+        if (data.address) {
+            shopAddress.value = data.address
         }
 
         // 强制更新界面
@@ -573,6 +579,13 @@ const updateStoreInfo = () => {
             selectedStore.distance !== shopDistance.value
         ) {
             shopDistance.value = selectedStore.distance
+            updated = true
+        }
+        if (
+            selectedStore.address &&
+            selectedStore.address !== shopAddress.value
+        ) {
+            shopAddress.value = selectedStore.address
             updated = true
         }
 
@@ -857,6 +870,7 @@ input {
     justify-content: space-between;
     align-items: center;
     padding: 20rpx 30rpx;
+    margin-top: 20rpx;
     background-color: #fff;
     border-bottom: 1rpx solid #f0f0f0;
 }
@@ -875,6 +889,12 @@ input {
 .shop-distance {
     font-size: 24rpx;
     color: #999;
+}
+
+.shop-address {
+    font-size: 24rpx;
+    color: #999;
+    margin-top: 4rpx;
 }
 
 .delivery-options {

@@ -48,10 +48,22 @@
             "es6": true,
             "postcss": true,
             "minified": true,
-            "checkSiteMap": false
+            "checkSiteMap": false,
+            "ignoreDevUnusedFiles": false,
+            "ignoreUploadUnusedFiles": false,
+            "checkDomain": false
         },
         "usingComponents": true,
-        "lazyCodeLoading": "requiredComponents"
+        "lazyCodeLoading": "requiredComponents",
+        "permission": {
+            "scope.userLocation": {
+                "desc": "你的位置信息将用于奶茶店定位"
+            }
+        },
+        "unipush": {
+            "enable": false
+        },
+        "requiredBackgroundModes": []
     },
     "mp-alipay": {
         "usingComponents": true
