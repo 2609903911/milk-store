@@ -67,7 +67,12 @@
                     </view>
                     <view class="coupon-action">
                         <text>暂不可用</text>
-                        <text class="arrow">></text>
+                        <uni-icons
+                            class="arrow"
+                            style="color: red"
+                            type="right"
+                            size="16"
+                        ></uni-icons>
                     </view>
                 </view>
 

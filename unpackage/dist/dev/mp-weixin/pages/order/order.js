@@ -22,6 +22,16 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const shopDistance = common_vendor.ref("0.41km");
     const shopAddress = common_vendor.ref("九江市中心区繁华路88号");
     const deliveryType = common_vendor.ref("self");
+    common_vendor.watch(deliveryType, (newValue) => {
+      common_vendor.index.setStorageSync("deliveryType", newValue);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:312", "配送方式已更新:", newValue);
+    });
+    common_vendor.onMounted(() => {
+      const savedDeliveryType = common_vendor.index.getStorageSync("deliveryType");
+      if (savedDeliveryType) {
+        deliveryType.value = savedDeliveryType;
+      }
+    });
     const noticeList = common_vendor.ref([
       "周一现场下单立减5元，仅限堂食",
       "会员日消费满30元送小确幸优惠券",
@@ -223,8 +233,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       common_vendor.index.$off("refresh-order-page", refreshPage);
     });
     const handleStoreSelected = (data) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:540", "收到门店选择事件:", data);
-      common_vendor.index.__f__("log", "at pages/order/order.vue:541", data);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:556", "收到门店选择事件:", data);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:557", data);
       if (data) {
         if (data.name) {
           shopName.value = data.name;
@@ -245,10 +255,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       }
     };
     const updateStoreInfo = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:567", "更新门店信息");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:583", "更新门店信息");
       const selectedStore = common_vendor.index.getStorageSync("selectedStore");
       if (selectedStore) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:570", "从存储中获取到的门店信息:", selectedStore);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:586", "从存储中获取到的门店信息:", selectedStore);
         let updated = false;
         if (selectedStore.name && selectedStore.name !== shopName.value) {
           shopName.value = selectedStore.name;
@@ -264,7 +274,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
         }
         if (updated) {
           common_vendor.nextTick$1(() => {
-            common_vendor.index.__f__("log", "at pages/order/order.vue:596", "强制刷新UI");
+            common_vendor.index.__f__("log", "at pages/order/order.vue:612", "强制刷新UI");
           });
         }
       }
@@ -324,7 +334,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:707", "打开商品详情", category.name, product.name);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:723", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
       setTimeout(() => {
         productDetailVisible.value = true;
@@ -341,26 +351,26 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:734", "添加到购物车", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:750", "添加到购物车", item);
       if (!item) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:737", "添加到购物车的商品数据为空");
+        common_vendor.index.__f__("error", "at pages/order/order.vue:753", "添加到购物车的商品数据为空");
         return;
       }
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.addToCart(item);
         } else {
-          common_vendor.index.__f__("warn", "at pages/order/order.vue:747", "orderCartRef不存在，尝试其他方式获取组件");
+          common_vendor.index.__f__("warn", "at pages/order/order.vue:763", "orderCartRef不存在，尝试其他方式获取组件");
           const pages = getCurrentPages();
           if (pages && pages.length > 0) {
             const currentPage = pages[pages.length - 1];
             if (currentPage.$refs && currentPage.$refs.orderCartRef) {
               currentPage.$refs.orderCartRef.addToCart(item);
             } else {
-              common_vendor.index.__f__("error", "at pages/order/order.vue:755", "无法获取购物车组件引用");
+              common_vendor.index.__f__("error", "at pages/order/order.vue:771", "无法获取购物车组件引用");
             }
           } else {
-            common_vendor.index.__f__("error", "at pages/order/order.vue:758", "无法获取当前页面实例");
+            common_vendor.index.__f__("error", "at pages/order/order.vue:774", "无法获取当前页面实例");
           }
         }
       });
@@ -368,7 +378,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:772", "打开促销商品详情", item.title);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:788", "打开促销商品详情", item.title);
         selectedProduct.value = { ...product };
         setTimeout(() => {
           productDetailVisible.value = true;
@@ -389,7 +399,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
     };
     const refreshPage = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:800", "执行页面刷新");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:816", "执行页面刷新");
       updateStoreInfo();
     };
     return (_ctx, _cache) => {

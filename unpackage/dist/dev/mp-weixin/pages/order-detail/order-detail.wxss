@@ -1,17 +1,21 @@
 
-.order-detail-container {
+.scroll-container.data-v-71729483 {
+    height: 100vh;
+    width: 100%;
+}
+.order-detail-container.data-v-71729483 {
     min-height: 100vh;
     background-color: #f5f5f5;
 }
 
 /* 顶部状态区域 */
-.status-banner {
+.status-banner.data-v-71729483 {
     position: relative;
     height: 400rpx;
     color: #ff2b6a;
     overflow: hidden;
 }
-.banner-background {
+.banner-background.data-v-71729483 {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -19,34 +23,35 @@
     left: 0;
     z-index: 1;
 }
-.nav-header {
+.nav-header.data-v-71729483 {
     position: relative;
     z-index: 2;
     display: flex;
     justify-content: flex-start;
     padding: 20rpx;
 }
-.back-icon {
+.back-icon.data-v-71729483 {
     width: 60rpx;
     height: 60rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    transform: translateY(40rpx);
 }
-.icon-back {
+.icon-back.data-v-71729483 {
     font-size: 44rpx;
 }
-.banner-title {
+.banner-title.data-v-71729483 {
     text-align: left;
     padding: 10rpx 40rpx;
 }
-.title-text {
+.title-text.data-v-71729483 {
     font-size: 40rpx;
     font-weight: bold;
     color: #111;
     font-style: italic;
 }
-.order-status {
+.order-status.data-v-71729483 {
     transform: translateY(60rpx);
     text-align: left;
     margin-top: 30rpx;
@@ -54,14 +59,14 @@
     position: relative;
     z-index: 2;
 }
-.status-text {
+.status-text.data-v-71729483 {
     font-size: 45rpx;
     font-weight: bold;
     color: #111;
 }
 
 /* 操作提示区域 - 压在顶部图片底部 */
-.action-tip-bar {
+.action-tip-bar.data-v-71729483 {
     position: relative;
     margin-top: -20rpx;
     background-color: #ffffff;
@@ -72,11 +77,11 @@
     align-items: center;
     z-index: 10;
 }
-.tip-text {
+.tip-text.data-v-71729483 {
     font-size: 28rpx;
     color: #666;
 }
-.reorder-btn {
+.reorder-btn.data-v-71729483 {
     background-color: transparent;
     color: #348bec;
     font-size: 28rpx;
@@ -86,7 +91,7 @@
 }
 
 /* 下单帮助提示 */
-.order-helper-tip {
+.order-helper-tip.data-v-71729483 {
     background-color: #edf7ff;
     padding: 20rpx 30rpx;
     display: flex;
@@ -94,172 +99,173 @@
     margin: 20rpx;
     border-radius: 8rpx;
 }
-.helper-icon {
+.helper-icon.data-v-71729483 {
     width: 40rpx;
     height: 40rpx;
     margin-right: 15rpx;
 }
-.helper-text {
+.helper-text.data-v-71729483 {
     flex: 1;
     font-size: 26rpx;
     color: #055ae1;
 }
-.helper-arrow {
+.helper-arrow.data-v-71729483 {
     font-size: 36rpx;
     color: #999;
 }
 
 /* 店铺信息 */
-.store-info-section {
+.store-info-section.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
     margin: 0 20rpx 20rpx 20rpx;
     border-radius: 8rpx;
 }
-.store-name {
+.store-name.data-v-71729483 {
     font-size: 32rpx;
     font-weight: bold;
     margin-bottom: 15rpx;
 }
-.store-address {
+.store-address.data-v-71729483 {
     font-size: 26rpx;
     color: #666;
     margin-bottom: 20rpx;
 }
-.store-actions {
+.store-actions.data-v-71729483 {
     display: flex;
     border-top: 1px solid #eee;
     padding-top: 20rpx;
 }
-.action-item {
+.action-item.data-v-71729483 {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8rpx;
 }
-.action-icon {
+.action-icon.data-v-71729483 {
     width: 48rpx;
     height: 48rpx;
 }
-.action-text {
+.action-text.data-v-71729483 {
     font-size: 24rpx;
     color: #666;
 }
 
 /* 商品信息 */
-.product-section {
+.product-section.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
     margin: 0 20rpx 20rpx 20rpx;
     border-radius: 8rpx;
 }
-.product-item {
+.product-item.data-v-71729483 {
     display: flex;
     align-items: center;
 }
-.product-image {
+.product-image.data-v-71729483 {
     width: 100rpx;
     height: 100rpx;
     border-radius: 8rpx;
 }
-.product-details {
+.product-details.data-v-71729483 {
     flex: 1;
     padding: 0 20rpx;
 }
-.product-name {
+.product-name.data-v-71729483 {
     font-size: 28rpx;
     margin-bottom: 10rpx;
 }
-.product-spec {
+.product-spec.data-v-71729483 {
     font-size: 24rpx;
     color: #999;
 }
-.product-price-info {
+.product-price-info.data-v-71729483 {
     text-align: right;
 }
-.price {
+.price.data-v-71729483 {
     font-size: 28rpx;
     font-weight: bold;
     display: block;
     margin-bottom: 10rpx;
 }
-.quantity {
+.quantity.data-v-71729483 {
     font-size: 24rpx;
     color: #999;
 }
 
 /* 价格信息 */
-.price-summary {
+.price-summary.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
     margin: 0 20rpx 20rpx 20rpx;
     border-radius: 8rpx;
 }
-.discount-info {
+.discount-info.data-v-71729483 {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10rpx;
 }
-.discount-label {
+.discount-label.data-v-71729483 {
     font-size: 26rpx;
     color: #666;
 }
-.discount-value {
+.discount-value.data-v-71729483 {
     font-size: 26rpx;
     color: #ff4500;
 }
-.discount-detail {
+.discount-detail.data-v-71729483 {
     font-size: 24rpx;
     color: #999;
     margin-bottom: 20rpx;
 }
-.total-price {
+.total-price.data-v-71729483 {
     display: flex;
     justify-content: space-between;
     padding-top: 20rpx;
     border-top: 1px solid #eee;
 }
-.total-label {
+.total-label.data-v-71729483 {
     font-size: 28rpx;
 }
-.total-value {
+.total-value.data-v-71729483 {
     font-size: 30rpx;
     font-weight: bold;
 }
 
 /* 订单信息 */
-.order-info {
+.order-info.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
     margin: 0 20rpx 40rpx 20rpx;
     border-radius: 8rpx;
 }
-.info-title {
+.info-title.data-v-71729483 {
     font-size: 30rpx;
     font-weight: bold;
     margin-bottom: 20rpx;
 }
-.info-item {
+.info-item.data-v-71729483 {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20rpx;
     align-items: center;
 }
-.info-label {
+.info-label.data-v-71729483 {
     font-size: 26rpx;
+    flex: 1;
     color: #999;
 }
-.info-value {
+.info-value.data-v-71729483 {
     font-size: 26rpx;
     color: #333;
 }
-.order-number {
+.order-number.data-v-71729483 {
     max-width: 70%;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.copy-btn {
+.copy-btn.data-v-71729483 {
     font-size: 24rpx;
     color: #1989fa;
     background-color: #f0f8ff;

@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "确认订单",
-  "usingComponents": {}
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
 }

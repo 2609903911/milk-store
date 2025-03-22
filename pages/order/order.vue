@@ -278,7 +278,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 // 使用easycom自动注册组件，不需要手动导入
 // 组件名称已在pages.json中注册
@@ -304,6 +304,22 @@ const shopAddress = ref('九江市中心区繁华路88号')
 
 // 配送方式
 const deliveryType = ref('self') // 'self' 自取, 'delivery' 外卖
+
+// 监听deliveryType变化并保存到localStorage
+watch(deliveryType, (newValue) => {
+    // 将配送方式保存到本地存储
+    uni.setStorageSync('deliveryType', newValue)
+    console.log('配送方式已更新:', newValue)
+})
+
+// 页面加载时初始化数据
+onMounted(() => {
+    // 尝试从本地存储中获取配送方式
+    const savedDeliveryType = uni.getStorageSync('deliveryType')
+    if (savedDeliveryType) {
+        deliveryType.value = savedDeliveryType
+    }
+})
 
 // 轮播播报数据
 const noticeList = ref([

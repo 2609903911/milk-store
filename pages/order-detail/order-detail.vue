@@ -1,126 +1,130 @@
 <template>
-    <view class="order-detail-container">
-        <!-- 顶部状态区域 -->
-        <view class="status-banner">
-            <!-- 背景图片 -->
-            <image
-                class="banner-background"
-                src="/static/images/order-background.jpg"
-                mode="aspectFill"
-            ></image>
-
-            <!-- 标题和返回按钮 -->
-            <view class="nav-header">
-                <view class="back-icon" @tap="goBack">
-                    <uni-icons type="left" size="24"></uni-icons>
-                </view>
-            </view>
-
-            <!-- 订单状态显示 -->
-            <view class="order-status">
-                <text class="status-text">订单已取消</text>
-            </view>
-        </view>
-
-        <!-- 操作提示区域 - 压在顶部图片底部 -->
-        <view class="action-tip-bar">
-            <text class="tip-text">期待您的再次光临</text>
-            <view class="reorder-btn">再来一单</view>
-        </view>
-
-        <!-- 下单帮助提示 -->
-        <view class="order-helper-tip">
-            <image
-                class="helper-icon"
-                src="/static/images/coin.png"
-                mode="aspectFit"
-            ></image>
-            <text class="helper-text">下单顺利完成，前往兑好礼</text>
-            <text class="helper-arrow">›</text>
-        </view>
-
-        <!-- 店铺信息 -->
-        <view class="store-info-section">
-            <view class="store-name">九江学院四食堂店</view>
-            <view class="store-address"
-                >江西省九江市浔阳区前进东路58号九江学院四食堂</view
-            >
-            <view class="store-actions">
-                <view class="action-item">
-                    <image
-                        class="action-icon"
-                        src="/static/images/phone.png"
-                        mode="aspectFit"
-                    ></image>
-                    <text class="action-text">电话</text>
-                </view>
-                <view class="action-item">
-                    <image
-                        class="action-icon"
-                        src="/static/images/navigation.png"
-                        mode="aspectFit"
-                    ></image>
-                    <text class="action-text">导航</text>
-                </view>
-            </view>
-        </view>
-
-        <!-- 商品信息 -->
-        <view class="product-section">
-            <view class="product-item">
+    <scroll-view class="scroll-container" scroll-y>
+        <view class="order-detail-container">
+            <!-- 顶部状态区域 -->
+            <view class="status-banner">
+                <!-- 背景图片 -->
                 <image
-                    class="product-image"
-                    src="/static/images/cart-icon.png"
+                    class="banner-background"
+                    src="/static/images/order-background.jpg"
+                    mode="aspectFill"
+                ></image>
+
+                <!-- 标题和返回按钮 -->
+                <view class="nav-header">
+                    <view class="back-icon" @tap="goBack">
+                        <uni-icons type="left" size="24"></uni-icons>
+                    </view>
+                </view>
+
+                <!-- 订单状态显示 -->
+                <view class="order-status">
+                    <text class="status-text">订单已取消</text>
+                </view>
+            </view>
+
+            <!-- 操作提示区域 - 压在顶部图片底部 -->
+            <view class="action-tip-bar">
+                <text class="tip-text">期待您的再次光临</text>
+                <view class="reorder-btn">再来一单</view>
+            </view>
+
+            <!-- 下单帮助提示 -->
+            <view class="order-helper-tip">
+                <image
+                    class="helper-icon"
+                    src="/static/images/coin.png"
                     mode="aspectFit"
                 ></image>
-                <view class="product-details">
-                    <view class="product-name">竹蓉芒打椰</view>
-                    <view class="product-spec">中杯,3分糖,少冰</view>
-                </view>
-                <view class="product-price-info">
-                    <text class="price">¥16.00</text>
-                    <text class="quantity">x1</text>
-                </view>
+                <text class="helper-text">下单顺利完成，前往兑好礼</text>
+                <text class="helper-arrow">›</text>
             </view>
-        </view>
 
-        <!-- 价格信息 -->
-        <view class="price-summary">
-            <view class="discount-info">
-                <text class="discount-label">优惠合计</text>
-                <text class="discount-value">- ¥1.92</text>
+            <!-- 店铺信息 -->
+            <view class="store-info-section">
+                <view class="store-name">九江学院四食堂店</view>
+                <view class="store-address"
+                    >江西省九江市浔阳区前进东路58号九江学院四食堂</view
+                >
+                <view class="store-actions">
+                    <view class="action-item">
+                        <image
+                            class="action-icon"
+                            src="/static/images/phone.png"
+                            mode="aspectFit"
+                        ></image>
+                        <text class="action-text">电话</text>
+                    </view>
+                    <view class="action-item">
+                        <image
+                            class="action-icon"
+                            src="/static/images/navigation.png"
+                            mode="aspectFit"
+                        ></image>
+                        <text class="action-text">导航</text>
+                    </view>
+                </view>
             </view>
-            <view class="discount-detail">
-                <text class="discount-desc">周四会员日，LV0-LV5...</text>
-            </view>
-            <view class="total-price">
-                <text class="total-label">共计1件商品，合计</text>
-                <text class="total-value">¥14.08</text>
-            </view>
-        </view>
 
-        <!-- 订单信息 -->
-        <view class="order-info">
-            <view class="info-title">订单信息</view>
-            <view class="info-item">
-                <text class="info-label">取餐码</text>
-                <text class="info-value">暂无</text>
+            <!-- 商品信息 -->
+            <view class="product-section">
+                <view class="product-item">
+                    <image
+                        class="product-image"
+                        src="/static/images/cart-icon.png"
+                        mode="aspectFit"
+                    ></image>
+                    <view class="product-details">
+                        <view class="product-name">竹蓉芒打椰</view>
+                        <view class="product-spec">中杯,3分糖,少冰</view>
+                    </view>
+                    <view class="product-price-info">
+                        <text class="price">¥16.00</text>
+                        <text class="quantity">x1</text>
+                    </view>
+                </view>
             </view>
-            <view class="info-item">
-                <text class="info-label">备注</text>
-                <text class="info-value">无</text>
+
+            <!-- 价格信息 -->
+            <view class="price-summary">
+                <view class="discount-info">
+                    <text class="discount-label">优惠合计</text>
+                    <text class="discount-value">- ¥1.92</text>
+                </view>
+                <view class="discount-detail">
+                    <text class="discount-desc">周四会员日，LV0-LV5...</text>
+                </view>
+                <view class="total-price">
+                    <text class="total-label">共计1件商品，合计</text>
+                    <text class="total-value">¥14.08</text>
+                </view>
             </view>
-            <view class="info-item">
-                <text class="info-label">下单时间</text>
-                <text class="info-value">2025-03-20 21:41:54</text>
-            </view>
-            <view class="info-item">
-                <text class="info-label">订单号</text>
-                <text class="info-value order-number">748388645480484946</text>
-                <text class="copy-btn">复制</text>
+
+            <!-- 订单信息 -->
+            <view class="order-info">
+                <view class="info-title">订单信息</view>
+                <view class="info-item">
+                    <text class="info-label">取餐码</text>
+                    <text class="info-value">暂无</text>
+                </view>
+                <view class="info-item">
+                    <text class="info-label">备注</text>
+                    <text class="info-value">无</text>
+                </view>
+                <view class="info-item">
+                    <text class="info-label">下单时间</text>
+                    <text class="info-value">2025-03-20 21:41:54</text>
+                </view>
+                <view class="info-item">
+                    <text class="info-label">订单号</text>
+                    <text class="info-value order-number"
+                        >748388645480484946</text
+                    >
+                    <text class="copy-btn" @tap="copyOrderNumber">复制</text>
+                </view>
             </view>
         </view>
-    </view>
+    </scroll-view>
 </template>
 
 <script setup>
@@ -149,7 +153,12 @@ const copyOrderNumber = () => {
 }
 </script>
 
-<style>
+<style scoped>
+.scroll-container {
+    height: 100vh;
+    width: 100%;
+}
+
 .order-detail-container {
     min-height: 100vh;
     background-color: #f5f5f5;
@@ -186,6 +195,7 @@ const copyOrderNumber = () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    transform: translateY(40rpx);
 }
 
 .icon-back {
@@ -436,6 +446,7 @@ const copyOrderNumber = () => {
 
 .info-label {
     font-size: 26rpx;
+    flex: 1;
     color: #999;
 }
 

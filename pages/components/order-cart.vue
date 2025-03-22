@@ -245,24 +245,39 @@ const addToCart = (item) => {
         if (arr1.length !== arr2.length) return false
 
         // 对加料数组进行排序以确保比较一致性
-        const sorted1 = [...arr1].sort((a, b) =>
-            (a.id || a.name).localeCompare(b.id || b.name)
-        )
-        const sorted2 = [...arr2].sort((a, b) =>
-            (a.id || a.name).localeCompare(b.id || b.name)
-        )
+        const sorted1 = [...arr1].sort((a, b) => {
+            // 处理不同类型的加料数据结构
+            const aValue = typeof a === 'string' ? a : a.id || a.name || ''
+            const bValue = typeof b === 'string' ? b : b.id || b.name || ''
+            return aValue.localeCompare(bValue)
+        })
+        const sorted2 = [...arr2].sort((a, b) => {
+            // 处理不同类型的加料数据结构
+            const aValue = typeof a === 'string' ? a : a.id || a.name || ''
+            const bValue = typeof b === 'string' ? b : b.id || b.name || ''
+            return aValue.localeCompare(bValue)
+        })
 
         // 比较每个加料项
         for (let i = 0; i < sorted1.length; i++) {
             const item1 = sorted1[i]
             const item2 = sorted2[i]
 
-            // 比较重要属性，如id、名称、数量等
-            if (
-                item1.id !== item2.id ||
-                item1.name !== item2.name ||
-                item1.count !== item2.count
-            ) {
+            // 如果是字符串，直接比较
+            if (typeof item1 === 'string' && typeof item2 === 'string') {
+                if (item1 !== item2) return false
+                continue
+            }
+
+            // 如果是对象，比较重要属性
+            const id1 =
+                typeof item1 === 'string' ? item1 : item1.id || item1.name
+            const id2 =
+                typeof item2 === 'string' ? item2 : item2.id || item2.name
+            const count1 = typeof item1 === 'string' ? 1 : item1.count || 1
+            const count2 = typeof item2 === 'string' ? 1 : item2.count || 1
+
+            if (id1 !== id2 || count1 !== count2) {
                 return false
             }
         }
@@ -334,11 +349,7 @@ const clearCart = () => {
 const goCheckout = () => {
     // 获取选择的商品
     const selectedCartItems = cartItems.value
-        .filter(
-            (item) =>
-                selectedItems.value.has(item.id) ||
-                selectedItems.value.size === 0
-        )
+        .filter((item) => selectedItems.value.has(item.id))
         .map((item) => {
             // 确保属性名称一致，将count转换为quantity
             return {
@@ -360,6 +371,15 @@ const goCheckout = () => {
     const totalPrice = selectedCartItems
         .reduce((sum, item) => sum + item.price * item.quantity, 0)
         .toFixed(2)
+
+    // 判断总价是否为0
+    if (parseFloat(totalPrice) == 0) {
+        uni.showToast({
+            title: '请选择商品',
+            icon: 'none'
+        })
+        return
+    }
 
     // 获取当前选择的门店信息
     const storeInfo = uni.getStorageSync('selectedStore') || {

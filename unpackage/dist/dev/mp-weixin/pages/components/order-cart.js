@@ -90,16 +90,29 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       const areArraysEqual = (arr1 = [], arr2 = []) => {
         if (arr1.length !== arr2.length)
           return false;
-        const sorted1 = [...arr1].sort(
-          (a, b) => (a.id || a.name).localeCompare(b.id || b.name)
-        );
-        const sorted2 = [...arr2].sort(
-          (a, b) => (a.id || a.name).localeCompare(b.id || b.name)
-        );
+        const sorted1 = [...arr1].sort((a, b) => {
+          const aValue = typeof a === "string" ? a : a.id || a.name || "";
+          const bValue = typeof b === "string" ? b : b.id || b.name || "";
+          return aValue.localeCompare(bValue);
+        });
+        const sorted2 = [...arr2].sort((a, b) => {
+          const aValue = typeof a === "string" ? a : a.id || a.name || "";
+          const bValue = typeof b === "string" ? b : b.id || b.name || "";
+          return aValue.localeCompare(bValue);
+        });
         for (let i = 0; i < sorted1.length; i++) {
           const item1 = sorted1[i];
           const item2 = sorted2[i];
-          if (item1.id !== item2.id || item1.name !== item2.name || item1.count !== item2.count) {
+          if (typeof item1 === "string" && typeof item2 === "string") {
+            if (item1 !== item2)
+              return false;
+            continue;
+          }
+          const id1 = typeof item1 === "string" ? item1 : item1.id || item1.name;
+          const id2 = typeof item2 === "string" ? item2 : item2.id || item2.name;
+          const count1 = typeof item1 === "string" ? 1 : item1.count || 1;
+          const count2 = typeof item2 === "string" ? 1 : item2.count || 1;
+          if (id1 !== id2 || count1 !== count2) {
             return false;
           }
         }
@@ -115,20 +128,20 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       });
       common_vendor.index.__f__(
         "log",
-        "at pages/components/order-cart.vue:292",
+        "at pages/components/order-cart.vue:307",
         "查找结果:",
         existingItemIndex,
         existingItemIndex !== -1 ? "找到相同商品" : "未找到相同商品"
       );
       if (existingItemIndex !== -1) {
         cartItems.value[existingItemIndex].count += productData.count;
-        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:301", "更新后的商品:", cartItems.value[existingItemIndex]);
+        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:316", "更新后的商品:", cartItems.value[existingItemIndex]);
       } else {
         cartItems.value.push(productData);
         selectedItems.value.add(productData.id);
-        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:307", "添加新商品:", productData);
+        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:322", "添加新商品:", productData);
       }
-      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:310", "当前购物车商品:", cartItems.value);
+      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:325", "当前购物车商品:", cartItems.value);
     };
     const increaseItem = (index) => {
       cartItems.value[index].count += 1;
@@ -148,9 +161,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       hideCartDetail();
     };
     const goCheckout = () => {
-      const selectedCartItems = cartItems.value.filter(
-        (item) => selectedItems.value.has(item.id) || selectedItems.value.size === 0
-      ).map((item) => {
+      const selectedCartItems = cartItems.value.filter((item) => selectedItems.value.has(item.id)).map((item) => {
         return {
           ...item,
           quantity: item.count,
@@ -166,6 +177,13 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         return;
       }
       const totalPrice2 = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+      if (parseFloat(totalPrice2) == 0) {
+        common_vendor.index.showToast({
+          title: "请选择商品",
+          icon: "none"
+        });
+        return;
+      }
       const storeInfo = common_vendor.index.getStorageSync("selectedStore") || {
         name: "九江中心店",
         distance: "0.97km",

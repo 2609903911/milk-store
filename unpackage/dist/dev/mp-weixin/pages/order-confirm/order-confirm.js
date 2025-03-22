@@ -1,6 +1,14 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "order-confirm",
   setup(__props) {
@@ -17,7 +25,7 @@ const _sfc_main = {
       try {
         const orderData = common_vendor.index.getStorageSync("orderConfirmData");
         if (orderData) {
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:139", "从本地存储获取订单数据:", orderData);
+          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:144", "从本地存储获取订单数据:", orderData);
           orderItems.value = orderData.items || [];
           totalPrice.value = orderData.totalPrice || "0.00";
           if (orderData.store) {
@@ -28,7 +36,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:155", "获取订单数据失败", error);
+        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:160", "获取订单数据失败", error);
         common_vendor.index.showToast({
           title: "获取订单数据失败",
           icon: "none"
@@ -77,11 +85,15 @@ const _sfc_main = {
           };
         }),
         g: common_assets._imports_0$4,
-        h: common_vendor.t(totalPrice.value),
-        i: common_vendor.t(orderItems.value.length),
-        j: common_assets._imports_1$1,
-        k: common_vendor.t(totalPrice.value),
-        l: common_vendor.o(handlePayment)
+        h: common_vendor.p({
+          type: "right",
+          size: "16"
+        }),
+        i: common_vendor.t(totalPrice.value),
+        j: common_vendor.t(orderItems.value.length),
+        k: common_assets._imports_1$1,
+        l: common_vendor.t(totalPrice.value),
+        m: common_vendor.o(handlePayment)
       };
     };
   }
