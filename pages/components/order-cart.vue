@@ -375,7 +375,7 @@ const goCheckout = () => {
     // 判断总价是否为0
     if (parseFloat(totalPrice) == 0) {
         uni.showToast({
-            title: '请选择商品',
+            title: '=请选择商品',
             icon: 'none'
         })
         return
@@ -391,20 +391,6 @@ const goCheckout = () => {
 
     // 获取配送方式（默认为自取）
     const deliveryType = uni.getStorageSync('deliveryType') || 'self'
-
-    // 从购物车中删除已选择的商品
-    const selectedIds = new Set([...selectedItems.value])
-    // 删除选中的商品
-    cartItems.value = cartItems.value.filter(
-        (item) => !selectedIds.has(item.id)
-    )
-    // 清空选中状态
-    selectedItems.value.clear()
-
-    // 如果购物车为空，隐藏详情弹窗
-    if (cartItems.value.length === 0) {
-        hideCartDetail()
-    }
 
     // 创建完整的订单数据，准备传递给订单详情页
     const orderDetailData = {

@@ -21,6 +21,7 @@ const _sfc_main = {
         {
           id: "2023032001",
           storeName: "九江学院四食堂店",
+          storeAddress: "江西省九江市浔阳区前进东路58号九江学院四食堂",
           deliveryType: "self",
           status: "completed",
           time: new Date(now.getTime() - 36e5).getTime(),
@@ -39,6 +40,7 @@ const _sfc_main = {
         {
           id: "2023032002",
           storeName: "九江中心店",
+          storeAddress: "九江市中心区繁华路88号",
           deliveryType: "delivery",
           status: "pending",
           time: now.getTime(),
@@ -157,27 +159,28 @@ const _sfc_main = {
           return common_vendor.e({
             a: common_vendor.t(order.deliveryType === "self" ? "自取" : "外卖"),
             b: common_vendor.t(order.storeName),
-            c: common_vendor.t(getStatusText(order.status)),
-            d: order.items[0].image,
-            e: common_vendor.t(order.items[0].name),
-            f: order.items.length > 1
+            c: common_vendor.t(order.storeAddress),
+            d: common_vendor.t(getStatusText(order.status)),
+            e: order.items[0].image,
+            f: common_vendor.t(order.items[0].name),
+            g: order.items.length > 1
           }, order.items.length > 1 ? {
-            g: common_vendor.t(order.items.length)
+            h: common_vendor.t(order.items.length)
           } : {}, {
-            h: common_vendor.t(formatTime(order.time)),
-            i: common_vendor.t(order.totalPrice),
-            j: common_vendor.t(getTotalQuantity(order)),
-            k: common_vendor.o(($event) => viewOrderDetail(order), index),
-            l: order.status === "completed"
+            i: common_vendor.t(formatTime(order.time)),
+            j: common_vendor.t(order.totalPrice),
+            k: common_vendor.t(getTotalQuantity(order)),
+            l: common_vendor.o(($event) => viewOrderDetail(order), index),
+            m: order.status === "completed"
           }, order.status === "completed" ? {
-            m: common_vendor.o(($event) => reorder(order), index)
+            n: common_vendor.o(($event) => reorder(order), index)
           } : {}, {
-            n: order.status === "pending"
+            o: order.status === "pending"
           }, order.status === "pending" ? {
-            o: common_vendor.o(($event) => cancelOrder(index), index)
+            p: common_vendor.o(($event) => cancelOrder(index), index)
           } : {}, {
-            p: common_vendor.o(($event) => deleteOrder(index), index),
-            q: index
+            q: common_vendor.o(($event) => deleteOrder(index), index),
+            r: index
           });
         })
       } : {});

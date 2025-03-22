@@ -179,7 +179,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       const totalPrice2 = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
       if (parseFloat(totalPrice2) == 0) {
         common_vendor.index.showToast({
-          title: "请选择商品",
+          title: "=请选择商品",
           icon: "none"
         });
         return;
@@ -191,14 +191,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         phone: "13027261672"
       };
       const deliveryType = common_vendor.index.getStorageSync("deliveryType") || "self";
-      const selectedIds = /* @__PURE__ */ new Set([...selectedItems.value]);
-      cartItems.value = cartItems.value.filter(
-        (item) => !selectedIds.has(item.id)
-      );
-      selectedItems.value.clear();
-      if (cartItems.value.length === 0) {
-        hideCartDetail();
-      }
       const orderDetailData = {
         id: "ORD" + Date.now().toString().slice(-8),
         // 生成订单编号

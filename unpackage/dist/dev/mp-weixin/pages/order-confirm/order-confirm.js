@@ -55,6 +55,14 @@ const _sfc_main = {
       });
     };
     const handlePayment = () => {
+      const pages = getCurrentPages();
+      pages.find((page) => page.route === "pages/index/index");
+      common_vendor.index.setStorageSync("clearCartAfterPayment", "true");
+      const orderConfirmData = common_vendor.index.getStorageSync("orderConfirmData") || {};
+      const selectedItemIds = (orderConfirmData.items || []).map(
+        (item) => item.id
+      );
+      common_vendor.index.setStorageSync("itemsToDeleteFromCart", selectedItemIds);
       common_vendor.index.showToast({
         title: "模拟支付成功",
         icon: "success",

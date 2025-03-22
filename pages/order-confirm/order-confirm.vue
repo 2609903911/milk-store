@@ -180,6 +180,22 @@ const copyPhoneNumber = () => {
 
 // 处理支付
 const handlePayment = () => {
+    // 创建一个获取购物车组件的引用
+    const pages = getCurrentPages()
+    const homePage = pages.find((page) => page.route === 'pages/index/index')
+
+    // 设置一个标志以便在回到首页后清除购物车中的已选商品
+    uni.setStorageSync('clearCartAfterPayment', 'true')
+
+    // 获取选中的商品ID以便删除
+    const orderConfirmData = uni.getStorageSync('orderConfirmData') || {}
+    const selectedItemIds = (orderConfirmData.items || []).map(
+        (item) => item.id
+    )
+    // 保存需要删除的商品ID
+    uni.setStorageSync('itemsToDeleteFromCart', selectedItemIds)
+
+    // 显示支付成功提示
     uni.showToast({
         title: '模拟支付成功',
         icon: 'success',

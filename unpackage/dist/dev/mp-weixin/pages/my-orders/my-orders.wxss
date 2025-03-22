@@ -77,6 +77,15 @@
     font-size: 28rpx;
     color: #333;
     font-weight: 500;
+    margin-bottom: 6rpx;
+}
+.shop-address {
+    font-size: 24rpx;
+    color: #999;
+    max-width: 400rpx;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .order-status {
     font-size: 28rpx;

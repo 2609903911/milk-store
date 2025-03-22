@@ -24,6 +24,9 @@
                             order.deliveryType === 'self' ? '自取' : '外卖'
                         }}</view>
                         <view class="shop-name">{{ order.storeName }}</view>
+                        <view class="shop-address">{{
+                            order.storeAddress
+                        }}</view>
                     </view>
                     <view class="order-status">{{
                         getStatusText(order.status)
@@ -108,6 +111,7 @@ const mockOrderData = () => {
         {
             id: '2023032001',
             storeName: '九江学院四食堂店',
+            storeAddress: '江西省九江市浔阳区前进东路58号九江学院四食堂',
             deliveryType: 'self',
             status: 'completed',
             time: new Date(now.getTime() - 3600000).getTime(), // 1小时前
@@ -125,6 +129,7 @@ const mockOrderData = () => {
         {
             id: '2023032002',
             storeName: '九江中心店',
+            storeAddress: '九江市中心区繁华路88号',
             deliveryType: 'delivery',
             status: 'pending',
             time: now.getTime(),
@@ -359,6 +364,16 @@ const deleteOrder = (index) => {
     font-size: 28rpx;
     color: #333;
     font-weight: 500;
+    margin-bottom: 6rpx;
+}
+
+.shop-address {
+    font-size: 24rpx;
+    color: #999;
+    max-width: 400rpx;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .order-status {
