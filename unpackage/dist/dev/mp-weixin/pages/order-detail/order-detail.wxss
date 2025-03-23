@@ -2,10 +2,13 @@
 .scroll-container.data-v-71729483 {
     height: 100vh;
     width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 .order-detail-container.data-v-71729483 {
     min-height: 100vh;
     background-color: #f5f5f5;
+    padding-bottom: 60rpx; /* 底部增加一些内边距，确保内容完全可见 */
 }
 
 /* 顶部状态区域 */
@@ -17,7 +20,7 @@
 }
 .banner-background.data-v-71729483 {
     position: absolute;
-    width: 100%;
+    width: 150%;
     height: 100%;
     top: 0;
     left: 0;
@@ -71,81 +74,70 @@
     margin-top: -20rpx;
     background-color: #ffffff;
     border-radius: 20rpx 20rpx 0 0;
-    padding: 30rpx;
+    padding: 20rpx 30rpx;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 10;
+    border-bottom: 1px solid #f0f0f0;
+}
+.tip-area.data-v-71729483 {
+    display: flex;
+    align-items: center;
+}
+.tip-icon.data-v-71729483 {
+    width: 36rpx;
+    height: 36rpx;
+    margin-right: 10rpx;
 }
 .tip-text.data-v-71729483 {
-    font-size: 28rpx;
-    color: #666;
+    font-size: 26rpx;
+    color: #3088eb;
 }
 .reorder-btn.data-v-71729483 {
     background-color: transparent;
     color: #348bec;
     font-size: 28rpx;
-    padding: 12rpx 30rpx;
-    border-radius: 20rpx;
+    padding: 8rpx 24rpx;
+    border-radius: 30rpx;
     border: 1px solid #348bec;
-}
-
-/* 下单帮助提示 */
-.order-helper-tip.data-v-71729483 {
-    background-color: #edf7ff;
-    padding: 20rpx 30rpx;
-    display: flex;
-    align-items: center;
-    margin: 20rpx;
-    border-radius: 8rpx;
-}
-.helper-icon.data-v-71729483 {
-    width: 40rpx;
-    height: 40rpx;
-    margin-right: 15rpx;
-}
-.helper-text.data-v-71729483 {
-    flex: 1;
-    font-size: 26rpx;
-    color: #055ae1;
-}
-.helper-arrow.data-v-71729483 {
-    font-size: 36rpx;
-    color: #999;
 }
 
 /* 店铺信息 */
 .store-info-section.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
-    margin: 0 20rpx 20rpx 20rpx;
-    border-radius: 8rpx;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 20rpx solid #f5f5f5;
+}
+.store-header.data-v-71729483 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15rpx;
 }
 .store-name.data-v-71729483 {
     font-size: 32rpx;
     font-weight: bold;
-    margin-bottom: 15rpx;
 }
 .store-address.data-v-71729483 {
     font-size: 26rpx;
     color: #666;
-    margin-bottom: 20rpx;
 }
 .store-actions.data-v-71729483 {
     display: flex;
-    border-top: 1px solid #eee;
-    padding-top: 20rpx;
+    align-items: center;
 }
 .action-item.data-v-71729483 {
-    flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 8rpx;
+    margin-left: 30rpx;
 }
 .action-icon.data-v-71729483 {
-    width: 48rpx;
-    height: 48rpx;
+    width: 32rpx;
+    height: 32rpx;
+    margin-right: 8rpx;
 }
 .action-text.data-v-71729483 {
     font-size: 24rpx;
@@ -156,25 +148,42 @@
 .product-section.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
-    margin: 0 20rpx 20rpx 20rpx;
-    border-radius: 8rpx;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 20rpx solid #f5f5f5;
 }
 .product-item.data-v-71729483 {
     display: flex;
     align-items: center;
+    padding: 15rpx 0;
+}
+.product-image-wrapper.data-v-71729483 {
+    width: 90rpx;
+    height: 90rpx;
+    margin-right: 20rpx;
+    border-radius: 8rpx;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    background-color: #f5f5f5;
 }
 .product-image.data-v-71729483 {
-    width: 100rpx;
-    height: 100rpx;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     border-radius: 8rpx;
 }
 .product-details.data-v-71729483 {
     flex: 1;
-    padding: 0 20rpx;
+    padding: 0 10rpx;
 }
 .product-name.data-v-71729483 {
     font-size: 28rpx;
-    margin-bottom: 10rpx;
+    margin-bottom: 6rpx;
+    color: #333;
 }
 .product-spec.data-v-71729483 {
     font-size: 24rpx;
@@ -182,12 +191,16 @@
 }
 .product-price-info.data-v-71729483 {
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 .price.data-v-71729483 {
     font-size: 28rpx;
-    font-weight: bold;
+    color: #333;
+    font-weight: normal;
     display: block;
-    margin-bottom: 10rpx;
+    margin-bottom: 6rpx;
 }
 .quantity.data-v-71729483 {
     font-size: 24rpx;
@@ -197,14 +210,15 @@
 /* 价格信息 */
 .price-summary.data-v-71729483 {
     background-color: white;
-    padding: 30rpx;
-    margin: 0 20rpx 20rpx 20rpx;
-    border-radius: 8rpx;
+    padding: 24rpx 30rpx;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 20rpx solid #f5f5f5;
 }
 .discount-info.data-v-71729483 {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10rpx;
+    margin-bottom: 6rpx;
 }
 .discount-label.data-v-71729483 {
     font-size: 26rpx;
@@ -212,63 +226,69 @@
 }
 .discount-value.data-v-71729483 {
     font-size: 26rpx;
-    color: #ff4500;
+    color: #ff3030;
 }
 .discount-detail.data-v-71729483 {
     font-size: 24rpx;
     color: #999;
-    margin-bottom: 20rpx;
+    margin-bottom: 16rpx;
 }
 .total-price.data-v-71729483 {
     display: flex;
-    justify-content: space-between;
-    padding-top: 20rpx;
-    border-top: 1px solid #eee;
+    justify-content: flex-end;
+    padding-top: 16rpx;
+    border-top: 1px solid #f0f0f0;
 }
 .total-label.data-v-71729483 {
-    font-size: 28rpx;
+    font-size: 26rpx;
+    color: #666;
+    margin-right: 10rpx;
 }
 .total-value.data-v-71729483 {
     font-size: 30rpx;
     font-weight: bold;
+    color: #333;
 }
 
 /* 订单信息 */
 .order-info.data-v-71729483 {
     background-color: white;
     padding: 30rpx;
-    margin: 0 20rpx 40rpx 20rpx;
-    border-radius: 8rpx;
+    margin: 0;
+    border-radius: 0;
 }
 .info-title.data-v-71729483 {
     font-size: 30rpx;
     font-weight: bold;
     margin-bottom: 20rpx;
+    color: #333;
 }
 .info-item.data-v-71729483 {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20rpx;
+    margin-bottom: 16rpx;
     align-items: center;
 }
 .info-label.data-v-71729483 {
-    font-size: 26rpx;
     flex: 1;
-    color: #999;
+    font-size: 26rpx;
+    color: #666;
 }
 .info-value.data-v-71729483 {
     font-size: 26rpx;
     color: #333;
+    text-align: right;
 }
 .order-number.data-v-71729483 {
-    max-width: 70%;
+    max-width: 220rpx;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .copy-btn.data-v-71729483 {
     font-size: 24rpx;
-    color: #1989fa;
+    color: #3088eb;
     background-color: #f0f8ff;
-    padding: 4rpx 16rpx;
+    padding: 2rpx 16rpx;
     border-radius: 30rpx;
+    margin-left: 10rpx;
 }

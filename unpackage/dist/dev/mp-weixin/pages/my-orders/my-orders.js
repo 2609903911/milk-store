@@ -106,6 +106,7 @@ const _sfc_main = {
       });
     };
     const viewOrderDetail = (order) => {
+      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:216", "查看订单详情:", order.id);
       common_vendor.index.setStorageSync("currentOrderDetail", order);
       common_vendor.index.navigateTo({
         url: `/pages/order-detail/order-detail?orderId=${order.id}`
@@ -150,7 +151,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: !hasOrders.value
       }, !hasOrders.value ? {
-        b: common_assets._imports_0$2,
+        b: common_assets._imports_0$1,
         c: common_vendor.o(goToOrder)
       } : {}, {
         d: hasOrders.value
@@ -159,28 +160,27 @@ const _sfc_main = {
           return common_vendor.e({
             a: common_vendor.t(order.deliveryType === "self" ? "自取" : "外卖"),
             b: common_vendor.t(order.storeName),
-            c: common_vendor.t(order.storeAddress),
-            d: common_vendor.t(getStatusText(order.status)),
-            e: order.items[0].image,
-            f: common_vendor.t(order.items[0].name),
-            g: order.items.length > 1
+            c: common_vendor.t(getStatusText(order.status)),
+            d: order.items[0].image,
+            e: common_vendor.t(order.items[0].name),
+            f: order.items.length > 1
           }, order.items.length > 1 ? {
-            h: common_vendor.t(order.items.length)
+            g: common_vendor.t(order.items.length)
           } : {}, {
-            i: common_vendor.t(formatTime(order.time)),
-            j: common_vendor.t(order.totalPrice),
-            k: common_vendor.t(getTotalQuantity(order)),
-            l: common_vendor.o(($event) => viewOrderDetail(order), index),
-            m: order.status === "completed"
+            h: common_vendor.t(formatTime(order.time)),
+            i: common_vendor.t(order.totalPrice),
+            j: common_vendor.t(getTotalQuantity(order)),
+            k: common_vendor.o(($event) => viewOrderDetail(order), index),
+            l: order.status === "completed"
           }, order.status === "completed" ? {
-            n: common_vendor.o(($event) => reorder(order), index)
+            m: common_vendor.o(($event) => reorder(order), index)
           } : {}, {
-            o: order.status === "pending"
+            n: order.status === "pending"
           }, order.status === "pending" ? {
-            p: common_vendor.o(($event) => cancelOrder(index), index)
+            o: common_vendor.o(($event) => cancelOrder(index), index)
           } : {}, {
-            q: common_vendor.o(($event) => deleteOrder(index), index),
-            r: index
+            p: common_vendor.o(($event) => deleteOrder(index), index),
+            q: index
           });
         })
       } : {});

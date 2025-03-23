@@ -12,14 +12,89 @@ if (!Math) {
 const _sfc_main = {
   __name: "order-detail",
   setup(__props) {
+    const orderId = common_vendor.ref("");
+    const orderStatus = common_vendor.ref("");
+    const storeName = common_vendor.ref("");
+    const storeAddress = common_vendor.ref("");
+    const orderItems = common_vendor.ref([]);
+    const totalPrice = common_vendor.ref("");
+    const orderTime = common_vendor.ref("");
+    const discount = common_vendor.computed(() => {
+      if (!totalPrice.value)
+        return "0.00";
+      const total = parseFloat(totalPrice.value);
+      return (total * 0.1).toFixed(2);
+    });
+    const totalQuantity = common_vendor.computed(() => {
+      return orderItems.value.reduce((total, item) => total + item.quantity, 0);
+    });
     const goBack = () => {
       common_vendor.index.navigateBack();
     };
+    const getStatusText = (status) => {
+      const statusMap = {
+        pending: "待取餐",
+        completed: "已完成",
+        cancelled: "已取消"
+      };
+      return statusMap[status] || "未知状态";
+    };
     common_vendor.onMounted(() => {
+      var _a;
+      try {
+        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:180", "订单详情页面已加载");
+        let urlOrderId = "";
+        const mpPages = getCurrentPages();
+        if (mpPages && mpPages.length > 0) {
+          const currentPage = mpPages[mpPages.length - 1];
+          urlOrderId = ((_a = currentPage.options) == null ? void 0 : _a.orderId) || "";
+          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:192", "微信小程序环境，获取订单ID:", urlOrderId);
+        }
+        const orderDetail = common_vendor.index.getStorageSync("currentOrderDetail");
+        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:207", "本地存储订单信息:", orderDetail);
+        if (orderDetail && (urlOrderId === "" || orderDetail.id === urlOrderId)) {
+          orderId.value = orderDetail.id || "";
+          orderStatus.value = orderDetail.status || "";
+          storeName.value = orderDetail.storeName || "";
+          storeAddress.value = orderDetail.storeAddress || "";
+          orderItems.value = orderDetail.items || [];
+          totalPrice.value = orderDetail.totalPrice || "0.00";
+          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:222", "店铺地址:", storeAddress.value);
+          if (orderDetail.time) {
+            const date = new Date(orderDetail.time);
+            orderTime.value = `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+            ).padStart(2, "0")}-${String(date.getDate()).padStart(
+              2,
+              "0"
+            )} ${String(date.getHours()).padStart(2, "0")}:${String(
+              date.getMinutes()
+            ).padStart(2, "0")}:${String(date.getSeconds()).padStart(
+              2,
+              "0"
+            )}`;
+          }
+        } else {
+          common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:240", "订单ID不匹配或未找到订单信息");
+          common_vendor.index.showToast({
+            title: "未找到订单信息",
+            icon: "none"
+          });
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 1500);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:252", "获取订单详情出错:", error);
+        common_vendor.index.showToast({
+          title: "获取订单信息失败",
+          icon: "none"
+        });
+      }
     });
     const copyOrderNumber = () => {
       common_vendor.index.setClipboardData({
-        data: "748388645480484946",
+        data: orderId.value,
         success: () => {
           common_vendor.index.showToast({
             title: "复制成功"
@@ -27,19 +102,56 @@ const _sfc_main = {
         }
       });
     };
+    const reorderItems = () => {
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:274", "再来一单");
+      const orderData = {
+        items: orderItems.value,
+        totalPrice: totalPrice.value,
+        store: {
+          name: storeName.value,
+          address: storeAddress.value
+        },
+        deliveryType: "self"
+        // 默认自取
+      };
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:287", "准备提交的订单数据:", orderData);
+      common_vendor.index.setStorageSync("orderConfirmData", orderData);
+      common_vendor.index.navigateTo({
+        url: "/pages/order-confirm/order-confirm"
+      });
+    };
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$5,
+        a: common_assets._imports_0$4,
         b: common_vendor.p({
           type: "left",
-          size: "24"
+          size: "24",
+          color: "#333"
         }),
         c: common_vendor.o(goBack),
-        d: common_assets._imports_1$2,
-        e: common_assets._imports_2$1,
-        f: common_assets._imports_3$1,
-        g: common_assets._imports_0,
-        h: common_vendor.o(copyOrderNumber)
+        d: common_vendor.t(getStatusText(orderStatus.value)),
+        e: common_assets._imports_1$3,
+        f: common_vendor.o(reorderItems),
+        g: common_vendor.t(storeName.value),
+        h: common_assets._imports_2$2,
+        i: common_assets._imports_3$2,
+        j: common_vendor.t(storeAddress.value),
+        k: common_vendor.f(orderItems.value, (item, k0, i0) => {
+          return {
+            a: item.image,
+            b: common_vendor.t(item.name),
+            c: common_vendor.t(item.specs),
+            d: common_vendor.t(item.price.toFixed(2)),
+            e: common_vendor.t(item.quantity),
+            f: item.name
+          };
+        }),
+        l: common_vendor.t(discount.value),
+        m: common_vendor.t(totalQuantity.value),
+        n: common_vendor.t(totalPrice.value),
+        o: common_vendor.t(orderTime.value),
+        p: common_vendor.t(orderId.value),
+        q: common_vendor.o(copyOrderNumber)
       };
     };
   }

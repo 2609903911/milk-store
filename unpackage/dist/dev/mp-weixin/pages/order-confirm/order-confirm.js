@@ -55,14 +55,34 @@ const _sfc_main = {
       });
     };
     const handlePayment = () => {
+      var _a, _b;
       const pages = getCurrentPages();
       pages.find((page) => page.route === "pages/index/index");
       common_vendor.index.setStorageSync("clearCartAfterPayment", "true");
+      common_vendor.index.setStorageSync("ordersNeedRefresh", "true");
       const orderConfirmData = common_vendor.index.getStorageSync("orderConfirmData") || {};
       const selectedItemIds = (orderConfirmData.items || []).map(
         (item) => item.id
       );
       common_vendor.index.setStorageSync("itemsToDeleteFromCart", selectedItemIds);
+      const now = /* @__PURE__ */ new Date();
+      const newOrder = {
+        id: "ORDER" + now.getTime(),
+        // 使用时间戳创建唯一ID
+        storeName: ((_a = orderConfirmData.store) == null ? void 0 : _a.name) || "默认店铺",
+        storeAddress: ((_b = orderConfirmData.store) == null ? void 0 : _b.address) || "默认地址",
+        deliveryType: orderConfirmData.deliveryType || "self",
+        status: "pending",
+        // 新订单状态为待取餐
+        time: now.getTime(),
+        items: orderConfirmData.items || [],
+        totalPrice: orderConfirmData.totalPrice || "0.00"
+      };
+      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:215", "创建新订单:", newOrder);
+      const savedOrders = common_vendor.index.getStorageSync("savedOrders") || [];
+      savedOrders.unshift(newOrder);
+      common_vendor.index.setStorageSync("savedOrders", savedOrders);
+      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:223", "订单已保存到本地存储");
       common_vendor.index.showToast({
         title: "模拟支付成功",
         icon: "success",
@@ -92,19 +112,20 @@ const _sfc_main = {
             f: index
           };
         }),
-        g: common_assets._imports_0$4,
+        g: common_assets._imports_0$3,
         h: common_vendor.p({
           type: "right",
           size: "16"
         }),
         i: common_vendor.t(totalPrice.value),
         j: common_vendor.t(orderItems.value.length),
-        k: common_assets._imports_1$1,
+        k: common_assets._imports_1$2,
         l: common_vendor.t(totalPrice.value),
         m: common_vendor.o(handlePayment)
       };
     };
   }
 };
-wx.createPage(_sfc_main);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-e7689724"]]);
+wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/order-confirm/order-confirm.js.map

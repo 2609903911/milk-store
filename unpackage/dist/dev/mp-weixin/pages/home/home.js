@@ -84,8 +84,8 @@ const _sfc_main = {
             b: currentSwiper.value === index ? 1 : ""
           };
         }),
-        f: common_assets._imports_0$1,
-        g: common_assets._imports_1,
+        f: common_assets._imports_1,
+        g: common_assets._imports_1$1,
         h: common_vendor.o(navigateToOrder),
         i: common_assets._imports_2,
         j: common_assets._imports_3,
