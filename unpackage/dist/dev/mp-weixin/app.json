@@ -7,7 +7,8 @@
     "pages/order-confirm/order-confirm",
     "pages/map/map",
     "pages/map-city/map-city",
-    "pages/order-detail/order-detail"
+    "pages/order-detail/order-detail",
+    "pages/order-medal/order-medal"
   ],
   "window": {
     "navigationBarTextStyle": "black",

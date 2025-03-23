@@ -9,8 +9,8 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/profile/profile",
-          "pathName": "pages/profile/profile",
+          "name": "pages/order-medal/order-medal",
+          "pathName": "pages/order-medal/order-medal",
           "query": "",
           "launchMode": "default",
           "scene": null

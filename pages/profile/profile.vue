@@ -23,7 +23,7 @@
                     <view class="medal-wall-btn" @click="openMedalWall">
                         <image
                             class="medal-icon"
-                            src="/static/images/medal-icon.png"
+                            src="../../static/images/medal-icon.png"
                         ></image>
                         <text class="medal-text">勋章墙</text>
                     </view>
@@ -35,12 +35,12 @@
                 <view class="account-row">
                     <view class="account-item">
                         <view class="account-label">熊猫币</view>
-                        <view class="account-value">0</view>
+                        <view class="account-value">248</view>
                     </view>
                     <view class="divider"></view>
                     <view class="account-item">
                         <view class="account-label">优惠券</view>
-                        <view class="account-value">0</view>
+                        <view class="account-value">3</view>
                     </view>
                 </view>
             </view>
@@ -129,129 +129,26 @@
                 <view class="services-header">
                     <image
                         class="service-icon"
-                        src="/static/images/service-icon.png"
+                        src="../../static/images/service-icon.png"
                     ></image>
                     <text class="services-title">会员服务</text>
                 </view>
 
                 <view class="services-grid">
-                    <!-- 第一行 -->
                     <view
                         class="service-item"
-                        @click="handleServiceClick('团餐')"
+                        v-for="(item, index) in serviceItems"
+                        :key="index"
+                        @click="handleServiceClick(item.name)"
                     >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-group.png"
-                        ></image>
-                        <text class="service-name">团餐</text>
+                        <image class="service-img" :src="item.icon"></image>
+                        <text class="service-name">{{ item.name }}</text>
                     </view>
                     <view
                         class="service-item"
-                        @click="handleServiceClick('礼品卡')"
+                        v-if="serviceItems.length % 4 !== 0"
                     >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-gift.png"
-                        ></image>
-                        <text class="service-name">礼品卡</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('礼券兑换')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-coupon.png"
-                        ></image>
-                        <text class="service-name">礼券兑换</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('我的邀请')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-invite.png"
-                        ></image>
-                        <text class="service-name">我的邀请</text>
-                    </view>
-
-                    <!-- 第二行 -->
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('熊猫币商城')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-mall.png"
-                        ></image>
-                        <text class="service-name">熊猫币商城</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('加盟申请')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-join.png"
-                        ></image>
-                        <text class="service-name">加盟申请</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('联系客服')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-contact.png"
-                        ></image>
-                        <text class="service-name">联系客服</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('个人资料')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-profile.png"
-                        ></image>
-                        <text class="service-name">个人资料</text>
-                    </view>
-
-                    <!-- 第三行 -->
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('抽奖公示')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-lottery.png"
-                        ></image>
-                        <text class="service-name">抽奖公示</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('茶茶公益')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-charity.png"
-                        ></image>
-                        <text class="service-name">茶茶公益</text>
-                    </view>
-                    <view
-                        class="service-item"
-                        @click="handleServiceClick('更多')"
-                    >
-                        <image
-                            class="service-img"
-                            src="/static/images/service-more.png"
-                        ></image>
-                        <text class="service-name">更多</text>
-                    </view>
-                    <view class="service-item">
-                        <!-- 预留空位 -->
+                        <!-- 预留空位，保持布局整齐 -->
                     </view>
                 </view>
             </view>
@@ -260,16 +157,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 
 const title = ref('我的')
 
 // 打开勋章墙
 const openMedalWall = () => {
-    // 可以导航到勋章墙页面或者打开弹窗
-    uni.showToast({
-        title: '勋章墙功能即将上线',
-        icon: 'none'
+    // 跳转到勋章墙页面
+    uni.navigateTo({
+        url: '/pages/order-medal/order-medal'
     })
 }
 
@@ -281,6 +177,19 @@ const goToMall = () => {
     })
     // 此处可添加实际跳转逻辑
 }
+
+// 服务项目数据
+const serviceItems = reactive([
+    { name: '团餐', icon: '../../static/images/service/group.png' },
+    { name: '礼品卡', icon: '../../static/images/service/gift-card.png' },
+    { name: '礼券兑换', icon: '../../static/images/service/certificate.png' },
+    { name: '我的徽章', icon: '../../static/images/service/medal.png' },
+    { name: '熊猫币商城', icon: '../../static/images/service/store.png' },
+    { name: '加盟申请', icon: '../../static/images/service/franchise.png' },
+    { name: '联系客服', icon: '../../static/images/service/contact.png' },
+    { name: '个人资料', icon: '../../static/images/service/profile.png' },
+    { name: '抽奖公示', icon: '../../static/images/service/prize.png' }
+])
 
 // 处理服务点击事件
 const handleServiceClick = (serviceName) => {
@@ -509,7 +418,7 @@ const handleServiceClick = (serviceName) => {
     line-height: 60rpx;
     text-align: center;
     font-size: 26rpx;
-    border-radius: 30rpx;
+    border-radius: 15rpx;
     margin: 0;
     padding: 0;
 }

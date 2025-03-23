@@ -10,6 +10,7 @@ if (!Math) {
   "./pages/map/map.js";
   "./pages/map-city/map-city.js";
   "./pages/order-detail/order-detail.js";
+  "./pages/order-medal/order-medal.js";
 }
 const _sfc_main = {
   onLaunch: function() {

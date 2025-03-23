@@ -49,7 +49,14 @@
             "path" : "pages/order-detail/order-detail",
             "style" : {
                 "navigationBarTitleText" : "订单详情",
-                 "navigationStyle" : "custom"
+                "navigationStyle" : "custom"
+            }
+        },
+        {
+            "path" : "pages/order-medal/order-medal",
+            "style" : {
+                "navigationBarTitleText" : "勋章墙",
+                "navigationStyle" : "custom"
             }
         }
     ],

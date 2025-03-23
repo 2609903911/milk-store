@@ -6,9 +6,8 @@ const _sfc_main = {
   setup(__props) {
     common_vendor.ref("我的");
     const openMedalWall = () => {
-      common_vendor.index.showToast({
-        title: "勋章墙功能即将上线",
-        icon: "none"
+      common_vendor.index.navigateTo({
+        url: "/pages/order-medal/order-medal"
       });
     };
     const goToMall = () => {
@@ -17,6 +16,17 @@ const _sfc_main = {
         icon: "none"
       });
     };
+    const serviceItems = common_vendor.reactive([
+      { name: "团餐", icon: "../../static/images/service/group.png" },
+      { name: "礼品卡", icon: "../../static/images/service/gift-card.png" },
+      { name: "礼券兑换", icon: "../../static/images/service/certificate.png" },
+      { name: "我的徽章", icon: "../../static/images/service/medal.png" },
+      { name: "熊猫币商城", icon: "../../static/images/service/store.png" },
+      { name: "加盟申请", icon: "../../static/images/service/franchise.png" },
+      { name: "联系客服", icon: "../../static/images/service/contact.png" },
+      { name: "个人资料", icon: "../../static/images/service/profile.png" },
+      { name: "抽奖公示", icon: "../../static/images/service/prize.png" }
+    ]);
     const handleServiceClick = (serviceName) => {
       common_vendor.index.showToast({
         title: `您点击了${serviceName}`,
@@ -24,7 +34,7 @@ const _sfc_main = {
       });
     };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_assets._imports_0$2,
         b: common_assets._imports_1,
         c: common_assets._imports_2$1,
@@ -35,29 +45,16 @@ const _sfc_main = {
         h: common_assets._imports_5$1,
         i: common_assets._imports_6$1,
         j: common_assets._imports_7$1,
-        k: common_assets._imports_8$1,
-        l: common_vendor.o(($event) => handleServiceClick("团餐")),
-        m: common_assets._imports_9,
-        n: common_vendor.o(($event) => handleServiceClick("礼品卡")),
-        o: common_assets._imports_10,
-        p: common_vendor.o(($event) => handleServiceClick("礼券兑换")),
-        q: common_assets._imports_11,
-        r: common_vendor.o(($event) => handleServiceClick("我的邀请")),
-        s: common_assets._imports_12,
-        t: common_vendor.o(($event) => handleServiceClick("熊猫币商城")),
-        v: common_assets._imports_13,
-        w: common_vendor.o(($event) => handleServiceClick("加盟申请")),
-        x: common_assets._imports_14,
-        y: common_vendor.o(($event) => handleServiceClick("联系客服")),
-        z: common_assets._imports_15,
-        A: common_vendor.o(($event) => handleServiceClick("个人资料")),
-        B: common_assets._imports_16,
-        C: common_vendor.o(($event) => handleServiceClick("抽奖公示")),
-        D: common_assets._imports_17,
-        E: common_vendor.o(($event) => handleServiceClick("茶茶公益")),
-        F: common_assets._imports_18,
-        G: common_vendor.o(($event) => handleServiceClick("更多"))
-      };
+        k: common_vendor.f(serviceItems, (item, index, i0) => {
+          return {
+            a: item.icon,
+            b: common_vendor.t(item.name),
+            c: index,
+            d: common_vendor.o(($event) => handleServiceClick(item.name), index)
+          };
+        }),
+        l: serviceItems.length % 4 !== 0
+      }, serviceItems.length % 4 !== 0 ? {} : {});
     };
   }
 };
