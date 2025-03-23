@@ -187,13 +187,40 @@ const handlePayment = () => {
     // 设置一个标志以便在回到首页后清除购物车中的已选商品
     uni.setStorageSync('clearCartAfterPayment', 'true')
 
+    // 设置标志通知my-orders页面刷新数据
+    uni.setStorageSync('ordersNeedRefresh', 'true')
+
     // 获取选中的商品ID以便删除
     const orderConfirmData = uni.getStorageSync('orderConfirmData') || {}
     const selectedItemIds = (orderConfirmData.items || []).map(
         (item) => item.id
     )
+
     // 保存需要删除的商品ID
     uni.setStorageSync('itemsToDeleteFromCart', selectedItemIds)
+
+    // 创建新订单记录并添加到savedOrders中
+    const now = new Date()
+    const newOrder = {
+        id: 'ORDER' + now.getTime(), // 使用时间戳创建唯一ID
+        storeName: orderConfirmData.store?.name || '默认店铺',
+        storeAddress: orderConfirmData.store?.address || '默认地址',
+        deliveryType: orderConfirmData.deliveryType || 'self',
+        status: 'pending', // 新订单状态为待取餐
+        time: now.getTime(),
+        items: orderConfirmData.items || [],
+        totalPrice: orderConfirmData.totalPrice || '0.00'
+    }
+
+    console.log('创建新订单:', newOrder)
+
+    // 获取现有订单列表并添加新订单
+    const savedOrders = uni.getStorageSync('savedOrders') || []
+    savedOrders.unshift(newOrder) // 添加到订单列表开头
+
+    // 保存更新后的订单列表
+    uni.setStorageSync('savedOrders', savedOrders)
+    console.log('订单已保存到本地存储')
 
     // 显示支付成功提示
     uni.showToast({
@@ -212,7 +239,7 @@ const handlePayment = () => {
 }
 </script>
 
-<style>
+<style scoped>
 .scroll-container {
     height: 100vh;
     width: 100%;

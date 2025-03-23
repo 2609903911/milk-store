@@ -24,9 +24,6 @@
                             order.deliveryType === 'self' ? '自取' : '外卖'
                         }}</view>
                         <view class="shop-name">{{ order.storeName }}</view>
-                        <view class="shop-address">{{
-                            order.storeAddress
-                        }}</view>
                     </view>
                     <view class="order-status">{{
                         getStatusText(order.status)
@@ -216,10 +213,12 @@ const reorder = (order) => {
 
 // 查看订单详情
 const viewOrderDetail = (order) => {
+    console.log('查看订单详情:', order.id)
+
     // 将当前订单保存到本地存储，以便订单详情页面可以访问
     uni.setStorageSync('currentOrderDetail', order)
 
-    // 跳转到订单详情页面，并传递订单ID
+    // 只传递订单ID，其他信息从本地存储获取
     uni.navigateTo({
         url: `/pages/order-detail/order-detail?orderId=${order.id}`
     })

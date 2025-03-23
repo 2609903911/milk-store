@@ -13,74 +13,82 @@
                 <!-- 标题和返回按钮 -->
                 <view class="nav-header">
                     <view class="back-icon" @tap="goBack">
-                        <uni-icons type="left" size="24"></uni-icons>
+                        <uni-icons
+                            type="left"
+                            size="24"
+                            color="#333"
+                        ></uni-icons>
                     </view>
                 </view>
 
                 <!-- 订单状态显示 -->
                 <view class="order-status">
-                    <text class="status-text">订单已取消</text>
+                    <text class="status-text"
+                        >商品{{ getStatusText(orderStatus) }}</text
+                    >
                 </view>
             </view>
 
             <!-- 操作提示区域 - 压在顶部图片底部 -->
             <view class="action-tip-bar">
-                <text class="tip-text">期待您的再次光临</text>
-                <view class="reorder-btn">再来一单</view>
-            </view>
-
-            <!-- 下单帮助提示 -->
-            <view class="order-helper-tip">
-                <image
-                    class="helper-icon"
-                    src="/static/images/coin.png"
-                    mode="aspectFit"
-                ></image>
-                <text class="helper-text">下单顺利完成，前往兑好礼</text>
-                <text class="helper-arrow">›</text>
+                <view class="tip-area">
+                    <image
+                        class="tip-icon"
+                        src="/static/images/coin.png"
+                        mode="aspectFit"
+                    ></image>
+                    <text class="tip-text">下单赠能量，前往兑好礼 ></text>
+                </view>
+                <view class="reorder-btn" @tap="reorderItems">再来一单</view>
             </view>
 
             <!-- 店铺信息 -->
             <view class="store-info-section">
-                <view class="store-name">九江学院四食堂店</view>
-                <view class="store-address"
-                    >江西省九江市浔阳区前进东路58号九江学院四食堂</view
-                >
-                <view class="store-actions">
-                    <view class="action-item">
-                        <image
-                            class="action-icon"
-                            src="/static/images/phone.png"
-                            mode="aspectFit"
-                        ></image>
-                        <text class="action-text">电话</text>
-                    </view>
-                    <view class="action-item">
-                        <image
-                            class="action-icon"
-                            src="/static/images/navigation.png"
-                            mode="aspectFit"
-                        ></image>
-                        <text class="action-text">导航</text>
+                <view class="store-header">
+                    <view class="store-name">{{ storeName }}</view>
+                    <view class="store-actions">
+                        <view class="action-item phone-action">
+                            <image
+                                class="action-icon"
+                                src="/static/images/phone.png"
+                                mode="aspectFit"
+                            ></image>
+                            <text class="action-text">电话</text>
+                        </view>
+                        <view class="action-item nav-action">
+                            <image
+                                class="action-icon"
+                                src="/static/images/navigation.png"
+                                mode="aspectFit"
+                            ></image>
+                            <text class="action-text">导航</text>
+                        </view>
                     </view>
                 </view>
+                <view class="store-address">{{ storeAddress }}</view>
             </view>
 
             <!-- 商品信息 -->
             <view class="product-section">
-                <view class="product-item">
-                    <image
-                        class="product-image"
-                        src="/static/images/cart-icon.png"
-                        mode="aspectFit"
-                    ></image>
+                <view
+                    class="product-item"
+                    v-for="item in orderItems"
+                    :key="item.name"
+                >
+                    <view class="product-image-wrapper">
+                        <image
+                            class="product-image"
+                            :src="item.image"
+                            mode="aspectFill"
+                        ></image>
+                    </view>
                     <view class="product-details">
-                        <view class="product-name">竹蓉芒打椰</view>
-                        <view class="product-spec">中杯,3分糖,少冰</view>
+                        <view class="product-name">{{ item.name }}</view>
+                        <view class="product-spec">{{ item.specs }}</view>
                     </view>
                     <view class="product-price-info">
-                        <text class="price">¥16.00</text>
-                        <text class="quantity">x1</text>
+                        <text class="price">¥{{ item.price.toFixed(2) }}</text>
+                        <text class="quantity">x{{ item.quantity }}</text>
                     </view>
                 </view>
             </view>
@@ -89,14 +97,16 @@
             <view class="price-summary">
                 <view class="discount-info">
                     <text class="discount-label">优惠合计</text>
-                    <text class="discount-value">- ¥1.92</text>
+                    <text class="discount-value">- ¥ {{ discount }}</text>
                 </view>
                 <view class="discount-detail">
-                    <text class="discount-desc">周四会员日，LV0-LV5...</text>
+                    <text class="discount-desc">LV0新会员指定果茶...</text>
                 </view>
                 <view class="total-price">
-                    <text class="total-label">共计1件商品，合计</text>
-                    <text class="total-value">¥14.08</text>
+                    <text class="total-label"
+                        >共计{{ totalQuantity }}件商品，合计</text
+                    >
+                    <text class="total-value">¥ {{ totalPrice }}</text>
                 </view>
             </view>
 
@@ -113,13 +123,11 @@
                 </view>
                 <view class="info-item">
                     <text class="info-label">下单时间</text>
-                    <text class="info-value">2025-03-20 21:41:54</text>
+                    <text class="info-value">{{ orderTime }}</text>
                 </view>
                 <view class="info-item">
                     <text class="info-label">订单号</text>
-                    <text class="info-value order-number"
-                        >748388645480484946</text
-                    >
+                    <text class="info-value order-number">{{ orderId }}</text>
                     <text class="copy-btn" @tap="copyOrderNumber">复制</text>
                 </view>
             </view>
@@ -128,27 +136,162 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+
+// 订单信息
+const orderId = ref('')
+const orderStatus = ref('')
+const storeName = ref('')
+const storeAddress = ref('')
+const orderItems = ref([])
+const totalPrice = ref('')
+const orderTime = ref('')
+
+// 计算优惠金额（示例：总是按10%计算）
+const discount = computed(() => {
+    if (!totalPrice.value) return '0.00'
+    const total = parseFloat(totalPrice.value)
+    return (total * 0.1).toFixed(2)
+})
+
+// 获取商品总数量
+const totalQuantity = computed(() => {
+    return orderItems.value.reduce((total, item) => total + item.quantity, 0)
+})
 
 // 返回上一页
 const goBack = () => {
     uni.navigateBack()
 }
 
+// 获取订单状态文本
+const getStatusText = (status) => {
+    const statusMap = {
+        pending: '待取餐',
+        completed: '已完成',
+        cancelled: '已取消'
+    }
+    return statusMap[status] || '未知状态'
+}
+
 // 在页面加载时获取订单数据
 onMounted(() => {
-    // 这里可以从缓存或API获取订单详情
+    try {
+        console.log('订单详情页面已加载')
+
+        // 针对不同平台获取页面参数
+        let urlOrderId = ''
+
+        // #ifdef MP-WEIXIN
+        // 微信小程序环境
+        const mpPages = getCurrentPages()
+        if (mpPages && mpPages.length > 0) {
+            const currentPage = mpPages[mpPages.length - 1]
+            // 微信小程序直接从options获取
+            urlOrderId = currentPage.options?.orderId || ''
+            console.log('微信小程序环境，获取订单ID:', urlOrderId)
+        }
+        // #endif
+
+        // #ifndef MP-WEIXIN
+        // 非微信小程序环境（H5等）
+        const pages = getCurrentPages()
+        const currentPage = pages[pages.length - 1]
+        const options = currentPage?.$page?.options || {}
+        urlOrderId = options.orderId || ''
+        console.log('其他环境，获取订单ID:', urlOrderId)
+        // #endif
+
+        // 从本地存储获取完整订单信息
+        const orderDetail = uni.getStorageSync('currentOrderDetail')
+        console.log('本地存储订单信息:', orderDetail)
+
+        // 验证参数 - 允许没有urlOrderId也可以显示，只要有orderDetail
+        if (
+            orderDetail &&
+            (urlOrderId === '' || orderDetail.id === urlOrderId)
+        ) {
+            // 从本地存储加载所有订单数据
+            orderId.value = orderDetail.id || ''
+            orderStatus.value = orderDetail.status || ''
+            storeName.value = orderDetail.storeName || ''
+            storeAddress.value = orderDetail.storeAddress || ''
+            orderItems.value = orderDetail.items || []
+            totalPrice.value = orderDetail.totalPrice || '0.00'
+
+            console.log('店铺地址:', storeAddress.value)
+
+            // 格式化时间
+            if (orderDetail.time) {
+                const date = new Date(orderDetail.time)
+                orderTime.value = `${date.getFullYear()}-${String(
+                    date.getMonth() + 1
+                ).padStart(2, '0')}-${String(date.getDate()).padStart(
+                    2,
+                    '0'
+                )} ${String(date.getHours()).padStart(2, '0')}:${String(
+                    date.getMinutes()
+                ).padStart(2, '0')}:${String(date.getSeconds()).padStart(
+                    2,
+                    '0'
+                )}`
+            }
+        } else {
+            console.error('订单ID不匹配或未找到订单信息')
+            uni.showToast({
+                title: '未找到订单信息',
+                icon: 'none'
+            })
+
+            // 延迟返回
+            setTimeout(() => {
+                uni.navigateBack()
+            }, 1500)
+        }
+    } catch (error) {
+        console.error('获取订单详情出错:', error)
+        uni.showToast({
+            title: '获取订单信息失败',
+            icon: 'none'
+        })
+    }
 })
 
 // 复制订单号
 const copyOrderNumber = () => {
     uni.setClipboardData({
-        data: '748388645480484946',
+        data: orderId.value,
         success: () => {
             uni.showToast({
                 title: '复制成功'
             })
         }
+    })
+}
+
+// 再来一单功能
+const reorderItems = () => {
+    console.log('再来一单')
+
+    // 复制当前订单信息
+    const orderData = {
+        items: orderItems.value,
+        totalPrice: totalPrice.value,
+        store: {
+            name: storeName.value,
+            address: storeAddress.value
+        },
+        deliveryType: 'self' // 默认自取
+    }
+
+    console.log('准备提交的订单数据:', orderData)
+
+    // 保存到本地存储，供订单确认页使用
+    uni.setStorageSync('orderConfirmData', orderData)
+
+    // 跳转到订单确认页
+    uni.navigateTo({
+        url: '/pages/order-confirm/order-confirm'
     })
 }
 </script>
@@ -157,11 +300,14 @@ const copyOrderNumber = () => {
 .scroll-container {
     height: 100vh;
     width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
 .order-detail-container {
     min-height: 100vh;
     background-color: #f5f5f5;
+    padding-bottom: 60rpx; /* 底部增加一些内边距，确保内容完全可见 */
 }
 
 /* 顶部状态区域 */
@@ -174,7 +320,7 @@ const copyOrderNumber = () => {
 
 .banner-background {
     position: absolute;
-    width: 100%;
+    width: 150%;
     height: 100%;
     top: 0;
     left: 0;
@@ -235,91 +381,80 @@ const copyOrderNumber = () => {
     margin-top: -20rpx;
     background-color: #ffffff;
     border-radius: 20rpx 20rpx 0 0;
-    padding: 30rpx;
+    padding: 20rpx 30rpx;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 10;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tip-area {
+    display: flex;
+    align-items: center;
+}
+
+.tip-icon {
+    width: 36rpx;
+    height: 36rpx;
+    margin-right: 10rpx;
 }
 
 .tip-text {
-    font-size: 28rpx;
-    color: #666;
+    font-size: 26rpx;
+    color: #3088eb;
 }
 
 .reorder-btn {
     background-color: transparent;
     color: #348bec;
     font-size: 28rpx;
-    padding: 12rpx 30rpx;
-    border-radius: 20rpx;
+    padding: 8rpx 24rpx;
+    border-radius: 30rpx;
     border: 1px solid #348bec;
-}
-
-/* 下单帮助提示 */
-.order-helper-tip {
-    background-color: #edf7ff;
-    padding: 20rpx 30rpx;
-    display: flex;
-    align-items: center;
-    margin: 20rpx;
-    border-radius: 8rpx;
-}
-
-.helper-icon {
-    width: 40rpx;
-    height: 40rpx;
-    margin-right: 15rpx;
-}
-
-.helper-text {
-    flex: 1;
-    font-size: 26rpx;
-    color: #055ae1;
-}
-
-.helper-arrow {
-    font-size: 36rpx;
-    color: #999;
 }
 
 /* 店铺信息 */
 .store-info-section {
     background-color: white;
     padding: 30rpx;
-    margin: 0 20rpx 20rpx 20rpx;
-    border-radius: 8rpx;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 20rpx solid #f5f5f5;
+}
+
+.store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15rpx;
 }
 
 .store-name {
     font-size: 32rpx;
     font-weight: bold;
-    margin-bottom: 15rpx;
 }
 
 .store-address {
     font-size: 26rpx;
     color: #666;
-    margin-bottom: 20rpx;
 }
 
 .store-actions {
     display: flex;
-    border-top: 1px solid #eee;
-    padding-top: 20rpx;
+    align-items: center;
 }
 
 .action-item {
-    flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 8rpx;
+    margin-left: 30rpx;
 }
 
 .action-icon {
-    width: 48rpx;
-    height: 48rpx;
+    width: 32rpx;
+    height: 32rpx;
+    margin-right: 8rpx;
 }
 
 .action-text {
@@ -331,29 +466,47 @@ const copyOrderNumber = () => {
 .product-section {
     background-color: white;
     padding: 30rpx;
-    margin: 0 20rpx 20rpx 20rpx;
-    border-radius: 8rpx;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 20rpx solid #f5f5f5;
 }
 
 .product-item {
     display: flex;
     align-items: center;
+    padding: 15rpx 0;
+}
+
+.product-image-wrapper {
+    width: 90rpx;
+    height: 90rpx;
+    margin-right: 20rpx;
+    border-radius: 8rpx;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    background-color: #f5f5f5;
 }
 
 .product-image {
-    width: 100rpx;
-    height: 100rpx;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     border-radius: 8rpx;
 }
 
 .product-details {
     flex: 1;
-    padding: 0 20rpx;
+    padding: 0 10rpx;
 }
 
 .product-name {
     font-size: 28rpx;
-    margin-bottom: 10rpx;
+    margin-bottom: 6rpx;
+    color: #333;
 }
 
 .product-spec {
@@ -363,13 +516,17 @@ const copyOrderNumber = () => {
 
 .product-price-info {
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .price {
     font-size: 28rpx;
-    font-weight: bold;
+    color: #333;
+    font-weight: normal;
     display: block;
-    margin-bottom: 10rpx;
+    margin-bottom: 6rpx;
 }
 
 .quantity {
@@ -380,15 +537,16 @@ const copyOrderNumber = () => {
 /* 价格信息 */
 .price-summary {
     background-color: white;
-    padding: 30rpx;
-    margin: 0 20rpx 20rpx 20rpx;
-    border-radius: 8rpx;
+    padding: 24rpx 30rpx;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 20rpx solid #f5f5f5;
 }
 
 .discount-info {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10rpx;
+    margin-bottom: 6rpx;
 }
 
 .discount-label {
@@ -398,74 +556,80 @@ const copyOrderNumber = () => {
 
 .discount-value {
     font-size: 26rpx;
-    color: #ff4500;
+    color: #ff3030;
 }
 
 .discount-detail {
     font-size: 24rpx;
     color: #999;
-    margin-bottom: 20rpx;
+    margin-bottom: 16rpx;
 }
 
 .total-price {
     display: flex;
-    justify-content: space-between;
-    padding-top: 20rpx;
-    border-top: 1px solid #eee;
+    justify-content: flex-end;
+    padding-top: 16rpx;
+    border-top: 1px solid #f0f0f0;
 }
 
 .total-label {
-    font-size: 28rpx;
+    font-size: 26rpx;
+    color: #666;
+    margin-right: 10rpx;
 }
 
 .total-value {
     font-size: 30rpx;
     font-weight: bold;
+    color: #333;
 }
 
 /* 订单信息 */
 .order-info {
     background-color: white;
     padding: 30rpx;
-    margin: 0 20rpx 40rpx 20rpx;
-    border-radius: 8rpx;
+    margin: 0;
+    border-radius: 0;
 }
 
 .info-title {
     font-size: 30rpx;
     font-weight: bold;
     margin-bottom: 20rpx;
+    color: #333;
 }
 
 .info-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20rpx;
+    margin-bottom: 16rpx;
     align-items: center;
 }
 
 .info-label {
-    font-size: 26rpx;
     flex: 1;
-    color: #999;
+    font-size: 26rpx;
+    color: #666;
 }
 
 .info-value {
     font-size: 26rpx;
     color: #333;
+    text-align: right;
 }
 
 .order-number {
-    max-width: 70%;
+    max-width: 220rpx;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .copy-btn {
     font-size: 24rpx;
-    color: #1989fa;
+    color: #3088eb;
     background-color: #f0f8ff;
-    padding: 4rpx 16rpx;
+    padding: 2rpx 16rpx;
     border-radius: 30rpx;
+    margin-left: 10rpx;
 }
 </style>
