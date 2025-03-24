@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const utils_userState = require("../../utils/userState.js");
 const _sfc_main = {
   __name: "home",
   setup(__props) {
@@ -84,16 +85,18 @@ const _sfc_main = {
             b: currentSwiper.value === index ? 1 : ""
           };
         }),
-        f: common_assets._imports_1,
-        g: common_assets._imports_1$1,
-        h: common_vendor.o(navigateToOrder),
-        i: common_assets._imports_2,
-        j: common_assets._imports_3,
-        k: common_assets._imports_4,
-        l: common_assets._imports_5,
-        m: common_assets._imports_6,
-        n: common_assets._imports_7,
-        o: common_assets._imports_8
+        f: common_vendor.unref(utils_userState.userState).avatar,
+        g: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
+        h: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
+        i: common_assets._imports_0$1,
+        j: common_vendor.o(navigateToOrder),
+        k: common_assets._imports_1,
+        l: common_assets._imports_2,
+        m: common_assets._imports_3,
+        n: common_assets._imports_4,
+        o: common_assets._imports_5,
+        p: common_assets._imports_6,
+        q: common_assets._imports_7
       };
     };
   }

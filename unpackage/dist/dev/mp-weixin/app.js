@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
+const utils_userStorage = require("./utils/userStorage.js");
+const utils_userState = require("./utils/userState.js");
+const utils_userService = require("./utils/userService.js");
 if (!Math) {
   "./pages/home/home.js";
   "./pages/order/order.js";
@@ -14,13 +17,45 @@ if (!Math) {
 }
 const _sfc_main = {
   onLaunch: function() {
-    common_vendor.index.__f__("log", "at App.vue:4", "App Launch");
+    common_vendor.index.__f__("log", "at App.vue:9", "App Launch");
+    this.initUserInfo();
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:7", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:15", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:10", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:18", "App Hide");
+  },
+  methods: {
+    // 初始化用户信息
+    initUserInfo() {
+      try {
+        const initialized = utils_userState.initUserState();
+        if (!initialized) {
+          common_vendor.index.__f__("error", "at App.vue:29", "用户状态初始化失败");
+          return;
+        }
+        const userInfo = utils_userStorage.getUserInfo();
+        if (!userInfo) {
+          common_vendor.index.__f__("log", "at App.vue:37", "未检测到用户信息，将使用访客模式");
+          this.createGuestUser();
+        } else {
+          common_vendor.index.__f__("log", "at App.vue:41", "已加载用户信息");
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at App.vue:44", "初始化用户信息失败", error);
+      }
+    },
+    // 创建游客用户（可选功能）
+    createGuestUser() {
+      const phoneNumber = "guest_" + Date.now();
+      const { success, userInfo } = utils_userService.loginUser(phoneNumber);
+      if (success) {
+        common_vendor.index.__f__("log", "at App.vue:55", "已创建游客账号");
+      } else {
+        common_vendor.index.__f__("error", "at App.vue:57", "创建游客账号失败");
+      }
+    }
   }
 };
 const OrderDetail = () => "./pages/components/shop-detail.js";

@@ -78,16 +78,18 @@
             <view class="user-info-wrapper">
                 <view class="user-info">
                     <view class="avatar-container">
-                        <image
-                            class="avatar"
-                            src="/static/images/avatar.png"
-                        ></image>
+                        <image class="avatar" :src="userState.avatar"></image>
                     </view>
                     <view class="user-greeting">
-                        <text>Hi~醇厚的生椰西瓜</text>
+                        <text>Hi~{{ userState.nickname }}</text>
                     </view>
                     <view class="coupon-btn">
-                        <text>优惠券 0</text>
+                        <text
+                            >优惠券
+                            {{
+                                userState.coupons ? userState.coupons.length : 0
+                            }}</text
+                        >
                     </view>
                 </view>
             </view>
@@ -250,6 +252,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { userState } from '../../utils/userState'
 
 const currentSwiper = ref(0)
 

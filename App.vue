@@ -1,13 +1,62 @@
 <script>
+import { getUserInfo } from './utils/userStorage'
+import { createDefaultUserInfo } from './utils/userModel'
+import { initUserState } from './utils/userState'
+import { loginUser } from './utils/userService'
+
 export default {
     onLaunch: function () {
         console.log('App Launch')
+
+        // 初始化用户信息
+        this.initUserInfo()
     },
     onShow: function () {
         console.log('App Show')
     },
     onHide: function () {
         console.log('App Hide')
+    },
+
+    methods: {
+        // 初始化用户信息
+        initUserInfo() {
+            try {
+                // 初始化全局用户状态
+                const initialized = initUserState()
+
+                if (!initialized) {
+                    console.error('用户状态初始化失败')
+                    return
+                }
+
+                // 检查本地是否已有用户信息
+                const userInfo = getUserInfo()
+
+                if (!userInfo) {
+                    console.log('未检测到用户信息，将使用访客模式')
+                    // 如果是首次使用应用，可以考虑自动创建一个游客账号
+                    this.createGuestUser()
+                } else {
+                    console.log('已加载用户信息')
+                }
+            } catch (error) {
+                console.error('初始化用户信息失败', error)
+            }
+        },
+
+        // 创建游客用户（可选功能）
+        createGuestUser() {
+            // 自动创建一个游客账号
+            const phoneNumber = 'guest_' + Date.now()
+            const { success, userInfo } = loginUser(phoneNumber)
+
+            if (success) {
+                console.log('已创建游客账号')
+            } else {
+                console.error('创建游客账号失败')
+            }
+        }
     }
 }
 </script>

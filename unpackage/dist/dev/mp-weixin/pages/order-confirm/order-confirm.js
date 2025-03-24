@@ -112,7 +112,7 @@ const _sfc_main = {
             f: index
           };
         }),
-        g: common_assets._imports_0$3,
+        g: common_assets._imports_0$4,
         h: common_vendor.p({
           type: "right",
           size: "16"

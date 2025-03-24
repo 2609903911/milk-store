@@ -223,14 +223,14 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$5,
+        a: common_assets._imports_0$6,
         b: common_vendor.p({
           type: "left",
           size: "24",
           color: "#fff"
         }),
         c: common_vendor.o(goBack),
-        d: common_assets._imports_1,
+        d: common_assets._imports_1$4,
         e: common_vendor.t(userLevel.value),
         f: common_vendor.t(totalActiveMedals.value),
         g: common_assets._imports_2$3,

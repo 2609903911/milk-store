@@ -6984,7 +6984,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "192.168.252.142,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_L0sKhn";
+  const id = "mp-weixin_6WchPw";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -7946,6 +7946,7 @@ exports.resolveComponent = resolveComponent;
 exports.s = s;
 exports.sr = sr;
 exports.t = t;
+exports.unref = unref;
 exports.watch = watch;
 exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

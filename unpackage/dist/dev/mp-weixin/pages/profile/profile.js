@@ -1,6 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const utils_userState = require("../../utils/userState.js");
+const utils_userService = require("../../utils/userService.js");
 const _sfc_main = {
   __name: "profile",
   setup(__props) {
@@ -24,10 +26,37 @@ const _sfc_main = {
       { name: "熊猫币商城", icon: "../../static/images/service/store.png" },
       { name: "加盟申请", icon: "../../static/images/service/franchise.png" },
       { name: "联系客服", icon: "../../static/images/service/contact.png" },
-      { name: "个人资料", icon: "../../static/images/service/profile.png" },
+      {
+        name: "个人资料",
+        icon: "../../static/images/service/profile.png",
+        action: "editProfile"
+      },
       { name: "抽奖公示", icon: "../../static/images/service/prize.png" }
     ]);
     const handleServiceClick = (serviceName) => {
+      const item = serviceItems.find((item2) => item2.name === serviceName);
+      if (item && item.action === "editProfile") {
+        common_vendor.index.showModal({
+          title: "编辑个人资料",
+          content: "这里应该跳转到个人资料编辑页面",
+          confirmText: "修改昵称",
+          success: (res) => {
+            if (res.confirm) {
+              utils_userService.updateUserProfile({
+                nickname: "熊猫奶茶VIP会员"
+              }).then(({ success }) => {
+                if (success) {
+                  common_vendor.index.showToast({
+                    title: "昵称修改成功",
+                    icon: "success"
+                  });
+                }
+              });
+            }
+          }
+        });
+        return;
+      }
       common_vendor.index.showToast({
         title: `您点击了${serviceName}`,
         icon: "none"
@@ -35,17 +64,20 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$2,
-        b: common_assets._imports_1,
-        c: common_assets._imports_2$1,
-        d: common_vendor.o(openMedalWall),
-        e: common_assets._imports_3$1,
-        f: common_vendor.o(goToMall),
-        g: common_assets._imports_4$1,
-        h: common_assets._imports_5$1,
-        i: common_assets._imports_6$1,
-        j: common_assets._imports_7$1,
-        k: common_vendor.f(serviceItems, (item, index, i0) => {
+        a: common_assets._imports_0$3,
+        b: common_vendor.unref(utils_userState.userState).avatar,
+        c: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
+        d: common_assets._imports_1$1,
+        e: common_vendor.o(openMedalWall),
+        f: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
+        g: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
+        h: common_assets._imports_2$1,
+        i: common_vendor.o(goToMall),
+        j: common_assets._imports_3$1,
+        k: common_assets._imports_4$1,
+        l: common_assets._imports_5$1,
+        m: common_assets._imports_6$1,
+        n: common_vendor.f(serviceItems, (item, index, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -53,7 +85,7 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleServiceClick(item.name), index)
           };
         }),
-        l: serviceItems.length % 4 !== 0
+        o: serviceItems.length % 4 !== 0
       }, serviceItems.length % 4 !== 0 ? {} : {});
     };
   }

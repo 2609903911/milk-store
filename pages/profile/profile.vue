@@ -13,13 +13,10 @@
             <!-- 用户信息区域 -->
             <view class="user-info-section">
                 <view class="avatar-box">
-                    <image
-                        class="avatar"
-                        src="/static/images/avatar.png"
-                    ></image>
+                    <image class="avatar" :src="userState.avatar"></image>
                 </view>
                 <view class="user-details">
-                    <text class="nickname">熊猫奶茶会员</text>
+                    <text class="nickname">{{ userState.nickname }}</text>
                     <view class="medal-wall-btn" @click="openMedalWall">
                         <image
                             class="medal-icon"
@@ -35,12 +32,16 @@
                 <view class="account-row">
                     <view class="account-item">
                         <view class="account-label">熊猫币</view>
-                        <view class="account-value">248</view>
+                        <view class="account-value">{{
+                            userState.pandaCoins
+                        }}</view>
                     </view>
                     <view class="divider"></view>
                     <view class="account-item">
                         <view class="account-label">优惠券</view>
-                        <view class="account-value">3</view>
+                        <view class="account-value">{{
+                            userState.coupons ? userState.coupons.length : 0
+                        }}</view>
                     </view>
                 </view>
             </view>
@@ -157,7 +158,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { userState } from '../../utils/userState'
+import { updateUserProfile } from '../../utils/userService'
 
 const title = ref('我的')
 
@@ -187,17 +190,49 @@ const serviceItems = reactive([
     { name: '熊猫币商城', icon: '../../static/images/service/store.png' },
     { name: '加盟申请', icon: '../../static/images/service/franchise.png' },
     { name: '联系客服', icon: '../../static/images/service/contact.png' },
-    { name: '个人资料', icon: '../../static/images/service/profile.png' },
+    {
+        name: '个人资料',
+        icon: '../../static/images/service/profile.png',
+        action: 'editProfile'
+    },
     { name: '抽奖公示', icon: '../../static/images/service/prize.png' }
 ])
 
 // 处理服务点击事件
 const handleServiceClick = (serviceName) => {
+    // 根据不同服务名称跳转到不同页面
+    const item = serviceItems.find((item) => item.name === serviceName)
+
+    if (item && item.action === 'editProfile') {
+        // 跳转到个人资料编辑页面
+        // 实际项目中应该创建一个编辑页面
+        uni.showModal({
+            title: '编辑个人资料',
+            content: '这里应该跳转到个人资料编辑页面',
+            confirmText: '修改昵称',
+            success: (res) => {
+                if (res.confirm) {
+                    // 模拟修改昵称
+                    updateUserProfile({
+                        nickname: '熊猫奶茶VIP会员'
+                    }).then(({ success }) => {
+                        if (success) {
+                            uni.showToast({
+                                title: '昵称修改成功',
+                                icon: 'success'
+                            })
+                        }
+                    })
+                }
+            }
+        })
+        return
+    }
+
     uni.showToast({
         title: `您点击了${serviceName}`,
         icon: 'none'
     })
-    // 根据不同服务名称跳转到不同页面
 }
 </script>
 

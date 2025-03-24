@@ -9,13 +9,6 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/order-medal/order-medal",
-          "pathName": "pages/order-medal/order-medal",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "pages/home/home",
           "pathName": "pages/home/home",
           "query": "",
