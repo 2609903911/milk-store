@@ -83,7 +83,7 @@
                     <view class="user-greeting">
                         <text>Hi~{{ userState.nickname }}</text>
                     </view>
-                    <view class="coupon-btn">
+                    <view class="coupon-btn" @click="navigateToCoupons">
                         <text
                             >优惠券
                             {{
@@ -297,6 +297,13 @@ const swiperChange = (e) => {
 const navigateToOrder = () => {
     uni.switchTab({
         url: '/pages/order/order'
+    })
+}
+
+// 跳转到优惠券页面
+const navigateToCoupons = () => {
+    uni.navigateTo({
+        url: '/pages/coupons/coupons'
     })
 }
 </script>

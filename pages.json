@@ -58,6 +58,12 @@
                 "navigationBarTitleText" : "勋章墙",
                 "navigationStyle" : "custom"
             }
+        },
+        {
+            "path" : "pages/coupons/coupons",
+            "style" : {
+                "navigationBarTitleText" : "我的优惠券"
+            }
         }
     ],
     "globalStyle" : {

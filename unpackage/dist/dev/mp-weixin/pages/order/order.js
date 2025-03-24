@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_userState = require("../../utils/userState.js");
 if (!Array) {
   const _easycom_shop_detail2 = common_vendor.resolveComponent("shop-detail");
   _easycom_shop_detail2();
@@ -24,7 +25,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const deliveryType = common_vendor.ref("self");
     common_vendor.watch(deliveryType, (newValue) => {
       common_vendor.index.setStorageSync("deliveryType", newValue);
-      common_vendor.index.__f__("log", "at pages/order/order.vue:312", "配送方式已更新:", newValue);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:315", "配送方式已更新:", newValue);
     });
     common_vendor.onMounted(() => {
       const savedDeliveryType = common_vendor.index.getStorageSync("deliveryType");
@@ -65,6 +66,11 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const activeTab = common_vendor.ref("menu");
     const activeCategoryIndex = common_vendor.ref(0);
+    common_vendor.watch(activeTab, (newValue) => {
+      if (newValue === "coupon") {
+        loadUserCoupons();
+      }
+    });
     const currentCategoryId = common_vendor.ref("product-0");
     const categories = common_vendor.ref([
       {
@@ -227,14 +233,15 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     });
     common_vendor.onShow(() => {
       updateStoreInfo();
+      loadUserCoupons();
     });
     common_vendor.onUnmounted(() => {
       common_vendor.index.$off("store-selected", handleStoreSelected);
       common_vendor.index.$off("refresh-order-page", refreshPage);
     });
     const handleStoreSelected = (data) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:556", "收到门店选择事件:", data);
-      common_vendor.index.__f__("log", "at pages/order/order.vue:557", data);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:570", "收到门店选择事件:", data);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:571", data);
       if (data) {
         if (data.name) {
           shopName.value = data.name;
@@ -255,10 +262,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       }
     };
     const updateStoreInfo = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:583", "更新门店信息");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:597", "更新门店信息");
       const selectedStore = common_vendor.index.getStorageSync("selectedStore");
       if (selectedStore) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:586", "从存储中获取到的门店信息:", selectedStore);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:600", "从存储中获取到的门店信息:", selectedStore);
         let updated = false;
         if (selectedStore.name && selectedStore.name !== shopName.value) {
           shopName.value = selectedStore.name;
@@ -274,7 +281,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
         }
         if (updated) {
           common_vendor.nextTick$1(() => {
-            common_vendor.index.__f__("log", "at pages/order/order.vue:612", "强制刷新UI");
+            common_vendor.index.__f__("log", "at pages/order/order.vue:626", "强制刷新UI");
           });
         }
       }
@@ -294,47 +301,91 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       }
       isPromoHidden.value = scrollTop > 50;
     };
-    const coupons = common_vendor.ref([
-      {
-        discount: "9.5",
-        unit: "折",
-        type: "到店、外卖",
-        title: "【3月会员签到】订单95折券",
-        description: "",
-        expireDate: "2025-03-22 23:59:59",
-        scope: "部分门店，部分商品",
-        color: "#007AFF"
-      },
-      {
-        discount: "5",
-        unit: "元",
-        type: "到店自取",
-        title: "【新人优惠】满20减5元券",
-        description: "满20元可用",
-        expireDate: "2025-04-15 23:59:59",
-        scope: "全部门店，部分商品",
-        color: "#FF6B00"
-      },
-      {
-        discount: "10",
-        unit: "元",
-        type: "外卖专享",
-        title: "【周末福利】满30减10元券",
-        description: "满30元可用",
-        expireDate: "2025-03-30 23:59:59",
-        scope: "部分门店，全部商品",
-        color: "#FF2D55"
+    const coupons = common_vendor.ref([]);
+    const formatDate = (timestamp) => {
+      if (!timestamp)
+        return "";
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    const loadUserCoupons = () => {
+      if (utils_userState.userState.coupons && Array.isArray(utils_userState.userState.coupons)) {
+        coupons.value = utils_userState.userState.coupons.map((coupon) => {
+          let discount = "";
+          let unit = "";
+          let color = "";
+          switch (coupon.type) {
+            case "discount":
+              discount = coupon.value;
+              unit = "折";
+              color = "#007AFF";
+              break;
+            case "cash":
+              discount = coupon.value;
+              unit = "元";
+              color = "#FF6B00";
+              break;
+            case "free":
+              discount = "免单";
+              unit = "";
+              color = "#FF2D55";
+              break;
+            case "buyOneGetOne":
+              discount = "买一";
+              unit = "赠一";
+              color = "#34C759";
+              break;
+            case "specialPrice":
+              discount = coupon.value;
+              unit = "元";
+              color = "#AF52DE";
+              break;
+            case "shipping":
+              discount = "免";
+              unit = "运费";
+              color = "#5856D6";
+              break;
+            default:
+              discount = coupon.value;
+              unit = "";
+              color = "#007AFF";
+          }
+          const expireDate = formatDate(coupon.endTime);
+          return {
+            id: coupon.id,
+            discount,
+            unit,
+            type: coupon.scope === "all" ? "全场通用" : "部分商品",
+            title: coupon.title,
+            description: coupon.description || (coupon.minOrderAmount > 0 ? `满${coupon.minOrderAmount}元可用` : ""),
+            expireDate,
+            scope: coupon.description,
+            color,
+            originalCoupon: coupon
+            // 保存原始优惠券数据，便于后续使用
+          };
+        });
+        common_vendor.index.__f__("log", "at pages/order/order.vue:750", "已加载优惠券：", coupons.value.length, "张");
+      } else {
+        common_vendor.index.__f__("warn", "at pages/order/order.vue:752", "未找到用户优惠券数据");
       }
-    ]);
+    };
     const useCoupon = (coupon) => {
       activeTab.value = "menu";
+      common_vendor.index.showToast({
+        title: "已选择优惠券：" + coupon.title,
+        icon: "none"
+      });
     };
     common_vendor.ref(1);
     common_vendor.ref(0);
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:723", "打开商品详情", category.name, product.name);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:803", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
       setTimeout(() => {
         productDetailVisible.value = true;
@@ -351,26 +402,26 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:750", "添加到购物车", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:830", "添加到购物车", item);
       if (!item) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:753", "添加到购物车的商品数据为空");
+        common_vendor.index.__f__("error", "at pages/order/order.vue:833", "添加到购物车的商品数据为空");
         return;
       }
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.addToCart(item);
         } else {
-          common_vendor.index.__f__("warn", "at pages/order/order.vue:763", "orderCartRef不存在，尝试其他方式获取组件");
+          common_vendor.index.__f__("warn", "at pages/order/order.vue:843", "orderCartRef不存在，尝试其他方式获取组件");
           const pages = getCurrentPages();
           if (pages && pages.length > 0) {
             const currentPage = pages[pages.length - 1];
             if (currentPage.$refs && currentPage.$refs.orderCartRef) {
               currentPage.$refs.orderCartRef.addToCart(item);
             } else {
-              common_vendor.index.__f__("error", "at pages/order/order.vue:771", "无法获取购物车组件引用");
+              common_vendor.index.__f__("error", "at pages/order/order.vue:851", "无法获取购物车组件引用");
             }
           } else {
-            common_vendor.index.__f__("error", "at pages/order/order.vue:774", "无法获取当前页面实例");
+            common_vendor.index.__f__("error", "at pages/order/order.vue:854", "无法获取当前页面实例");
           }
         }
       });
@@ -378,7 +429,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:788", "打开促销商品详情", item.title);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:868", "打开促销商品详情", item.title);
         selectedProduct.value = { ...product };
         setTimeout(() => {
           productDetailVisible.value = true;
@@ -399,7 +450,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
     };
     const refreshPage = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:816", "执行页面刷新");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:896", "执行页面刷新");
       updateStoreInfo();
     };
     return (_ctx, _cache) => {
@@ -473,7 +524,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             f: common_vendor.t(coupon.description),
             g: common_vendor.t(coupon.expireDate),
             h: common_vendor.t(coupon.scope),
-            i: common_vendor.o(($event) => useCoupon(), index),
+            i: common_vendor.o(($event) => useCoupon(coupon), index),
             j: coupon.color,
             k: index
           };

@@ -14,36 +14,33 @@ if (!Math) {
   "./pages/map-city/map-city.js";
   "./pages/order-detail/order-detail.js";
   "./pages/order-medal/order-medal.js";
+  "./pages/coupons/coupons.js";
 }
 const _sfc_main = {
   onLaunch: function() {
     common_vendor.index.__f__("log", "at App.vue:9", "App Launch");
+    utils_userState.initUserState();
     this.initUserInfo();
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:15", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:18", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:18", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:21", "App Hide");
   },
   methods: {
     // 初始化用户信息
     initUserInfo() {
       try {
-        const initialized = utils_userState.initUserState();
-        if (!initialized) {
-          common_vendor.index.__f__("error", "at App.vue:29", "用户状态初始化失败");
-          return;
-        }
         const userInfo = utils_userStorage.getUserInfo();
         if (!userInfo) {
-          common_vendor.index.__f__("log", "at App.vue:37", "未检测到用户信息，将使用访客模式");
+          common_vendor.index.__f__("log", "at App.vue:32", "未检测到用户信息，将使用访客模式");
           this.createGuestUser();
         } else {
-          common_vendor.index.__f__("log", "at App.vue:41", "已加载用户信息");
+          common_vendor.index.__f__("log", "at App.vue:36", "已加载用户信息");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at App.vue:44", "初始化用户信息失败", error);
+        common_vendor.index.__f__("error", "at App.vue:39", "初始化用户信息失败", error);
       }
     },
     // 创建游客用户（可选功能）
@@ -51,9 +48,9 @@ const _sfc_main = {
       const phoneNumber = "guest_" + Date.now();
       const { success, userInfo } = utils_userService.loginUser(phoneNumber);
       if (success) {
-        common_vendor.index.__f__("log", "at App.vue:55", "已创建游客账号");
+        common_vendor.index.__f__("log", "at App.vue:50", "已创建游客账号");
       } else {
-        common_vendor.index.__f__("error", "at App.vue:57", "创建游客账号失败");
+        common_vendor.index.__f__("error", "at App.vue:52", "创建游客账号失败");
       }
     }
   }

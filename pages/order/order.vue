@@ -217,63 +217,66 @@
 
                 <!-- 用券下单内容 -->
                 <view class="coupon-content" v-else>
-                    <view class="coupon-list">
-                        <view
-                            class="coupon-item"
-                            v-for="(coupon, index) in coupons"
-                            :key="index"
-                        >
+                    <scroll-view scroll-y class="coupon-scroll-view">
+                        <view class="coupon-list">
                             <view
-                                class="coupon-left"
-                                :style="{ backgroundColor: coupon.color }"
+                                class="coupon-item"
+                                v-for="(coupon, index) in coupons"
+                                :key="index"
                             >
-                                <view class="discount-value"
-                                    >{{ coupon.discount
-                                    }}<text class="discount-unit">{{
-                                        coupon.unit
-                                    }}</text></view
-                                >
-                                <view class="coupon-type">{{
-                                    coupon.type
-                                }}</view>
-                            </view>
-                            <view class="coupon-right">
-                                <view class="coupon-title">{{
-                                    coupon.title
-                                }}</view>
-                                <view class="coupon-desc">{{
-                                    coupon.description
-                                }}</view>
-                                <view class="coupon-period"
-                                    >有效期至{{ coupon.expireDate }}</view
-                                >
-                                <view class="coupon-scope">{{
-                                    coupon.scope
-                                }}</view>
                                 <view
-                                    class="use-btn"
-                                    @click="useCoupon(coupon)"
+                                    class="coupon-left"
                                     :style="{ backgroundColor: coupon.color }"
-                                    >去选购</view
                                 >
+                                    <view class="discount-value"
+                                        >{{ coupon.discount
+                                        }}<text class="discount-unit">{{
+                                            coupon.unit
+                                        }}</text></view
+                                    >
+                                    <view class="coupon-type">{{
+                                        coupon.type
+                                    }}</view>
+                                </view>
+                                <view class="coupon-right">
+                                    <view class="coupon-title">{{
+                                        coupon.title
+                                    }}</view>
+                                    <view class="coupon-desc">{{
+                                        coupon.description
+                                    }}</view>
+                                    <view class="coupon-period"
+                                        >有效期至{{ coupon.expireDate }}</view
+                                    >
+                                    <view class="coupon-scope">{{
+                                        coupon.scope
+                                    }}</view>
+                                    <view
+                                        class="use-btn"
+                                        @click="useCoupon(coupon)"
+                                        :style="{
+                                            backgroundColor: coupon.color
+                                        }"
+                                        >去选购</view
+                                    >
+                                </view>
                             </view>
                         </view>
-                    </view>
+                    </scroll-view>
                 </view>
             </view>
+            <!-- 商品详情弹框 -->
+            <shop-detail
+                v-if="productDetailVisible"
+                :visible="productDetailVisible"
+                :product="selectedProduct"
+                @update:visible="updateDetailVisible"
+                @add-to-cart="handleAddToCart"
+            />
+
+            <!-- 购物车组件 -->
+            <order-cart ref="orderCartRef" />
         </view>
-
-        <!-- 商品详情弹框 -->
-        <shop-detail
-            v-if="productDetailVisible"
-            :visible="productDetailVisible"
-            :product="selectedProduct"
-            @update:visible="updateDetailVisible"
-            @add-to-cart="handleAddToCart"
-        />
-
-        <!-- 购物车组件 -->
-        <order-cart ref="orderCartRef" />
     </view>
 </template>
 
@@ -362,6 +365,14 @@ const onScroll = (e) => {
 // 分类相关
 const activeTab = ref('menu')
 const activeCategoryIndex = ref(0)
+
+// 监听activeTab变化
+watch(activeTab, (newValue) => {
+    if (newValue === 'coupon') {
+        // 当切换到优惠券标签时，确保加载最新的优惠券数据
+        loadUserCoupons()
+    }
+})
 
 // 我们改成使用scroll-into-view而不是scroll-top
 const currentCategoryId = ref('product-0')
@@ -543,6 +554,9 @@ onMounted(() => {
 onShow(() => {
     // 更新门店信息
     updateStoreInfo()
+
+    // 加载用户优惠券
+    loadUserCoupons()
 })
 
 // 在组件卸载时取消监听事件
@@ -647,43 +661,109 @@ const onProductScroll = (e) => {
 }
 
 // 优惠券数据
-const coupons = ref([
-    {
-        discount: '9.5',
-        unit: '折',
-        type: '到店、外卖',
-        title: '【3月会员签到】订单95折券',
-        description: '',
-        expireDate: '2025-03-22 23:59:59',
-        scope: '部分门店，部分商品',
-        color: '#007AFF'
-    },
-    {
-        discount: '5',
-        unit: '元',
-        type: '到店自取',
-        title: '【新人优惠】满20减5元券',
-        description: '满20元可用',
-        expireDate: '2025-04-15 23:59:59',
-        scope: '全部门店，部分商品',
-        color: '#FF6B00'
-    },
-    {
-        discount: '10',
-        unit: '元',
-        type: '外卖专享',
-        title: '【周末福利】满30减10元券',
-        description: '满30元可用',
-        expireDate: '2025-03-30 23:59:59',
-        scope: '部分门店，全部商品',
-        color: '#FF2D55'
+const coupons = ref([])
+
+// 引入userState
+import { userState } from '../../utils/userState'
+
+// 格式化日期的函数
+const formatDate = (timestamp) => {
+    if (!timestamp) return ''
+
+    const date = new Date(timestamp)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+}
+// 获取用户信息中的优惠券
+const loadUserCoupons = () => {
+    // 直接从全局状态获取优惠券数据，而不是从localStorage
+    if (userState.coupons && Array.isArray(userState.coupons)) {
+        // 将用户信息中的优惠券转换为订单页面需要的格式
+        coupons.value = userState.coupons.map((coupon) => {
+            // 根据优惠券类型生成不同的显示内容
+            let discount = ''
+            let unit = ''
+            let color = ''
+
+            switch (coupon.type) {
+                case 'discount': // 折扣券
+                    discount = coupon.value
+                    unit = '折'
+                    color = '#007AFF'
+                    break
+                case 'cash': // 现金券
+                    discount = coupon.value
+                    unit = '元'
+                    color = '#FF6B00'
+                    break
+                case 'free': // 免单券
+                    discount = '免单'
+                    unit = ''
+                    color = '#FF2D55'
+                    break
+                case 'buyOneGetOne': // 买一赠一券
+                    discount = '买一'
+                    unit = '赠一'
+                    color = '#34C759'
+                    break
+                case 'specialPrice': // 特价券
+                    discount = coupon.value
+                    unit = '元'
+                    color = '#AF52DE'
+                    break
+                case 'shipping': // 免运费券
+                    discount = '免'
+                    unit = '运费'
+                    color = '#5856D6'
+                    break
+                default:
+                    discount = coupon.value
+                    unit = ''
+                    color = '#007AFF'
+            }
+
+            // 格式化过期时间
+            const expireDate = formatDate(coupon.endTime)
+
+            return {
+                id: coupon.id,
+                discount,
+                unit,
+                type: coupon.scope === 'all' ? '全场通用' : '部分商品',
+                title: coupon.title,
+                description:
+                    coupon.description ||
+                    (coupon.minOrderAmount > 0
+                        ? `满${coupon.minOrderAmount}元可用`
+                        : ''),
+                expireDate,
+                scope: coupon.description,
+                color,
+                originalCoupon: coupon // 保存原始优惠券数据，便于后续使用
+            }
+        })
+
+        // 打印调试信息
+        console.log('已加载优惠券：', coupons.value.length, '张')
+    } else {
+        console.warn('未找到用户优惠券数据')
     }
-])
+}
 
 // 使用优惠券
 const useCoupon = (coupon) => {
     // 切换到菜单
     activeTab.value = 'menu'
+
+    // 可以在这里添加优惠券使用逻辑
+    uni.showToast({
+        title: '已选择优惠券：' + coupon.title,
+        icon: 'none'
+    })
+
     // 这里可以添加其他逻辑，如标记当前使用的优惠券等
 }
 
@@ -1202,23 +1282,29 @@ input {
 
 // 优惠券列表样式
 .coupon-content {
-    padding: 30rpx;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.coupon-scroll-view {
+    height: calc(
+        100vh - 400rpx
+    ); /* 调整高度确保在不同设备上都有足够的滚动空间 */
+    width: 100%;
 }
 
 .coupon-list {
-    display: flex;
-    flex-direction: column;
-    gap: 30rpx;
+    padding: 20rpx;
 }
 
 .coupon-item {
     display: flex;
-    height: 220rpx;
     background-color: #fff;
-    border-radius: 16rpx;
+    margin-bottom: 20rpx;
+    border-radius: 12rpx;
+    box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-    position: relative;
 }
 
 .coupon-item::before {
@@ -1364,6 +1450,6 @@ input {
     padding: 10rpx 30rpx;
     color: #fff;
     font-size: 26rpx;
-    border-radius: 100rpx;
+    border-radius: 10rpx;
 }
 </style> 

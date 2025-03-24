@@ -8,6 +8,9 @@ export default {
     onLaunch: function () {
         console.log('App Launch')
 
+        // 初始化用户状态
+        initUserState()
+
         // 初始化用户信息
         this.initUserInfo()
     },
@@ -22,14 +25,6 @@ export default {
         // 初始化用户信息
         initUserInfo() {
             try {
-                // 初始化全局用户状态
-                const initialized = initUserState()
-
-                if (!initialized) {
-                    console.error('用户状态初始化失败')
-                    return
-                }
-
                 // 检查本地是否已有用户信息
                 const userInfo = getUserInfo()
 

@@ -18,6 +18,11 @@ const _sfc_main = {
         icon: "none"
       });
     };
+    const navigateToCoupons = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/coupons/coupons"
+      });
+    };
     const serviceItems = common_vendor.reactive([
       { name: "团餐", icon: "../../static/images/service/group.png" },
       { name: "礼品卡", icon: "../../static/images/service/gift-card.png" },
@@ -71,13 +76,14 @@ const _sfc_main = {
         e: common_vendor.o(openMedalWall),
         f: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
         g: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
-        h: common_assets._imports_2$1,
-        i: common_vendor.o(goToMall),
-        j: common_assets._imports_3$1,
-        k: common_assets._imports_4$1,
-        l: common_assets._imports_5$1,
-        m: common_assets._imports_6$1,
-        n: common_vendor.f(serviceItems, (item, index, i0) => {
+        h: common_vendor.o(navigateToCoupons),
+        i: common_assets._imports_2$1,
+        j: common_vendor.o(goToMall),
+        k: common_assets._imports_3$1,
+        l: common_assets._imports_4$1,
+        m: common_assets._imports_5$1,
+        n: common_assets._imports_6$1,
+        o: common_vendor.f(serviceItems, (item, index, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -85,7 +91,7 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleServiceClick(item.name), index)
           };
         }),
-        o: serviceItems.length % 4 !== 0
+        p: serviceItems.length % 4 !== 0
       }, serviceItems.length % 4 !== 0 ? {} : {});
     };
   }

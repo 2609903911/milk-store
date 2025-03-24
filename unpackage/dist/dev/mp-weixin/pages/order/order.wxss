@@ -343,21 +343,25 @@ input.data-v-93207a4f {
   font-size: 25rpx;
 }
 .coupon-content.data-v-93207a4f {
-  padding: 30rpx;
-}
-.coupon-list.data-v-93207a4f {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
+}
+.coupon-scroll-view.data-v-93207a4f {
+  height: calc(100vh - 400rpx);
+  /* 调整高度确保在不同设备上都有足够的滚动空间 */
+  width: 100%;
+}
+.coupon-list.data-v-93207a4f {
+  padding: 20rpx;
 }
 .coupon-item.data-v-93207a4f {
   display: flex;
-  height: 220rpx;
   background-color: #fff;
-  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-  position: relative;
 }
 .coupon-item.data-v-93207a4f::before {
   content: "";
@@ -444,5 +448,5 @@ input.data-v-93207a4f {
   padding: 10rpx 30rpx;
   color: #fff;
   font-size: 26rpx;
-  border-radius: 100rpx;
+  border-radius: 10rpx;
 }

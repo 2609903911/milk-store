@@ -48,6 +48,11 @@ const _sfc_main = {
         url: "/pages/order/order"
       });
     };
+    const navigateToCoupons = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/coupons/coupons"
+      });
+    };
     return (_ctx, _cache) => {
       return {
         a: common_vendor.f(bannerList.value, (item, index, i0) => {
@@ -88,15 +93,16 @@ const _sfc_main = {
         f: common_vendor.unref(utils_userState.userState).avatar,
         g: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
         h: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
-        i: common_assets._imports_0$1,
-        j: common_vendor.o(navigateToOrder),
-        k: common_assets._imports_1,
-        l: common_assets._imports_2,
-        m: common_assets._imports_3,
-        n: common_assets._imports_4,
-        o: common_assets._imports_5,
-        p: common_assets._imports_6,
-        q: common_assets._imports_7
+        i: common_vendor.o(navigateToCoupons),
+        j: common_assets._imports_0$1,
+        k: common_vendor.o(navigateToOrder),
+        l: common_assets._imports_1,
+        m: common_assets._imports_2,
+        n: common_assets._imports_3,
+        o: common_assets._imports_4,
+        p: common_assets._imports_5,
+        q: common_assets._imports_6,
+        r: common_assets._imports_7
       };
     };
   }

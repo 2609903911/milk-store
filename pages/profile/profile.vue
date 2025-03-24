@@ -37,7 +37,7 @@
                         }}</view>
                     </view>
                     <view class="divider"></view>
-                    <view class="account-item">
+                    <view class="account-item" @click="navigateToCoupons">
                         <view class="account-label">优惠券</view>
                         <view class="account-value">{{
                             userState.coupons ? userState.coupons.length : 0
@@ -179,6 +179,13 @@ const goToMall = () => {
         icon: 'none'
     })
     // 此处可添加实际跳转逻辑
+}
+
+// 跳转到优惠券页面
+const navigateToCoupons = () => {
+    uni.navigateTo({
+        url: '/pages/coupons/coupons'
+    })
 }
 
 // 服务项目数据
