@@ -64,6 +64,13 @@
             "style" : {
                 "navigationBarTitleText" : "我的优惠券"
             }
+        },
+        {
+            "path" : "pages/panda-store/panda-store",
+            "style" : {
+                "navigationBarTitleText" : "熊猫币商城",
+                "navigationStyle" : "custom"
+            }
         }
     ],
     "globalStyle" : {

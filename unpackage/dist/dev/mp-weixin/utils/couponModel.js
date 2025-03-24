@@ -118,35 +118,10 @@ const createFreeCoupon = (maxAmount = 0, options = {}) => {
     ...options
   });
 };
-const createBuyOneGetOneCoupon = (options = {}) => {
-  return createCoupon({
-    type: COUPON_TYPES.BUY_ONE_GET_ONE,
-    title: "买一赠一券",
-    value: 1,
-    // 赠送数量
-    description: "购买指定商品可获赠相同商品1份",
-    ...options
-  });
-};
-const createSpecialPriceCoupon = (productId, specialPrice, options = {}) => {
-  return createCoupon({
-    type: COUPON_TYPES.SPECIAL_PRICE,
-    title: "特价券",
-    value: specialPrice,
-    // 特价金额
-    scope: COUPON_SCOPES.PRODUCT,
-    scopeIds: [productId],
-    description: `指定商品特价${specialPrice}元`,
-    ...options
-  });
-};
 exports.COUPON_STATUS = COUPON_STATUS;
 exports.COUPON_TYPES = COUPON_TYPES;
 exports.calculateCouponStatus = calculateCouponStatus;
-exports.createBuyOneGetOneCoupon = createBuyOneGetOneCoupon;
 exports.createCashCoupon = createCashCoupon;
-exports.createCoupon = createCoupon;
 exports.createDiscountCoupon = createDiscountCoupon;
 exports.createFreeCoupon = createFreeCoupon;
-exports.createSpecialPriceCoupon = createSpecialPriceCoupon;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/couponModel.js.map

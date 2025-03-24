@@ -9,7 +9,8 @@
     "pages/map-city/map-city",
     "pages/order-detail/order-detail",
     "pages/order-medal/order-medal",
-    "pages/coupons/coupons"
+    "pages/coupons/coupons",
+    "pages/panda-store/panda-store"
   ],
   "window": {
     "navigationBarTextStyle": "black",

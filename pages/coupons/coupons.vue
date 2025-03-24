@@ -359,13 +359,6 @@
             </swiper-item>
         </swiper>
 
-        <!-- 底部领券入口 -->
-        <view class="claim-coupon-bar">
-            <button class="claim-btn" @click="showCouponCenter">
-                领取优惠券
-            </button>
-        </view>
-
         <!-- 领券中心自定义弹窗 -->
         <view
             v-if="isCouponCenterVisible"
@@ -477,8 +470,7 @@ import { COUPON_TYPES, COUPON_STATUS } from '../../utils/couponModel'
 import {
     getUserCoupons,
     getCouponsByStatus,
-    claimCoupon,
-    generateRandomCoupon
+    claimCoupon
 } from '../../utils/couponService'
 
 // 标签页
@@ -511,7 +503,6 @@ const formatDate = (timestamp) => {
 // 初始化数据
 onMounted(() => {
     loadCoupons()
-    generateAvailableCoupons()
 })
 
 // 加载优惠券数据
@@ -520,19 +511,6 @@ const loadCoupons = () => {
     validCoupons.value = getCouponsByStatus(COUPON_STATUS.VALID)
     usedCoupons.value = getCouponsByStatus(COUPON_STATUS.USED)
     expiredCoupons.value = getCouponsByStatus(COUPON_STATUS.EXPIRED)
-}
-
-// 生成可领取的优惠券
-const generateAvailableCoupons = () => {
-    // 模拟生成多种类型的优惠券
-    availableCoupons.value = [
-        generateRandomCoupon(COUPON_TYPES.DISCOUNT),
-        generateRandomCoupon(COUPON_TYPES.CASH),
-        generateRandomCoupon(COUPON_TYPES.FREE),
-        generateRandomCoupon(COUPON_TYPES.BUY_ONE_GET_ONE),
-        generateRandomCoupon(COUPON_TYPES.SPECIAL_PRICE),
-        generateRandomCoupon(COUPON_TYPES.SHIPPING)
-    ]
 }
 
 // 切换标签页
@@ -545,44 +523,9 @@ const swiperChange = (e) => {
     currentTab.value = e.detail.current
 }
 
-// 显示优惠券中心
-const showCouponCenter = () => {
-    isCouponCenterVisible.value = true
-}
-
 // 关闭优惠券中心
 const closeCouponCenter = () => {
     isCouponCenterVisible.value = false
-}
-
-// 领取优惠券
-const claimCouponAction = (coupon) => {
-    const result = claimCoupon(coupon)
-
-    if (result.success) {
-        uni.showToast({
-            title: '领取成功',
-            icon: 'success'
-        })
-
-        // 刷新优惠券列表
-        loadCoupons()
-
-        // 从可领取列表中移除
-        availableCoupons.value = availableCoupons.value.filter(
-            (c) => c.id !== coupon.id
-        )
-
-        // 如果可领取优惠券不足，生成新的
-        if (availableCoupons.value.length < 3) {
-            availableCoupons.value.push(generateRandomCoupon())
-        }
-    } else {
-        uni.showToast({
-            title: result.message || '领取失败',
-            icon: 'none'
-        })
-    }
 }
 
 // 使用优惠券

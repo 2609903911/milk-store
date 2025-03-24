@@ -53,6 +53,11 @@ const _sfc_main = {
         url: "/pages/coupons/coupons"
       });
     };
+    const navigateToPandaStore = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/panda-store/panda-store"
+      });
+    };
     return (_ctx, _cache) => {
       return {
         a: common_vendor.f(bannerList.value, (item, index, i0) => {
@@ -98,11 +103,12 @@ const _sfc_main = {
         k: common_vendor.o(navigateToOrder),
         l: common_assets._imports_1,
         m: common_assets._imports_2,
-        n: common_assets._imports_3,
-        o: common_assets._imports_4,
-        p: common_assets._imports_5,
-        q: common_assets._imports_6,
-        r: common_assets._imports_7
+        n: common_vendor.o(navigateToPandaStore),
+        o: common_assets._imports_3,
+        p: common_assets._imports_4,
+        q: common_assets._imports_5,
+        r: common_assets._imports_6,
+        s: common_assets._imports_7
       };
     };
   }

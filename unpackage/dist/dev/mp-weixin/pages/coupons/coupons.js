@@ -24,22 +24,11 @@ const _sfc_main = {
     };
     common_vendor.onMounted(() => {
       loadCoupons();
-      generateAvailableCoupons();
     });
     const loadCoupons = () => {
       validCoupons.value = utils_couponService.getCouponsByStatus(utils_couponModel.COUPON_STATUS.VALID);
       usedCoupons.value = utils_couponService.getCouponsByStatus(utils_couponModel.COUPON_STATUS.USED);
       expiredCoupons.value = utils_couponService.getCouponsByStatus(utils_couponModel.COUPON_STATUS.EXPIRED);
-    };
-    const generateAvailableCoupons = () => {
-      availableCoupons.value = [
-        utils_couponService.generateRandomCoupon(utils_couponModel.COUPON_TYPES.DISCOUNT),
-        utils_couponService.generateRandomCoupon(utils_couponModel.COUPON_TYPES.CASH),
-        utils_couponService.generateRandomCoupon(utils_couponModel.COUPON_TYPES.FREE),
-        utils_couponService.generateRandomCoupon(utils_couponModel.COUPON_TYPES.BUY_ONE_GET_ONE),
-        utils_couponService.generateRandomCoupon(utils_couponModel.COUPON_TYPES.SPECIAL_PRICE),
-        utils_couponService.generateRandomCoupon(utils_couponModel.COUPON_TYPES.SHIPPING)
-      ];
     };
     const switchTab = (index) => {
       currentTab.value = index;
@@ -47,32 +36,8 @@ const _sfc_main = {
     const swiperChange = (e) => {
       currentTab.value = e.detail.current;
     };
-    const showCouponCenter = () => {
-      isCouponCenterVisible.value = true;
-    };
     const closeCouponCenter = () => {
       isCouponCenterVisible.value = false;
-    };
-    const claimCouponAction = (coupon) => {
-      const result = utils_couponService.claimCoupon(coupon);
-      if (result.success) {
-        common_vendor.index.showToast({
-          title: "领取成功",
-          icon: "success"
-        });
-        loadCoupons();
-        availableCoupons.value = availableCoupons.value.filter(
-          (c) => c.id !== coupon.id
-        );
-        if (availableCoupons.value.length < 3) {
-          availableCoupons.value.push(utils_couponService.generateRandomCoupon());
-        }
-      } else {
-        common_vendor.index.showToast({
-          title: result.message || "领取失败",
-          icon: "none"
-        });
-      }
     };
     const useCouponClick = (coupon) => {
       common_vendor.index.showModal({
@@ -146,7 +111,7 @@ const _sfc_main = {
         }),
         c: validCoupons.value.length === 0
       }, validCoupons.value.length === 0 ? {
-        d: common_assets._imports_0$7
+        d: common_assets._imports_1$5
       } : {}, {
         e: common_vendor.f(usedCoupons.value, (coupon, k0, i0) => {
           return common_vendor.e({
@@ -175,7 +140,7 @@ const _sfc_main = {
         }),
         f: usedCoupons.value.length === 0
       }, usedCoupons.value.length === 0 ? {
-        g: common_assets._imports_0$7
+        g: common_assets._imports_1$5
       } : {}, {
         h: common_vendor.f(expiredCoupons.value, (coupon, k0, i0) => {
           return common_vendor.e({
@@ -204,15 +169,14 @@ const _sfc_main = {
         }),
         i: expiredCoupons.value.length === 0
       }, expiredCoupons.value.length === 0 ? {
-        j: common_assets._imports_0$7
+        j: common_assets._imports_1$5
       } : {}, {
         k: currentTab.value,
         l: common_vendor.o(swiperChange),
-        m: common_vendor.o(showCouponCenter),
-        n: isCouponCenterVisible.value
+        m: isCouponCenterVisible.value
       }, isCouponCenterVisible.value ? {
-        o: common_vendor.o(closeCouponCenter),
-        p: common_vendor.f(availableCoupons.value, (coupon, index, i0) => {
+        n: common_vendor.o(closeCouponCenter),
+        o: common_vendor.f(availableCoupons.value, (coupon, index, i0) => {
           return common_vendor.e({
             a: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT
           }, coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT ? {
@@ -232,14 +196,14 @@ const _sfc_main = {
             k: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
             l: common_vendor.t(coupon.title),
-            m: common_vendor.o(($event) => claimCouponAction(coupon), index),
+            m: common_vendor.o(($event) => _ctx.claimCouponAction(coupon), index),
             n: index,
             o: common_vendor.n(getCouponColorClass(coupon.type))
           });
         }),
-        q: common_vendor.o(() => {
+        p: common_vendor.o(() => {
         }),
-        r: common_vendor.o(closeCouponCenter)
+        q: common_vendor.o(closeCouponCenter)
       } : {});
     };
   }

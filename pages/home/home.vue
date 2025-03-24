@@ -115,7 +115,7 @@
 
             <!-- 功能区 -->
             <view class="function-container">
-                <view class="function-item">
+                <view class="function-item" @click="navigateToPandaStore">
                     <image
                         class="function-icon"
                         src="/static/images/panda-store.png"
@@ -304,6 +304,13 @@ const navigateToOrder = () => {
 const navigateToCoupons = () => {
     uni.navigateTo({
         url: '/pages/coupons/coupons'
+    })
+}
+
+// 跳转到熊猫币商城页面
+const navigateToPandaStore = () => {
+    uni.navigateTo({
+        url: '/pages/panda-store/panda-store'
     })
 }
 </script>
