@@ -9,13 +9,6 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/panda-store/panda-store",
-          "pathName": "pages/panda-store/panda-store",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "pages/home/home",
           "pathName": "pages/home/home",
           "query": "",

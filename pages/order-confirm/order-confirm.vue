@@ -57,7 +57,8 @@
             <view class="price-detail">
                 <view class="price-title">价格明细</view>
 
-                <view class="coupon-section">
+                <!-- 优惠券部分 -->
+                <view class="coupon-section" @click="openCouponSelect">
                     <view class="coupon-tag">
                         <image
                             class="coupon-icon"
@@ -66,15 +67,27 @@
                         <text>优惠券</text>
                     </view>
                     <view class="coupon-action">
-                        <text>暂不可用</text>
+                        <text>{{
+                            selectedCoupon ? selectedCoupon.title : '暂不可用'
+                        }}</text>
                         <uni-icons
                             class="arrow"
-                            style="color: red"
+                            :style="{
+                                color: selectedCoupon ? '#006de7' : '#999'
+                            }"
                             type="right"
                             size="16"
                         ></uni-icons>
                     </view>
                 </view>
+
+                <!-- 优惠券选择弹框 -->
+                <coupon-select
+                    :show="showCouponSelect"
+                    :order-amount="totalAmount"
+                    @update:show="showCouponSelect = $event"
+                    @select="handleCouponSelect"
+                />
 
                 <view class="total-section">
                     <text>合计</text>
@@ -121,7 +134,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import CouponSelect from '../components/coupon-select.vue'
 
 // 定义数据
 const orderItems = ref([])
@@ -133,6 +147,11 @@ const storeInfo = ref({
     phone: '13027261672'
 })
 const deliveryType = ref('self') // 'self'自取, 'delivery'外卖
+
+// 优惠券选择相关
+const showCouponSelect = ref(false)
+const selectedCoupon = ref(null)
+const totalAmount = ref(0)
 
 // 获取传递的数据
 onMounted(() => {
@@ -236,6 +255,41 @@ const handlePayment = () => {
             }, 1500)
         }
     })
+}
+
+// 计算总金额
+const calculateTotalAmount = () => {
+    totalAmount.value = orderItems.value.reduce((sum, item) => {
+        return sum + item.price * item.quantity
+    }, 0)
+}
+
+// 监听订单项变化
+watch(
+    orderItems,
+    () => {
+        calculateTotalAmount()
+    },
+    { deep: true }
+)
+
+// 显示优惠券选择弹框
+const openCouponSelect = () => {
+    showCouponSelect.value = true
+}
+
+// 处理优惠券选择
+const handleCouponSelect = (coupon) => {
+    selectedCoupon.value = coupon
+    if (coupon) {
+        let finalPrice = parseFloat(totalPrice.value)
+        if (coupon.type === 'CASH') {
+            finalPrice = Math.max(0, finalPrice - coupon.value)
+        } else if (coupon.type === 'DISCOUNT') {
+            finalPrice = finalPrice * (coupon.value / 10)
+        }
+        totalPrice.value = finalPrice.toFixed(2)
+    }
 }
 </script>
 

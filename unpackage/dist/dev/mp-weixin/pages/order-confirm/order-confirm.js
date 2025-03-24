@@ -7,8 +7,9 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + CouponSelect)();
 }
+const CouponSelect = () => "../components/coupon-select.js";
 const _sfc_main = {
   __name: "order-confirm",
   setup(__props) {
@@ -21,11 +22,14 @@ const _sfc_main = {
       phone: "13027261672"
     });
     const deliveryType = common_vendor.ref("self");
+    const showCouponSelect = common_vendor.ref(false);
+    const selectedCoupon = common_vendor.ref(null);
+    const totalAmount = common_vendor.ref(0);
     common_vendor.onMounted(() => {
       try {
         const orderData = common_vendor.index.getStorageSync("orderConfirmData");
         if (orderData) {
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:144", "从本地存储获取订单数据:", orderData);
+          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:163", "从本地存储获取订单数据:", orderData);
           orderItems.value = orderData.items || [];
           totalPrice.value = orderData.totalPrice || "0.00";
           if (orderData.store) {
@@ -36,7 +40,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:160", "获取订单数据失败", error);
+        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:179", "获取订单数据失败", error);
         common_vendor.index.showToast({
           title: "获取订单数据失败",
           icon: "none"
@@ -78,11 +82,11 @@ const _sfc_main = {
         items: orderConfirmData.items || [],
         totalPrice: orderConfirmData.totalPrice || "0.00"
       };
-      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:215", "创建新订单:", newOrder);
+      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:234", "创建新订单:", newOrder);
       const savedOrders = common_vendor.index.getStorageSync("savedOrders") || [];
       savedOrders.unshift(newOrder);
       common_vendor.index.setStorageSync("savedOrders", savedOrders);
-      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:223", "订单已保存到本地存储");
+      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:242", "订单已保存到本地存储");
       common_vendor.index.showToast({
         title: "模拟支付成功",
         icon: "success",
@@ -94,6 +98,33 @@ const _sfc_main = {
           }, 1500);
         }
       });
+    };
+    const calculateTotalAmount = () => {
+      totalAmount.value = orderItems.value.reduce((sum, item) => {
+        return sum + item.price * item.quantity;
+      }, 0);
+    };
+    common_vendor.watch(
+      orderItems,
+      () => {
+        calculateTotalAmount();
+      },
+      { deep: true }
+    );
+    const openCouponSelect = () => {
+      showCouponSelect.value = true;
+    };
+    const handleCouponSelect = (coupon) => {
+      selectedCoupon.value = coupon;
+      if (coupon) {
+        let finalPrice = parseFloat(totalPrice.value);
+        if (coupon.type === "CASH") {
+          finalPrice = Math.max(0, finalPrice - coupon.value);
+        } else if (coupon.type === "DISCOUNT") {
+          finalPrice = finalPrice * (coupon.value / 10);
+        }
+        totalPrice.value = finalPrice.toFixed(2);
+      }
     };
     return (_ctx, _cache) => {
       return {
@@ -113,15 +144,24 @@ const _sfc_main = {
           };
         }),
         g: common_assets._imports_0$4,
-        h: common_vendor.p({
+        h: common_vendor.t(selectedCoupon.value ? selectedCoupon.value.title : "暂不可用"),
+        i: selectedCoupon.value ? "#006de7" : "#999",
+        j: common_vendor.p({
           type: "right",
           size: "16"
         }),
-        i: common_vendor.t(totalPrice.value),
-        j: common_vendor.t(orderItems.value.length),
-        k: common_assets._imports_1$2,
-        l: common_vendor.t(totalPrice.value),
-        m: common_vendor.o(handlePayment)
+        k: common_vendor.o(openCouponSelect),
+        l: common_vendor.o(($event) => showCouponSelect.value = $event),
+        m: common_vendor.o(handleCouponSelect),
+        n: common_vendor.p({
+          show: showCouponSelect.value,
+          ["order-amount"]: totalAmount.value
+        }),
+        o: common_vendor.t(totalPrice.value),
+        p: common_vendor.t(orderItems.value.length),
+        q: common_assets._imports_1$2,
+        r: common_vendor.t(totalPrice.value),
+        s: common_vendor.o(handlePayment)
       };
     };
   }

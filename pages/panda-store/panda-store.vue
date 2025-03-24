@@ -22,8 +22,14 @@
                     <text>我的熊猫币</text>
                 </view>
 
-                <view class="user-info-value">{{ userState.pandaCoins }}</view>
-                <view class="user-info-desc">本月暂无即将到期的熊猫币</view>
+                <view class="user-info-value">
+                    <image
+                        class="coin-icon"
+                        src="/static/images/coin.png"
+                        mode="aspectFit"
+                    ></image>
+                    {{ userState.pandaCoins }}
+                </view>
 
                 <view class="user-info-tabs">
                     <view class="tab-item">
@@ -62,66 +68,93 @@
                     class="coupon-exchange-item"
                     :class="[getCouponColorClass(coupon.type)]"
                 >
-                    <!-- 优惠券左侧 -->
-                    <view class="coupon-left">
-                        <view class="coupon-value">
-                            <template
-                                v-if="coupon.type === COUPON_TYPES.DISCOUNT"
-                            >
-                                <text class="value">{{ coupon.value }}</text>
-                                <text class="unit">折</text>
-                            </template>
-                            <template
-                                v-else-if="coupon.type === COUPON_TYPES.CASH"
-                            >
-                                <text class="symbol">¥</text>
-                                <text class="value">{{ coupon.value }}</text>
-                            </template>
-                            <template
-                                v-else-if="coupon.type === COUPON_TYPES.FREE"
-                            >
-                                <text class="value">免单</text>
-                            </template>
-                            <template
-                                v-else-if="
-                                    coupon.type === COUPON_TYPES.BUY_ONE_GET_ONE
-                                "
-                            >
-                                <text class="value">买一赠一</text>
-                            </template>
-                            <template
-                                v-else-if="
-                                    coupon.type === COUPON_TYPES.SPECIAL_PRICE
-                                "
-                            >
-                                <text class="symbol">¥</text>
-                                <text class="value">{{ coupon.value }}</text>
-                            </template>
-                            <template
-                                v-else-if="
-                                    coupon.type === COUPON_TYPES.SHIPPING
-                                "
-                            >
-                                <text class="value">免运费</text>
-                            </template>
-                        </view>
-                        <view
-                            class="coupon-limit"
-                            v-if="coupon.minOrderAmount > 0"
-                        >
-                            满{{ coupon.minOrderAmount }}元可用
+                    <!-- 优惠券上部分 -->
+                    <view class="coupon-top">
+                        <view class="coupon-top-content">
+                            <view class="coupon-image-container">
+                                <image
+                                    class="coupon-type-image"
+                                    :src="getCouponTypeImage(coupon.type)"
+                                    mode="aspectFit"
+                                ></image>
+                            </view>
+                            <view class="coupon-value-container">
+                                <view class="coupon-value">
+                                    <template
+                                        v-if="
+                                            coupon.type ===
+                                            COUPON_TYPES.DISCOUNT
+                                        "
+                                    >
+                                        <text class="value">{{
+                                            coupon.value
+                                        }}</text>
+                                        <text class="unit">折</text>
+                                    </template>
+                                    <template
+                                        v-else-if="
+                                            coupon.type === COUPON_TYPES.CASH
+                                        "
+                                    >
+                                        <text class="symbol">¥</text>
+                                        <text class="value">{{
+                                            coupon.value
+                                        }}</text>
+                                    </template>
+                                    <template
+                                        v-else-if="
+                                            coupon.type === COUPON_TYPES.FREE
+                                        "
+                                    >
+                                        <text class="value">免单</text>
+                                    </template>
+                                    <template
+                                        v-else-if="
+                                            coupon.type ===
+                                            COUPON_TYPES.BUY_ONE_GET_ONE
+                                        "
+                                    >
+                                        <text class="value">买一赠一</text>
+                                    </template>
+                                    <template
+                                        v-else-if="
+                                            coupon.type ===
+                                            COUPON_TYPES.SPECIAL_PRICE
+                                        "
+                                    >
+                                        <text class="symbol">¥</text>
+                                        <text class="value">{{
+                                            coupon.value
+                                        }}</text>
+                                    </template>
+                                    <template
+                                        v-else-if="
+                                            coupon.type ===
+                                            COUPON_TYPES.SHIPPING
+                                        "
+                                    >
+                                        <text class="value">免运费</text>
+                                    </template>
+                                </view>
+                                <view
+                                    class="coupon-limit"
+                                    v-if="coupon.minOrderAmount > 0"
+                                >
+                                    满{{ coupon.minOrderAmount }}元可用
+                                </view>
+                            </view>
                         </view>
                     </view>
 
                     <!-- 中间分割线 -->
                     <view class="coupon-divider">
-                        <view class="circle top"></view>
+                        <view class="circle left"></view>
                         <view class="dashed-line"></view>
-                        <view class="circle bottom"></view>
+                        <view class="circle right"></view>
                     </view>
 
-                    <!-- 优惠券右侧 -->
-                    <view class="coupon-right">
+                    <!-- 优惠券下部分 -->
+                    <view class="coupon-bottom">
                         <view class="coupon-title">{{ coupon.title }}</view>
                         <view class="coupon-desc">{{
                             coupon.description
@@ -132,7 +165,11 @@
 
                         <view class="exchange-info">
                             <view class="coins-cost">
-                                <text class="coins-icon">🪙</text>
+                                <image
+                                    class="coins-icon"
+                                    src="/static/images/coin.png"
+                                    mode="aspectFit"
+                                ></image>
                                 <text class="coins-amount">{{
                                     coupon.coinsCost
                                 }}</text>
@@ -356,6 +393,26 @@ const getCouponColorClass = (type) => {
     }
 }
 
+// 获取优惠券类型对应的图片
+const getCouponTypeImage = (type) => {
+    switch (type) {
+        case COUPON_TYPES.DISCOUNT:
+            return '/static/images/coupon/coupon-discount.png'
+        case COUPON_TYPES.CASH:
+            return '/static/images/coupon/coupon-cash.png'
+        case COUPON_TYPES.FREE:
+            return '/static/images/coupon/coupon-free.png'
+        case COUPON_TYPES.BUY_ONE_GET_ONE:
+            return '/static/images/coupon/coupon-buy1get1.png'
+        case COUPON_TYPES.SPECIAL_PRICE:
+            return '/static/images/coupon/coupon-special.png'
+        case COUPON_TYPES.SHIPPING:
+            return '/static/images/coupon/coupon-shipping.png'
+        default:
+            return '/static/images/coupon/coupon-default.png'
+    }
+}
+
 // 兑换优惠券
 const exchangeCoupon = (coupon) => {
     // 检查熊猫币是否足够
@@ -479,9 +536,10 @@ const goBack = () => {
 .panda-store-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
     background-color: #f7f8fa;
     position: relative;
+    overflow: hidden;
 }
 
 // 导航栏
@@ -536,6 +594,7 @@ const goBack = () => {
     height: 360rpx;
     margin-bottom: 100rpx;
     overflow: visible;
+    flex-shrink: 0;
 }
 
 .panda-coins-bg {
@@ -589,6 +648,15 @@ const goBack = () => {
     color: #333;
     text-align: center;
     margin-bottom: 10rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coin-icon {
+    width: 60rpx;
+    height: 60rpx;
+    margin-right: 10rpx;
 }
 
 .user-info-desc {
@@ -630,6 +698,7 @@ const goBack = () => {
     padding: 0 10rpx;
     white-space: nowrap;
     margin-bottom: 20rpx;
+    flex-shrink: 0;
 }
 
 .coupon-tabs::-webkit-scrollbar {
@@ -666,32 +735,65 @@ const goBack = () => {
     flex: 1;
     padding: 0 20rpx;
     margin-top: 10rpx;
+    height: calc(100vh - 460rpx);
+    box-sizing: border-box;
 }
 
 .coupon-list {
     padding-bottom: 50rpx;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 // 优惠券兑换项
 .coupon-exchange-item {
     display: flex;
+    flex-direction: column;
     margin-bottom: 20rpx;
     border-radius: 16rpx;
     overflow: hidden;
     background-color: #fff;
     box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+    width: calc(50% - 10rpx);
+    height: 340rpx; // 设置固定高度确保一致性
 }
 
-// 优惠券左侧
-.coupon-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20rpx 30rpx;
-    width: 200rpx;
+// 优惠券上部分
+.coupon-top {
+    padding: 16rpx;
     background-color: #006de7;
     color: #fff;
+    height: 160rpx;
+    display: flex;
+    align-items: center;
+}
+
+.coupon-top-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.coupon-image-container {
+    width: 100rpx;
+    height: 100rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16rpx;
+}
+
+.coupon-type-image {
+    width: 100%;
+    height: 100%;
+}
+
+.coupon-value-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .coupon-value {
@@ -716,72 +818,83 @@ const goBack = () => {
 
 .coupon-limit {
     font-size: 24rpx;
-    margin-top: 10rpx;
+    margin-top: 4rpx;
 }
 
 // 优惠券中间分割线
 .coupon-divider {
     position: relative;
-    width: 0;
+    height: 0;
+    border-top: 2rpx dashed #e6e6e6;
 }
 
 .dashed-line {
     position: absolute;
-    top: 0;
-    bottom: 0;
     left: 0;
-    border-left: 2rpx dashed #e6e6e6;
-    height: 100%;
+    right: 0;
+    border-top: 2rpx dashed #e6e6e6;
 }
 
 .circle {
     position: absolute;
-    width: 20rpx;
-    height: 20rpx;
+    width: 16rpx;
+    height: 16rpx;
     background-color: #f7f8fa;
     border-radius: 50%;
-    left: -10rpx;
+    top: -8rpx;
 }
 
-.circle.top {
-    top: -10rpx;
+.circle.left {
+    left: -8rpx;
 }
 
-.circle.bottom {
-    bottom: -10rpx;
+.circle.right {
+    right: -8rpx;
 }
 
-// 优惠券右侧
-.coupon-right {
+// 优惠券下部分
+.coupon-bottom {
     flex: 1;
-    padding: 20rpx 30rpx;
+    padding: 16rpx;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .coupon-title {
-    font-size: 32rpx;
+    font-size: 28rpx;
     font-weight: bold;
-    margin-bottom: 10rpx;
+    margin-bottom: 8rpx;
     color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .coupon-desc {
-    font-size: 24rpx;
+    font-size: 22rpx;
     color: #666;
-    margin-bottom: 10rpx;
-    line-height: 1.4;
+    margin-bottom: 6rpx;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .coupon-validity {
-    font-size: 24rpx;
+    font-size: 22rpx;
     color: #999;
-    margin-bottom: 20rpx;
+    margin-bottom: 10rpx;
 }
 
 .exchange-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: auto;
+    padding-top: 10rpx;
 }
 
 .coins-cost {
@@ -790,13 +903,13 @@ const goBack = () => {
 }
 
 .coins-icon {
-    font-size: 28rpx;
+    font-size: 24rpx;
     color: #f8b500;
     margin-right: 6rpx;
 }
 
 .coins-amount {
-    font-size: 32rpx;
+    font-size: 28rpx;
     font-weight: bold;
     color: #f8b500;
 }
@@ -804,11 +917,13 @@ const goBack = () => {
 .exchange-btn {
     background-color: #006de7;
     color: #fff;
-    font-size: 26rpx;
-    padding: 8rpx 24rpx;
-    border-radius: 10rpx;
+    font-size: 24rpx;
+    padding: 8rpx 20rpx;
+    border-radius: 8rpx;
     line-height: 1.6;
     margin: 0;
+    min-width: 120rpx;
+    text-align: center;
 }
 
 .exchange-btn[disabled] {
@@ -838,27 +953,27 @@ const goBack = () => {
 }
 
 // 不同类型优惠券颜色
-.discount-coupon .coupon-left {
+.discount-coupon .coupon-top {
     background-color: #ff9500;
 }
 
-.cash-coupon .coupon-left {
+.cash-coupon .coupon-top {
     background-color: #ff3b30;
 }
 
-.free-coupon .coupon-left {
+.free-coupon .coupon-top {
     background-color: #5856d6;
 }
 
-.buy-one-coupon .coupon-left {
+.buy-one-coupon .coupon-top {
     background-color: #34c759;
 }
 
-.special-coupon .coupon-left {
+.special-coupon .coupon-top {
     background-color: #af52de;
 }
 
-.shipping-coupon .coupon-left {
+.shipping-coupon .coupon-top {
     background-color: #007aff;
 }
 
@@ -925,6 +1040,10 @@ const goBack = () => {
 // 去掉旧的coins-info相关样式
 .coins-info {
     display: none;
+}
+.coins-icon {
+    width: 30rpx;
+    height: 30rpx;
 }
 
 .coins-title,

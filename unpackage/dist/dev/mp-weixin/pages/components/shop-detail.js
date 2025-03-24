@@ -175,5 +175,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
     };
   }
 });
-wx.createComponent(_sfc_main);
+const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-a8be75a7"]]);
+wx.createComponent(Component);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/components/shop-detail.js.map

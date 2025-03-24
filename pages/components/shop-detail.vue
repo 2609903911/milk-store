@@ -355,7 +355,7 @@ onMounted(() => {
 // #endif
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 /* #ifdef MP-WEIXIN */
 page {
     overflow: hidden;
