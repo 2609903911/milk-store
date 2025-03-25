@@ -63,14 +63,6 @@
                                     <template
                                         v-else-if="
                                             coupon.type ===
-                                            COUPON_TYPES.BUY_ONE_GET_ONE
-                                        "
-                                    >
-                                        <text class="value">买一赠一</text>
-                                    </template>
-                                    <template
-                                        v-else-if="
-                                            coupon.type ===
                                             COUPON_TYPES.SPECIAL_PRICE
                                         "
                                     >
@@ -180,14 +172,6 @@
                                     <template
                                         v-else-if="
                                             coupon.type ===
-                                            COUPON_TYPES.BUY_ONE_GET_ONE
-                                        "
-                                    >
-                                        <text class="value">买一赠一</text>
-                                    </template>
-                                    <template
-                                        v-else-if="
-                                            coupon.type ===
                                             COUPON_TYPES.SPECIAL_PRICE
                                         "
                                     >
@@ -285,14 +269,6 @@
                                         "
                                     >
                                         <text class="value">免单</text>
-                                    </template>
-                                    <template
-                                        v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.BUY_ONE_GET_ONE
-                                        "
-                                    >
-                                        <text class="value">买一赠一</text>
                                     </template>
                                     <template
                                         v-else-if="
@@ -408,14 +384,6 @@
                                         "
                                     >
                                         <text class="value">免单</text>
-                                    </template>
-                                    <template
-                                        v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.BUY_ONE_GET_ONE
-                                        "
-                                    >
-                                        <text class="value">买一赠一</text>
                                     </template>
                                     <template
                                         v-else-if="
@@ -557,9 +525,6 @@ const getCouponColorClass = (type) => {
 
         case COUPON_TYPES.FREE:
             return 'free-coupon'
-
-        case COUPON_TYPES.BUY_ONE_GET_ONE:
-            return 'buy-one-coupon'
 
         case COUPON_TYPES.SPECIAL_PRICE:
             return 'special-coupon'
@@ -940,11 +905,6 @@ const getCouponColorClass = (type) => {
 .free-coupon .coupon-left,
 .free-coupon .center-coupon-top {
     background-color: #5856d6;
-}
-
-.buy-one-coupon .coupon-left,
-.buy-one-coupon .center-coupon-top {
-    background-color: #34c759;
 }
 
 .special-coupon .coupon-left,

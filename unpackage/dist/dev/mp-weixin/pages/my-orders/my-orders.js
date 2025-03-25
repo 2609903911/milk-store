@@ -11,61 +11,8 @@ const _sfc_main = {
       if (savedOrders && savedOrders.length) {
         orders.value = savedOrders;
         hasOrders.value = true;
-      } else {
-        mockOrderData();
       }
     });
-    const mockOrderData = () => {
-      const now = /* @__PURE__ */ new Date();
-      orders.value = [
-        {
-          id: "2023032001",
-          storeName: "九江学院四食堂店",
-          storeAddress: "江西省九江市浔阳区前进东路58号九江学院四食堂",
-          deliveryType: "self",
-          status: "completed",
-          time: new Date(now.getTime() - 36e5).getTime(),
-          // 1小时前
-          items: [
-            {
-              image: "/static/images/hot01.png",
-              name: "杨梅吐气",
-              price: 12,
-              quantity: 1,
-              specs: "常规"
-            }
-          ],
-          totalPrice: "12.00"
-        },
-        {
-          id: "2023032002",
-          storeName: "九江中心店",
-          storeAddress: "九江市中心区繁华路88号",
-          deliveryType: "delivery",
-          status: "pending",
-          time: now.getTime(),
-          items: [
-            {
-              image: "/static/images/fruit01.png",
-              name: "满杯百香",
-              price: 16,
-              quantity: 1,
-              specs: "去冰"
-            },
-            {
-              image: "/static/images/classic01.png",
-              name: "芝芝莓莓",
-              price: 22,
-              quantity: 1,
-              specs: "少糖"
-            }
-          ],
-          totalPrice: "38.00"
-        }
-      ];
-      hasOrders.value = true;
-      common_vendor.index.setStorageSync("savedOrders", orders.value);
-    };
     const goToOrder = () => {
       common_vendor.index.switchTab({
         url: "/pages/order/order"
@@ -106,7 +53,7 @@ const _sfc_main = {
       });
     };
     const viewOrderDetail = (order) => {
-      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:216", "查看订单详情:", order.id);
+      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:173", "查看订单详情:", order.id);
       common_vendor.index.setStorageSync("currentOrderDetail", order);
       common_vendor.index.navigateTo({
         url: `/pages/order-detail/order-detail?orderId=${order.id}`
@@ -168,19 +115,27 @@ const _sfc_main = {
             g: common_vendor.t(order.items.length)
           } : {}, {
             h: common_vendor.t(formatTime(order.time)),
-            i: common_vendor.t(order.totalPrice),
-            j: common_vendor.t(getTotalQuantity(order)),
-            k: common_vendor.o(($event) => viewOrderDetail(order), index),
-            l: order.status === "completed"
+            i: order.discount && order.discount.amount > 0
+          }, order.discount && order.discount.amount > 0 ? {
+            j: common_vendor.t(order.discount.amount)
+          } : {}, {
+            k: common_vendor.t(order.totalPrice),
+            l: common_vendor.t(getTotalQuantity(order)),
+            m: order.discount && order.discount.amount > 0
+          }, order.discount && order.discount.amount > 0 ? {
+            n: common_vendor.t(order.discount.originalPrice)
+          } : {}, {
+            o: common_vendor.o(($event) => viewOrderDetail(order), index),
+            p: order.status === "completed"
           }, order.status === "completed" ? {
-            m: common_vendor.o(($event) => reorder(order), index)
+            q: common_vendor.o(($event) => reorder(order), index)
           } : {}, {
-            n: order.status === "pending"
+            r: order.status === "pending"
           }, order.status === "pending" ? {
-            o: common_vendor.o(($event) => cancelOrder(index), index)
+            s: common_vendor.o(($event) => cancelOrder(index), index)
           } : {}, {
-            p: common_vendor.o(($event) => deleteOrder(index), index),
-            q: index
+            t: common_vendor.o(($event) => deleteOrder(index), index),
+            v: index
           });
         })
       } : {});

@@ -15,6 +15,17 @@
                 mode="aspectFill"
             ></image>
 
+            <!-- 熊猫币信息 -->
+            <view class="coin-info">
+                <view class="coin-box">
+                    <text class="coin-icon">🪙</text>
+                    <text class="coin-amount">0</text>
+                </view>
+                <button class="earn-coins-btn" @click="showEarnCoinsPopup">
+                    赚熊猫币
+                </button>
+            </view>
+
             <!-- 个人信息卡片 -->
             <view class="user-info-card">
                 <!-- 我的熊猫币标签 -->
@@ -107,14 +118,6 @@
                                         "
                                     >
                                         <text class="value">免单</text>
-                                    </template>
-                                    <template
-                                        v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.BUY_ONE_GET_ONE
-                                        "
-                                    >
-                                        <text class="value">买一赠一</text>
                                     </template>
                                     <template
                                         v-else-if="
@@ -233,8 +236,7 @@ import {
     COUPON_STATUS,
     createDiscountCoupon,
     createCashCoupon,
-    createFreeCoupon,
-    createBuyOneGetOneCoupon
+    createFreeCoupon
 } from '../../utils/couponModel'
 
 // 标签页
@@ -308,18 +310,6 @@ const allCoupons = reactive([
         coinsCost: 300,
         category: 'free'
     },
-    // 买一赠一券
-    {
-        id: 'ex_buy1get1_1',
-        title: '招牌奶茶买一赠一',
-        type: COUPON_TYPES.BUY_ONE_GET_ONE,
-        value: 1,
-        minOrderAmount: 0,
-        description: '招牌奶茶系列买一赠一',
-        validity: '15天',
-        coinsCost: 250,
-        category: 'buyOneGetOne'
-    },
     // 特价券
     {
         id: 'ex_special_1',
@@ -382,8 +372,6 @@ const getCouponColorClass = (type) => {
             return 'cash-coupon'
         case COUPON_TYPES.FREE:
             return 'free-coupon'
-        case COUPON_TYPES.BUY_ONE_GET_ONE:
-            return 'buy-one-coupon'
         case COUPON_TYPES.SPECIAL_PRICE:
             return 'special-coupon'
         case COUPON_TYPES.SHIPPING:
@@ -402,8 +390,6 @@ const getCouponTypeImage = (type) => {
             return '/static/images/coupon/coupon-cash.png'
         case COUPON_TYPES.FREE:
             return '/static/images/coupon/coupon-free.png'
-        case COUPON_TYPES.BUY_ONE_GET_ONE:
-            return '/static/images/coupon/coupon-buy1get1.png'
         case COUPON_TYPES.SPECIAL_PRICE:
             return '/static/images/coupon/coupon-special.png'
         case COUPON_TYPES.SHIPPING:
@@ -604,6 +590,48 @@ const goBack = () => {
     width: 100%;
     height: 115%;
     z-index: 0;
+}
+
+// 熊猫币信息
+.coin-info {
+    position: absolute;
+    top: 180rpx;
+    left: 30rpx;
+    right: 30rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    padding: 30rpx;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+    z-index: 5;
+}
+
+.coin-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20rpx;
+}
+
+.coin-icon {
+    font-size: 40rpx;
+    margin-right: 10rpx;
+}
+
+.coin-amount {
+    font-size: 72rpx;
+    font-weight: bold;
+    color: #333;
+}
+
+.earn-coins-btn {
+    background-color: #006de7;
+    color: #fff;
+    font-size: 24rpx;
+    padding: 8rpx 20rpx;
+    border-radius: 8rpx;
+    line-height: 1.6;
+    margin: 0;
+    min-width: 120rpx;
+    text-align: center;
 }
 
 // 我的熊猫币标签
@@ -963,10 +991,6 @@ const goBack = () => {
 
 .free-coupon .coupon-top {
     background-color: #5856d6;
-}
-
-.buy-one-coupon .coupon-top {
-    background-color: #34c759;
 }
 
 .special-coupon .coupon-top {

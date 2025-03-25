@@ -42,7 +42,10 @@ const _sfc_main = {
         const basicConditions = !isExpired && !isUsed && !isDeleted && meetsAmount;
         if (!basicConditions)
           return false;
-        if (coupon.type === "SPECIAL_PRICE" && coupon.scopeIds && coupon.scopeIds.length > 0) {
+        if (coupon.type === "free") {
+          return props.orderAmount <= coupon.value;
+        }
+        if (coupon.type === "specialPrice" && coupon.scopeIds && coupon.scopeIds.length > 0) {
           const hasMatchingProduct = props.orderItems.some(
             (item) => coupon.scopeIds.includes(item.id)
           );
@@ -59,8 +62,6 @@ const _sfc_main = {
           return "cash-coupon";
         case utils_couponModel.COUPON_TYPES.FREE:
           return "free-coupon";
-        case utils_couponModel.COUPON_TYPES.BUY_ONE_GET_ONE:
-          return "buy-one-coupon";
         case utils_couponModel.COUPON_TYPES.SPECIAL_PRICE:
           return "special-coupon";
         case utils_couponModel.COUPON_TYPES.SHIPPING:
@@ -106,36 +107,35 @@ const _sfc_main = {
             b: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
             d: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            h: common_vendor.t(coupon.value)
+          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            g: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
             c: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
             e: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE,
-            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            i: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            j: coupon.minOrderAmount > 0
+            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            i: coupon.minOrderAmount > 0
           }, coupon.minOrderAmount > 0 ? {
-            k: common_vendor.t(coupon.minOrderAmount)
+            j: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
-            l: common_vendor.t(coupon.title),
-            m: common_vendor.t(coupon.description),
-            n: common_vendor.t(formatDate(coupon.endTime)),
-            o: ((_a = selectedCoupon.value) == null ? void 0 : _a.id) === coupon.id
+            k: common_vendor.t(coupon.title),
+            l: common_vendor.t(coupon.description),
+            m: common_vendor.t(formatDate(coupon.endTime)),
+            n: ((_a = selectedCoupon.value) == null ? void 0 : _a.id) === coupon.id
           }, ((_b = selectedCoupon.value) == null ? void 0 : _b.id) === coupon.id ? {
-            p: "e5e865b0-1-" + i0,
-            q: common_vendor.p({
+            o: "e5e865b0-1-" + i0,
+            p: common_vendor.p({
               type: "checkmarkempty",
               size: "24",
               color: "#fff"
             })
           } : {}, {
-            r: index,
-            s: common_vendor.n(getCouponColorClass(coupon.type)),
-            t: common_vendor.n({
+            q: index,
+            r: common_vendor.n(getCouponColorClass(coupon.type)),
+            s: common_vendor.n({
               selected: ((_c = selectedCoupon.value) == null ? void 0 : _c.id) === coupon.id
             }),
-            v: common_vendor.o(($event) => selectCoupon(coupon), index)
+            t: common_vendor.o(($event) => selectCoupon(coupon), index)
           });
         }),
         e: availableCoupons.value.length === 0

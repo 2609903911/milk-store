@@ -333,11 +333,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
               unit = "";
               color = "#FF2D55";
               break;
-            case "buyOneGetOne":
-              discount = "买一";
-              unit = "赠一";
-              color = "#34C759";
-              break;
             case "specialPrice":
               discount = coupon.value;
               unit = "元";
@@ -368,9 +363,9 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             // 保存原始优惠券数据，便于后续使用
           };
         });
-        common_vendor.index.__f__("log", "at pages/order/order.vue:750", "已加载优惠券：", coupons.value.length, "张");
+        common_vendor.index.__f__("log", "at pages/order/order.vue:745", "已加载优惠券：", coupons.value.length, "张");
       } else {
-        common_vendor.index.__f__("warn", "at pages/order/order.vue:752", "未找到用户优惠券数据");
+        common_vendor.index.__f__("warn", "at pages/order/order.vue:747", "未找到用户优惠券数据");
       }
     };
     const useCoupon = (coupon) => {
@@ -385,7 +380,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:803", "打开商品详情", category.name, product.name);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:798", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
       setTimeout(() => {
         productDetailVisible.value = true;
@@ -402,26 +397,26 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:830", "添加到购物车", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:825", "添加到购物车", item);
       if (!item) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:833", "添加到购物车的商品数据为空");
+        common_vendor.index.__f__("error", "at pages/order/order.vue:828", "添加到购物车的商品数据为空");
         return;
       }
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.addToCart(item);
         } else {
-          common_vendor.index.__f__("warn", "at pages/order/order.vue:843", "orderCartRef不存在，尝试其他方式获取组件");
+          common_vendor.index.__f__("warn", "at pages/order/order.vue:838", "orderCartRef不存在，尝试其他方式获取组件");
           const pages = getCurrentPages();
           if (pages && pages.length > 0) {
             const currentPage = pages[pages.length - 1];
             if (currentPage.$refs && currentPage.$refs.orderCartRef) {
               currentPage.$refs.orderCartRef.addToCart(item);
             } else {
-              common_vendor.index.__f__("error", "at pages/order/order.vue:851", "无法获取购物车组件引用");
+              common_vendor.index.__f__("error", "at pages/order/order.vue:846", "无法获取购物车组件引用");
             }
           } else {
-            common_vendor.index.__f__("error", "at pages/order/order.vue:854", "无法获取当前页面实例");
+            common_vendor.index.__f__("error", "at pages/order/order.vue:849", "无法获取当前页面实例");
           }
         }
       });
@@ -429,7 +424,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:868", "打开促销商品详情", item.title);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:863", "打开促销商品详情", item.title);
         selectedProduct.value = { ...product };
         setTimeout(() => {
           productDetailVisible.value = true;
@@ -450,7 +445,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
     };
     const refreshPage = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:896", "执行页面刷新");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:891", "执行页面刷新");
       updateStoreInfo();
     };
     return (_ctx, _cache) => {

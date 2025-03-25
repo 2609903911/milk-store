@@ -8,7 +8,6 @@ export const COUPON_TYPES = {
   DISCOUNT: 'discount', // 折扣券（如8折）
   CASH: 'cash', // 现金券（如满50减10）
   FREE: 'free', // 免单券
-  BUY_ONE_GET_ONE: 'buyOneGetOne', // 买一赠一券
   SPECIAL_PRICE: 'specialPrice', // 特价券（某商品固定价格）
   SHIPPING: 'shipping' // 免运费券
 };
@@ -120,17 +119,6 @@ export const createFreeCoupon = (maxAmount = 0, options = {}) => {
     title: '免单券',
     value: maxAmount, // 最高免除金额，0表示无上限
     description: maxAmount > 0 ? `最高免${maxAmount}元` : '免除订单金额',
-    ...options
-  });
-};
-
-// 创建买一赠一券
-export const createBuyOneGetOneCoupon = (options = {}) => {
-  return createCoupon({
-    type: COUPON_TYPES.BUY_ONE_GET_ONE,
-    title: '买一赠一券',
-    value: 1, // 赠送数量
-    description: '购买指定商品可获赠相同商品1份',
     ...options
   });
 };

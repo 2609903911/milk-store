@@ -53,14 +53,6 @@
                                 <template
                                     v-else-if="
                                         coupon.type ===
-                                        COUPON_TYPES.BUY_ONE_GET_ONE
-                                    "
-                                >
-                                    <text class="value">买一赠一</text>
-                                </template>
-                                <template
-                                    v-else-if="
-                                        coupon.type ===
                                         COUPON_TYPES.SPECIAL_PRICE
                                     "
                                 >
@@ -188,9 +180,14 @@ const availableCoupons = computed(() => {
         // 如果不满足基本条件，直接返回false
         if (!basicConditions) return false
 
+        // 免单券需要检查订单金额是否小于等于券的value值
+        if (coupon.type === 'free') {
+            return props.orderAmount <= coupon.value
+        }
+
         // 特价券需要检查商品ID匹配
         if (
-            coupon.type === 'SPECIAL_PRICE' &&
+            coupon.type === 'specialPrice' &&
             coupon.scopeIds &&
             coupon.scopeIds.length > 0
         ) {
@@ -215,8 +212,6 @@ const getCouponColorClass = (type) => {
             return 'cash-coupon'
         case COUPON_TYPES.FREE:
             return 'free-coupon'
-        case COUPON_TYPES.BUY_ONE_GET_ONE:
-            return 'buy-one-coupon'
         case COUPON_TYPES.SPECIAL_PRICE:
             return 'special-coupon'
         case COUPON_TYPES.SHIPPING:
@@ -442,10 +437,6 @@ const close = () => {
 
 .free-coupon .coupon-left {
     background-color: #5856d6;
-}
-
-.buy-one-coupon .coupon-left {
-    background-color: #34c759;
 }
 
 .special-coupon .coupon-left {

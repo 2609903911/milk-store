@@ -180,9 +180,6 @@
 .free-coupon .coupon-left.data-v-e5e865b0 {
   background-color: #5856d6;
 }
-.buy-one-coupon .coupon-left.data-v-e5e865b0 {
-  background-color: #34c759;
-}
 .special-coupon .coupon-left.data-v-e5e865b0 {
   background-color: #af52de;
 }

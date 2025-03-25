@@ -404,7 +404,7 @@ input.data-v-93207a4f {
   background: linear-gradient(to bottom, transparent 0%, transparent 5%, #fff 5%, #fff 9%, transparent 9%, transparent 14%, #fff 14%, #fff 18%, transparent 18%, transparent 23%, #fff 23%, #fff 27%, transparent 27%, transparent 32%, #fff 32%, #fff 36%, transparent 36%, transparent 41%, #fff 41%, #fff 45%, transparent 45%, transparent 50%, #fff 50%, #fff 54%, transparent 54%, transparent 59%, #fff 59%, #fff 63%, transparent 63%, transparent 68%, #fff 68%, #fff 72%, transparent 72%, transparent 77%, #fff 77%, #fff 81%, transparent 81%, transparent 86%, #fff 86%, #fff 90%, transparent 90%, transparent 95%, #fff 95%, #fff 100%);
 }
 .discount-value.data-v-93207a4f {
-  font-size: 80rpx;
+  font-size: 40rpx;
   font-weight: bold;
   line-height: 1;
 }

@@ -146,13 +146,7 @@ const storeAddress = ref('')
 const orderItems = ref([])
 const totalPrice = ref('')
 const orderTime = ref('')
-
-// 计算优惠金额（示例：总是按10%计算）
-const discount = computed(() => {
-    if (!totalPrice.value) return '0.00'
-    const total = parseFloat(totalPrice.value)
-    return (total * 0.1).toFixed(2)
-})
+const discount = ref('')
 
 // 获取商品总数量
 const totalQuantity = computed(() => {
@@ -218,6 +212,7 @@ onMounted(() => {
             storeAddress.value = orderDetail.storeAddress || ''
             orderItems.value = orderDetail.items || []
             totalPrice.value = orderDetail.totalPrice || '0.00'
+            discount.value = orderDetail.discount.amount || '0.00'
 
             console.log('店铺地址:', storeAddress.value)
 

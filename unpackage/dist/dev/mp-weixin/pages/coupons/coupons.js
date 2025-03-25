@@ -61,8 +61,6 @@ const _sfc_main = {
           return "cash-coupon";
         case utils_couponModel.COUPON_TYPES.FREE:
           return "free-coupon";
-        case utils_couponModel.COUPON_TYPES.BUY_ONE_GET_ONE:
-          return "buy-one-coupon";
         case utils_couponModel.COUPON_TYPES.SPECIAL_PRICE:
           return "special-coupon";
         case utils_couponModel.COUPON_TYPES.SHIPPING:
@@ -88,25 +86,24 @@ const _sfc_main = {
             b: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
             d: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            h: common_vendor.t(coupon.value)
+          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            g: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
             c: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
             e: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE,
-            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            i: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            j: coupon.minOrderAmount > 0
+            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            i: coupon.minOrderAmount > 0
           }, coupon.minOrderAmount > 0 ? {
-            k: common_vendor.t(coupon.minOrderAmount)
+            j: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
-            l: common_vendor.t(coupon.title),
-            m: common_vendor.t(coupon.description),
-            n: common_vendor.t(formatDate(coupon.startTime)),
-            o: common_vendor.t(formatDate(coupon.endTime)),
-            p: common_vendor.o(($event) => useCouponClick(), coupon.id),
-            q: coupon.id,
-            r: common_vendor.n(getCouponColorClass(coupon.type))
+            k: common_vendor.t(coupon.title),
+            l: common_vendor.t(coupon.description),
+            m: common_vendor.t(formatDate(coupon.startTime)),
+            n: common_vendor.t(formatDate(coupon.endTime)),
+            o: common_vendor.o(($event) => useCouponClick(), coupon.id),
+            p: coupon.id,
+            q: common_vendor.n(getCouponColorClass(coupon.type))
           });
         }),
         c: validCoupons.value.length === 0
@@ -120,22 +117,21 @@ const _sfc_main = {
             b: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
             d: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            h: common_vendor.t(coupon.value)
+          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            g: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
             c: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
             e: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE,
-            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            i: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            j: coupon.minOrderAmount > 0
+            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            i: coupon.minOrderAmount > 0
           }, coupon.minOrderAmount > 0 ? {
-            k: common_vendor.t(coupon.minOrderAmount)
+            j: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
-            l: common_vendor.t(coupon.title),
-            m: common_vendor.t(coupon.description),
-            n: common_vendor.t(formatDate(coupon.usedTime)),
-            o: coupon.id
+            k: common_vendor.t(coupon.title),
+            l: common_vendor.t(coupon.description),
+            m: common_vendor.t(formatDate(coupon.usedTime)),
+            n: coupon.id
           });
         }),
         f: usedCoupons.value.length === 0
@@ -149,22 +145,21 @@ const _sfc_main = {
             b: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
             d: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            h: common_vendor.t(coupon.value)
+          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            g: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
             c: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
             e: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE,
-            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            i: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            j: coupon.minOrderAmount > 0
+            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            i: coupon.minOrderAmount > 0
           }, coupon.minOrderAmount > 0 ? {
-            k: common_vendor.t(coupon.minOrderAmount)
+            j: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
-            l: common_vendor.t(coupon.title),
-            m: common_vendor.t(coupon.description),
-            n: common_vendor.t(formatDate(coupon.endTime)),
-            o: coupon.id
+            k: common_vendor.t(coupon.title),
+            l: common_vendor.t(coupon.description),
+            m: common_vendor.t(formatDate(coupon.endTime)),
+            n: coupon.id
           });
         }),
         i: expiredCoupons.value.length === 0
@@ -183,22 +178,21 @@ const _sfc_main = {
             b: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
             d: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            h: common_vendor.t(coupon.value)
+          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            g: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
             c: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
             e: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE,
-            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            i: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            j: coupon.minOrderAmount > 0
+            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            i: coupon.minOrderAmount > 0
           }, coupon.minOrderAmount > 0 ? {
-            k: common_vendor.t(coupon.minOrderAmount)
+            j: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
-            l: common_vendor.t(coupon.title),
-            m: common_vendor.o(($event) => _ctx.claimCouponAction(coupon), index),
-            n: index,
-            o: common_vendor.n(getCouponColorClass(coupon.type))
+            k: common_vendor.t(coupon.title),
+            l: common_vendor.o(($event) => _ctx.claimCouponAction(coupon), index),
+            m: index,
+            n: common_vendor.n(getCouponColorClass(coupon.type))
           });
         }),
         p: common_vendor.o(() => {

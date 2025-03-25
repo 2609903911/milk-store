@@ -13,7 +13,6 @@ import {
   createDiscountCoupon,
   createCashCoupon,
   createFreeCoupon,
-  createBuyOneGetOneCoupon,
   createSpecialPriceCoupon
 } from './couponModel';
 
@@ -120,21 +119,6 @@ export const calculateDiscount = (coupon, orderInfo) => {
     case COUPON_TYPES.FREE:
       // 免单券，可能有最高限额
       return coupon.value > 0 ? Math.min(coupon.value, orderInfo.totalAmount) : orderInfo.totalAmount;
-      
-    case COUPON_TYPES.BUY_ONE_GET_ONE:
-      // 买一赠一券，计算赠送商品的价值
-      let discount = 0;
-      // 查找可用于买一赠一的商品
-      orderInfo.items.forEach(item => {
-        if (coupon.scopeIds.length === 0 || coupon.scopeIds.includes(item.productId)) {
-          if (item.quantity >= 2) {
-            // 每两件商品中有一件是免费的
-            const freeQuantity = Math.floor(item.quantity / 2);
-            discount += freeQuantity * item.price;
-          }
-        }
-      });
-      return discount;
       
     case COUPON_TYPES.SPECIAL_PRICE:
       // 特价券，将指定商品价格变为特价
@@ -309,10 +293,6 @@ export const generateRandomCoupon = (type) => {
     case COUPON_TYPES.FREE:
       // 免单券，可能有最高限额
       return createFreeCoupon(Math.random() > 0.7 ? 30 : 0);
-      
-    case COUPON_TYPES.BUY_ONE_GET_ONE:
-      // 买一赠一券
-      return createBuyOneGetOneCoupon();
       
     case COUPON_TYPES.SPECIAL_PRICE:
       // 随机特价券

@@ -19,12 +19,7 @@ const _sfc_main = {
     const orderItems = common_vendor.ref([]);
     const totalPrice = common_vendor.ref("");
     const orderTime = common_vendor.ref("");
-    const discount = common_vendor.computed(() => {
-      if (!totalPrice.value)
-        return "0.00";
-      const total = parseFloat(totalPrice.value);
-      return (total * 0.1).toFixed(2);
-    });
+    const discount = common_vendor.ref("");
     const totalQuantity = common_vendor.computed(() => {
       return orderItems.value.reduce((total, item) => total + item.quantity, 0);
     });
@@ -42,16 +37,16 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       var _a;
       try {
-        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:180", "订单详情页面已加载");
+        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:174", "订单详情页面已加载");
         let urlOrderId = "";
         const mpPages = getCurrentPages();
         if (mpPages && mpPages.length > 0) {
           const currentPage = mpPages[mpPages.length - 1];
           urlOrderId = ((_a = currentPage.options) == null ? void 0 : _a.orderId) || "";
-          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:192", "微信小程序环境，获取订单ID:", urlOrderId);
+          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:186", "微信小程序环境，获取订单ID:", urlOrderId);
         }
         const orderDetail = common_vendor.index.getStorageSync("currentOrderDetail");
-        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:207", "本地存储订单信息:", orderDetail);
+        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:201", "本地存储订单信息:", orderDetail);
         if (orderDetail && (urlOrderId === "" || orderDetail.id === urlOrderId)) {
           orderId.value = orderDetail.id || "";
           orderStatus.value = orderDetail.status || "";
@@ -59,7 +54,8 @@ const _sfc_main = {
           storeAddress.value = orderDetail.storeAddress || "";
           orderItems.value = orderDetail.items || [];
           totalPrice.value = orderDetail.totalPrice || "0.00";
-          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:222", "店铺地址:", storeAddress.value);
+          discount.value = orderDetail.discount.amount || "0.00";
+          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:217", "店铺地址:", storeAddress.value);
           if (orderDetail.time) {
             const date = new Date(orderDetail.time);
             orderTime.value = `${date.getFullYear()}-${String(
@@ -75,7 +71,7 @@ const _sfc_main = {
             )}`;
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:240", "订单ID不匹配或未找到订单信息");
+          common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:235", "订单ID不匹配或未找到订单信息");
           common_vendor.index.showToast({
             title: "未找到订单信息",
             icon: "none"
@@ -85,7 +81,7 @@ const _sfc_main = {
           }, 1500);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:252", "获取订单详情出错:", error);
+        common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:247", "获取订单详情出错:", error);
         common_vendor.index.showToast({
           title: "获取订单信息失败",
           icon: "none"
@@ -103,7 +99,7 @@ const _sfc_main = {
       });
     };
     const reorderItems = () => {
-      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:274", "再来一单");
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:269", "再来一单");
       const orderData = {
         items: orderItems.value,
         totalPrice: totalPrice.value,
@@ -114,7 +110,7 @@ const _sfc_main = {
         deliveryType: "self"
         // 默认自取
       };
-      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:287", "准备提交的订单数据:", orderData);
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:282", "准备提交的订单数据:", orderData);
       common_vendor.index.setStorageSync("orderConfirmData", orderData);
       common_vendor.index.navigateTo({
         url: "/pages/order-confirm/order-confirm"

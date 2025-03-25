@@ -267,7 +267,21 @@ const handlePayment = () => {
         status: 'pending', // 新订单状态为待取餐
         time: now.getTime(),
         items: orderConfirmData.items || [],
-        totalPrice: orderConfirmData.totalPrice || '0.00'
+        // 使用打折后的价格
+        totalPrice: totalPrice.value,
+        // 添加优惠信息
+        discount: {
+            amount: discountAmount.value,
+            originalPrice: originalPrice.value,
+            coupon: selectedCoupon.value
+                ? {
+                      id: selectedCoupon.value.id,
+                      title: selectedCoupon.value.title,
+                      type: selectedCoupon.value.type,
+                      value: selectedCoupon.value.value
+                  }
+                : null
+        }
     }
 
     console.log('创建新订单:', newOrder)
@@ -279,6 +293,18 @@ const handlePayment = () => {
     // 保存更新后的订单列表
     uni.setStorageSync('savedOrders', savedOrders)
     console.log('订单已保存到本地存储')
+
+    // 如果使用了优惠券，将其标记为已使用
+    if (selectedCoupon.value) {
+        const index = userState.coupons.findIndex(
+            (c) => c.id === selectedCoupon.value.id
+        )
+        if (index !== -1) {
+            userState.coupons[index].status = 'used'
+            // 更新本地存储中的优惠券状态
+            uni.setStorageSync('userCoupons', userState.coupons)
+        }
+    }
 
     // 显示支付成功提示
     uni.showToast({
@@ -357,6 +383,10 @@ const handleCouponSelect = (coupon) => {
                 // 从总价中减去折扣金额
                 finalPrice = Math.max(0, finalPrice - discount)
             }
+        } else if (coupon.type === 'free') {
+            // 免单券：直接将总价设置为0
+            discount = parseFloat(originalPrice.value)
+            finalPrice = 0
         }
 
         // 更新折扣金额和最终价格

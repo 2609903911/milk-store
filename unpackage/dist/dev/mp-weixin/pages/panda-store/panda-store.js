@@ -78,18 +78,6 @@ const _sfc_main = {
         coinsCost: 300,
         category: "free"
       },
-      // 买一赠一券
-      {
-        id: "ex_buy1get1_1",
-        title: "招牌奶茶买一赠一",
-        type: utils_couponModel.COUPON_TYPES.BUY_ONE_GET_ONE,
-        value: 1,
-        minOrderAmount: 0,
-        description: "招牌奶茶系列买一赠一",
-        validity: "15天",
-        coinsCost: 250,
-        category: "buyOneGetOne"
-      },
       // 特价券
       {
         id: "ex_special_1",
@@ -141,8 +129,6 @@ const _sfc_main = {
           return "cash-coupon";
         case utils_couponModel.COUPON_TYPES.FREE:
           return "free-coupon";
-        case utils_couponModel.COUPON_TYPES.BUY_ONE_GET_ONE:
-          return "buy-one-coupon";
         case utils_couponModel.COUPON_TYPES.SPECIAL_PRICE:
           return "special-coupon";
         case utils_couponModel.COUPON_TYPES.SHIPPING:
@@ -159,8 +145,6 @@ const _sfc_main = {
           return "/static/images/coupon/coupon-cash.png";
         case utils_couponModel.COUPON_TYPES.FREE:
           return "/static/images/coupon/coupon-free.png";
-        case utils_couponModel.COUPON_TYPES.BUY_ONE_GET_ONE:
-          return "/static/images/coupon/coupon-buy1get1.png";
         case utils_couponModel.COUPON_TYPES.SPECIAL_PRICE:
           return "/static/images/coupon/coupon-special.png";
         case utils_couponModel.COUPON_TYPES.SHIPPING:
@@ -254,13 +238,14 @@ const _sfc_main = {
         }),
         b: common_vendor.o(goBack),
         c: common_assets._imports_0$8,
-        d: common_assets._imports_1$3,
-        e: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
-        f: common_vendor.p({
+        d: common_vendor.o((...args) => _ctx.showEarnCoinsPopup && _ctx.showEarnCoinsPopup(...args)),
+        e: common_assets._imports_1$3,
+        f: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
+        g: common_vendor.p({
           type: "",
           size: "24"
         }),
-        g: common_vendor.f(tabs.value, (tab, index, i0) => {
+        h: common_vendor.f(tabs.value, (tab, index, i0) => {
           return {
             a: common_vendor.t(tab),
             b: index,
@@ -268,7 +253,7 @@ const _sfc_main = {
             d: common_vendor.o(($event) => switchTab(index), index)
           };
         }),
-        h: common_vendor.f(couponList.value, (coupon, index, i0) => {
+        i: common_vendor.f(couponList.value, (coupon, index, i0) => {
           return common_vendor.e({
             a: getCouponTypeImage(coupon.type),
             b: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT
@@ -276,41 +261,40 @@ const _sfc_main = {
             c: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
             e: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            i: common_vendor.t(coupon.value)
+          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            h: common_vendor.t(coupon.value)
           } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
             d: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
             f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).BUY_ONE_GET_ONE,
-            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            j: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            k: coupon.minOrderAmount > 0
+            g: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            i: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            j: coupon.minOrderAmount > 0
           }, coupon.minOrderAmount > 0 ? {
-            l: common_vendor.t(coupon.minOrderAmount)
+            k: common_vendor.t(coupon.minOrderAmount)
           } : {}, {
-            m: common_vendor.t(coupon.title),
-            n: common_vendor.t(coupon.description),
-            o: common_vendor.t(coupon.validity || "30天"),
-            p: common_vendor.t(coupon.coinsCost),
-            q: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins < coupon.coinsCost ? "熊猫币不足" : "立即兑换"),
-            r: common_vendor.o(($event) => exchangeCoupon(coupon), index),
-            s: common_vendor.unref(utils_userState.userState).pandaCoins < coupon.coinsCost,
-            t: index,
-            v: common_vendor.n(getCouponColorClass(coupon.type))
+            l: common_vendor.t(coupon.title),
+            m: common_vendor.t(coupon.description),
+            n: common_vendor.t(coupon.validity || "30天"),
+            o: common_vendor.t(coupon.coinsCost),
+            p: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins < coupon.coinsCost ? "熊猫币不足" : "立即兑换"),
+            q: common_vendor.o(($event) => exchangeCoupon(coupon), index),
+            r: common_vendor.unref(utils_userState.userState).pandaCoins < coupon.coinsCost,
+            s: index,
+            t: common_vendor.n(getCouponColorClass(coupon.type))
           });
         }),
-        i: common_assets._imports_1$3,
-        j: couponList.value.length === 0
+        j: common_assets._imports_1$3,
+        k: couponList.value.length === 0
       }, couponList.value.length === 0 ? {
-        k: common_assets._imports_2$4
+        l: common_assets._imports_2$4
       } : {}, {
-        l: showSuccessPopup.value
+        m: showSuccessPopup.value
       }, showSuccessPopup.value ? {
-        m: common_vendor.o(navigateToCoupons),
-        n: common_vendor.o(closeSuccessPopup),
-        o: common_vendor.o(() => {
+        n: common_vendor.o(navigateToCoupons),
+        o: common_vendor.o(closeSuccessPopup),
+        p: common_vendor.o(() => {
         }),
-        p: common_vendor.o(closeSuccessPopup)
+        q: common_vendor.o(closeSuccessPopup)
       } : {});
     };
   }

@@ -85,6 +85,42 @@
   height: 115%;
   z-index: 0;
 }
+.coin-info.data-v-21c67e85 {
+  position: absolute;
+  top: 180rpx;
+  left: 30rpx;
+  right: 30rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  z-index: 5;
+}
+.coin-box.data-v-21c67e85 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.coin-icon.data-v-21c67e85 {
+  font-size: 40rpx;
+  margin-right: 10rpx;
+}
+.coin-amount.data-v-21c67e85 {
+  font-size: 72rpx;
+  font-weight: bold;
+  color: #333;
+}
+.earn-coins-btn.data-v-21c67e85 {
+  background-color: #006de7;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  line-height: 1.6;
+  margin: 0;
+  min-width: 120rpx;
+  text-align: center;
+}
 .my-coins-badge.data-v-21c67e85 {
   position: absolute;
   top: 10rpx;
@@ -384,9 +420,6 @@
 }
 .free-coupon .coupon-top.data-v-21c67e85 {
   background-color: #5856d6;
-}
-.buy-one-coupon .coupon-top.data-v-21c67e85 {
-  background-color: #34c759;
 }
 .special-coupon .coupon-top.data-v-21c67e85 {
   background-color: #af52de;

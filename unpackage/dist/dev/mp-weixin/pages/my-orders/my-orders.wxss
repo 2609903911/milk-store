@@ -115,6 +115,23 @@
     font-size: 24rpx;
     color: #999;
 }
+.discount-info {
+    font-size: 24rpx;
+    color: #ff6a6a;
+    margin-top: 6rpx;
+}
+.discount-text {
+    display: inline-block;
+    background-color: #fff0f0;
+    padding: 4rpx 8rpx;
+    border-radius: 4rpx;
+}
+.original-price {
+    font-size: 24rpx;
+    color: #999;
+    text-decoration: line-through;
+    margin-top: 6rpx;
+}
 .order-price {
     text-align: right;
 }

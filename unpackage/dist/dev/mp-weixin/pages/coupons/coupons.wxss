@@ -325,10 +325,6 @@
 .free-coupon .center-coupon-top.data-v-8d9323cd {
   background-color: #5856d6;
 }
-.buy-one-coupon .coupon-left.data-v-8d9323cd,
-.buy-one-coupon .center-coupon-top.data-v-8d9323cd {
-  background-color: #34c759;
-}
 .special-coupon .coupon-left.data-v-8d9323cd,
 .special-coupon .center-coupon-top.data-v-8d9323cd {
   background-color: #af52de;

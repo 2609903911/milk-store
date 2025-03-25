@@ -56,41 +56,21 @@ export const createDefaultUserInfo = () => {
     // 3. 免单券示例
     {
       id: `coupon_${now}_3`,
-      title: '免单券（最高30元）',
+      title: '免单券',
       type: 'free',
-      value: 30, // 最高免除30元
+      value: 50, // 最高优惠50元
       minOrderAmount: 0, // 无最低消费
-      scope: 'member',
+      scope: 'all',
       scopeIds: [],
       startTime: now,
       endTime: now + 7 * 24 * 60 * 60 * 1000, // 7天后过期
       status: 'valid',
-      description: '订单金额直接免除，最高30元',
+      description: '满50元以下订单全额免单',
       imageUrl: '/static/images/coupon3.png',
       isDeleted: false,
       createTime: now,
       usedTime: null,
-      source: 'activity'
-    },
-    
-    // 4. 买一赠一券示例
-    {
-      id: `coupon_${now}_4`,
-      title: '买一赠一券',
-      type: 'buyOneGetOne',
-      value: 1, // 赠送1份
-      minOrderAmount: 0, // 无最低消费
-      scope: 'category',
-      scopeIds: ['招牌奶茶', '真鲜奶茶'], // 只适用于特定分类
-      startTime: now,
-      endTime: now + 20 * 24 * 60 * 60 * 1000, // 20天后过期
-      status: 'valid',
-      description: '指定奶茶类别买一赠一',
-      imageUrl: '/static/images/coupon4.png',
-      isDeleted: false,
-      createTime: now,
-      usedTime: null,
-      source: 'memberDay'
+      source: 'newUser'
     },
     
     // 5. 特价券示例

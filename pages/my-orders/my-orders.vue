@@ -46,12 +46,28 @@
                         <view class="order-time">{{
                             formatTime(order.time)
                         }}</view>
+                        <view
+                            class="discount-info"
+                            v-if="order.discount && order.discount.amount > 0"
+                        >
+                            <text class="discount-text"
+                                >已优惠: ¥{{ order.discount.amount }}</text
+                            >
+                        </view>
                     </view>
                     <view class="order-price">
                         <view class="price-tag">¥{{ order.totalPrice }}</view>
                         <view class="price-detail"
                             >共{{ getTotalQuantity(order) }}件</view
                         >
+                        <view
+                            class="original-price"
+                            v-if="order.discount && order.discount.amount > 0"
+                        >
+                            <text
+                                >原价: ¥{{ order.discount.originalPrice }}</text
+                            >
+                        </view>
                     </view>
                 </view>
 
@@ -88,73 +104,14 @@ const orders = ref([])
 
 // 初始化页面数据
 onMounted(() => {
-    // 模拟从本地存储获取订单数据
+    // 从本地存储获取订单数据
     const savedOrders = uni.getStorageSync('savedOrders')
     if (savedOrders && savedOrders.length) {
         orders.value = savedOrders
         hasOrders.value = true
-    } else {
-        // 模拟订单数据（开发测试用）
-        mockOrderData()
     }
+    // 移除默认示例订单数据自动创建逻辑
 })
-
-// 模拟订单数据（仅开发测试使用）
-const mockOrderData = () => {
-    // 当前日期对象
-    const now = new Date()
-
-    orders.value = [
-        {
-            id: '2023032001',
-            storeName: '九江学院四食堂店',
-            storeAddress: '江西省九江市浔阳区前进东路58号九江学院四食堂',
-            deliveryType: 'self',
-            status: 'completed',
-            time: new Date(now.getTime() - 3600000).getTime(), // 1小时前
-            items: [
-                {
-                    image: '/static/images/hot01.png',
-                    name: '杨梅吐气',
-                    price: 12,
-                    quantity: 1,
-                    specs: '常规'
-                }
-            ],
-            totalPrice: '12.00'
-        },
-        {
-            id: '2023032002',
-            storeName: '九江中心店',
-            storeAddress: '九江市中心区繁华路88号',
-            deliveryType: 'delivery',
-            status: 'pending',
-            time: now.getTime(),
-            items: [
-                {
-                    image: '/static/images/fruit01.png',
-                    name: '满杯百香',
-                    price: 16,
-                    quantity: 1,
-                    specs: '去冰'
-                },
-                {
-                    image: '/static/images/classic01.png',
-                    name: '芝芝莓莓',
-                    price: 22,
-                    quantity: 1,
-                    specs: '少糖'
-                }
-            ],
-            totalPrice: '38.00'
-        }
-    ]
-
-    hasOrders.value = true
-
-    // 将模拟数据保存到本地存储
-    uni.setStorageSync('savedOrders', orders.value)
-}
 
 // 跳转到点单页面
 const goToOrder = () => {
@@ -407,6 +364,26 @@ const deleteOrder = (index) => {
 .order-time {
     font-size: 24rpx;
     color: #999;
+}
+
+.discount-info {
+    font-size: 24rpx;
+    color: #ff6a6a;
+    margin-top: 6rpx;
+}
+
+.discount-text {
+    display: inline-block;
+    background-color: #fff0f0;
+    padding: 4rpx 8rpx;
+    border-radius: 4rpx;
+}
+
+.original-price {
+    font-size: 24rpx;
+    color: #999;
+    text-decoration: line-through;
+    margin-top: 6rpx;
 }
 
 .order-price {

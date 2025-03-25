@@ -9,6 +9,13 @@
     "miniprogram": {
       "list": [
         {
+          "name": "pages/my-orders/my-orders",
+          "pathName": "pages/my-orders/my-orders",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/order-confirm/order-confirm",
           "pathName": "pages/order-confirm/order-confirm",
           "query": "",

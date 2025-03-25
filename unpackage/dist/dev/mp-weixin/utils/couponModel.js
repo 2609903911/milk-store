@@ -6,8 +6,6 @@ const COUPON_TYPES = {
   // 现金券（如满50减10）
   FREE: "free",
   // 免单券
-  BUY_ONE_GET_ONE: "buyOneGetOne",
-  // 买一赠一券
   SPECIAL_PRICE: "specialPrice",
   // 特价券（某商品固定价格）
   SHIPPING: "shipping"

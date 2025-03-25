@@ -704,11 +704,6 @@ const loadUserCoupons = () => {
                     unit = ''
                     color = '#FF2D55'
                     break
-                case 'buyOneGetOne': // 买一赠一券
-                    discount = '买一'
-                    unit = '赠一'
-                    color = '#34C759'
-                    break
                 case 'specialPrice': // 特价券
                     discount = coupon.value
                     unit = '元'
@@ -1398,7 +1393,7 @@ input {
 }
 
 .discount-value {
-    font-size: 80rpx;
+    font-size: 40rpx;
     font-weight: bold;
     line-height: 1;
 }
