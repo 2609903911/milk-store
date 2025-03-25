@@ -2,7 +2,6 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userState = require("../../utils/userState.js");
-const utils_userService = require("../../utils/userService.js");
 const _sfc_main = {
   __name: "profile",
   setup(__props) {
@@ -41,24 +40,8 @@ const _sfc_main = {
     const handleServiceClick = (serviceName) => {
       const item = serviceItems.find((item2) => item2.name === serviceName);
       if (item && item.action === "editProfile") {
-        common_vendor.index.showModal({
-          title: "编辑个人资料",
-          content: "这里应该跳转到个人资料编辑页面",
-          confirmText: "修改昵称",
-          success: (res) => {
-            if (res.confirm) {
-              utils_userService.updateUserProfile({
-                nickname: "熊猫奶茶VIP会员"
-              }).then(({ success }) => {
-                if (success) {
-                  common_vendor.index.showToast({
-                    title: "昵称修改成功",
-                    icon: "success"
-                  });
-                }
-              });
-            }
-          }
+        common_vendor.index.navigateTo({
+          url: "/pages/personal-data/personal-data"
         });
         return;
       }

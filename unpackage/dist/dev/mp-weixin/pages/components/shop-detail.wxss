@@ -54,14 +54,33 @@ page.data-v-a8be75a7 {
   border-radius: 24rpx 24rpx 0 0;
   transition: all 0.3s ease;
   max-height: 85vh;
-  overflow-y: auto;
-  overflow-x: hidden;
   pointer-events: auto;
   /* 内容区域始终接收点击事件 */
   transform: translateY(100%);
+  display: flex;
+  flex-direction: column;
 }
 .popup-container.popup-show .popup-content.data-v-a8be75a7 {
   transform: translateY(0);
+}
+.action-bar.data-v-a8be75a7 {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
+  height: 120rpx;
+  flex-shrink: 0;
+}
+.detail-scroll-area.data-v-a8be75a7 {
+  flex: 1;
+  height: calc(85vh - 120rpx);
+  /* 减去操作栏高度 */
+  overflow-y: auto;
 }
 
 /* 通用样式 */
@@ -177,13 +196,6 @@ page.data-v-a8be75a7 {
   width: 80rpx;
   text-align: center;
   font-size: 30rpx;
-}
-.action-bar.data-v-a8be75a7 {
-  display: flex;
-  align-items: center;
-  padding: 30rpx;
-  background-color: #fff;
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 .total-price.data-v-a8be75a7 {
   flex: 1;

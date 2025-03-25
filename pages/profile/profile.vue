@@ -212,26 +212,8 @@ const handleServiceClick = (serviceName) => {
 
     if (item && item.action === 'editProfile') {
         // 跳转到个人资料编辑页面
-        // 实际项目中应该创建一个编辑页面
-        uni.showModal({
-            title: '编辑个人资料',
-            content: '这里应该跳转到个人资料编辑页面',
-            confirmText: '修改昵称',
-            success: (res) => {
-                if (res.confirm) {
-                    // 模拟修改昵称
-                    updateUserProfile({
-                        nickname: '熊猫奶茶VIP会员'
-                    }).then(({ success }) => {
-                        if (success) {
-                            uni.showToast({
-                                title: '昵称修改成功',
-                                icon: 'success'
-                            })
-                        }
-                    })
-                }
-            }
+        uni.navigateTo({
+            url: '/pages/personal-data/personal-data'
         })
         return
     }

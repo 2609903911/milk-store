@@ -6,135 +6,137 @@
         id="popup-container"
     >
         <view class="popup-content" @tap.stop="contentTap">
-            <!-- 商品详情内容 -->
-            <view class="product-detail">
-                <!-- 商品图片 -->
-                <image
-                    class="product-image"
-                    :src="product.image || '/static/images/hot01.png'"
-                    mode="aspectFill"
-                ></image>
+            <!-- 商品详情内容区域 - 使用scroll-view包裹 -->
+            <scroll-view class="detail-scroll-area" scroll-y>
+                <!-- 商品详情内容 -->
+                <view class="product-detail">
+                    <!-- 商品图片 -->
+                    <image
+                        class="product-image"
+                        :src="product.image || '/static/images/hot01.png'"
+                        mode="aspectFill"
+                    ></image>
 
-                <!-- 商品信息 -->
-                <view class="product-info">
-                    <view class="product-name">{{
-                        product.name || '商品名称'
-                    }}</view>
-                    <view class="product-desc">{{
-                        product.desc || '商品描述'
-                    }}</view>
-                    <view class="product-price"
-                        >¥{{ product.price || '0.00' }}</view
-                    >
-                </view>
-
-                <!-- 关闭按钮 -->
-                <view class="close-btn" @tap="closePopup">
-                    <text class="close-icon">×</text>
-                </view>
-            </view>
-
-            <!-- 选项区域 -->
-            <view class="options-container">
-                <!-- 温度选择 -->
-                <view class="option-section">
-                    <view class="option-title">温度</view>
-                    <view class="option-list">
-                        <view
-                            v-for="(temp, index) in temperatures"
-                            :key="'temp-' + index"
-                            class="option-item"
-                            :class="{
-                                'option-selected': selectedTemp === temp
-                            }"
-                            @tap="selectedTemp = temp"
+                    <!-- 商品信息 -->
+                    <view class="product-info">
+                        <view class="product-name">{{
+                            product.name || '商品名称'
+                        }}</view>
+                        <view class="product-desc">{{
+                            product.desc || '商品描述'
+                        }}</view>
+                        <view class="product-price"
+                            >¥{{ product.price || '0.00' }}</view
                         >
-                            {{ temp }}
-                        </view>
+                    </view>
+
+                    <!-- 关闭按钮 -->
+                    <view class="close-btn" @tap="closePopup">
+                        <text class="close-icon">×</text>
                     </view>
                 </view>
 
-                <!-- 糖度选择 -->
-                <view class="option-section">
-                    <view class="option-title">糖度</view>
-                    <view class="option-list">
-                        <view
-                            v-for="(sugar, index) in sugarLevels"
-                            :key="'sugar-' + index"
-                            class="option-item"
-                            :class="{
-                                'option-selected': selectedSugar === sugar
-                            }"
-                            @tap="selectedSugar = sugar"
-                        >
-                            {{ sugar }}
-                        </view>
-                    </view>
-                </view>
-
-                <!-- 加料选择 -->
-                <view class="option-section">
-                    <view class="option-title">加料</view>
-                    <view class="option-list">
-                        <view
-                            v-for="(topping, index) in toppings"
-                            :key="'topping-' + index"
-                            class="option-item"
-                            :class="{
-                                'option-selected': selectedToppings.includes(
-                                    topping.name
-                                )
-                            }"
-                            @tap="toggleTopping(topping.name)"
-                        >
-                            {{ topping.name }}
-                            <text class="option-price"
-                                >+¥{{ topping.price }}</text
+                <!-- 选项区域 -->
+                <view class="options-container">
+                    <!-- 温度选择 -->
+                    <view class="option-section">
+                        <view class="option-title">温度</view>
+                        <view class="option-list">
+                            <view
+                                v-for="(temp, index) in temperatures"
+                                :key="'temp-' + index"
+                                class="option-item"
+                                :class="{
+                                    'option-selected': selectedTemp === temp
+                                }"
+                                @tap="selectedTemp = temp"
                             >
+                                {{ temp }}
+                            </view>
                         </view>
                     </view>
-                </view>
 
-                <!-- 杯型选择 -->
-                <view class="option-section">
-                    <view class="option-title">杯型</view>
-                    <view class="option-list">
-                        <view
-                            v-for="(cup, index) in cupTypes"
-                            :key="'cup-' + index"
-                            class="option-item"
-                            :class="{
-                                'option-selected': selectedCup === cup.type
-                            }"
-                            @tap="selectedCup = cup.type"
-                        >
-                            {{ cup.type }}
-                            <text class="option-price" v-if="cup.price > 0"
-                                >+¥{{ cup.price }}</text
+                    <!-- 糖度选择 -->
+                    <view class="option-section">
+                        <view class="option-title">糖度</view>
+                        <view class="option-list">
+                            <view
+                                v-for="(sugar, index) in sugarLevels"
+                                :key="'sugar-' + index"
+                                class="option-item"
+                                :class="{
+                                    'option-selected': selectedSugar === sugar
+                                }"
+                                @tap="selectedSugar = sugar"
                             >
+                                {{ sugar }}
+                            </view>
+                        </view>
+                    </view>
+
+                    <!-- 加料选择 -->
+                    <view class="option-section">
+                        <view class="option-title">加料</view>
+                        <view class="option-list">
+                            <view
+                                v-for="(topping, index) in toppings"
+                                :key="'topping-' + index"
+                                class="option-item"
+                                :class="{
+                                    'option-selected':
+                                        selectedToppings.includes(topping.name)
+                                }"
+                                @tap="toggleTopping(topping.name)"
+                            >
+                                {{ topping.name }}
+                                <text class="option-price"
+                                    >+¥{{ topping.price }}</text
+                                >
+                            </view>
+                        </view>
+                    </view>
+
+                    <!-- 杯型选择 -->
+                    <view class="option-section">
+                        <view class="option-title">杯型</view>
+                        <view class="option-list">
+                            <view
+                                v-for="(cup, index) in cupTypes"
+                                :key="'cup-' + index"
+                                class="option-item"
+                                :class="{
+                                    'option-selected': selectedCup === cup.type
+                                }"
+                                @tap="selectedCup = cup.type"
+                            >
+                                {{ cup.type }}
+                                <text class="option-price" v-if="cup.price > 0"
+                                    >+¥{{ cup.price }}</text
+                                >
+                            </view>
                         </view>
                     </view>
                 </view>
-            </view>
 
-            <!-- 数量选择 -->
-            <view class="quantity-section">
-                <view class="quantity-title">数量</view>
-                <view class="quantity-control">
-                    <view class="quantity-btn minus" @tap="decreaseQuantity"
-                        >-</view
-                    >
-                    <view class="quantity-value">{{ quantity }}</view>
-                    <view
-                        class="quantity-btn plus"
-                        @tap="increaseQuantity"
-                        style="background-color: #006de7; color: #fff"
-                        >+</view
-                    >
+                <!-- 数量选择 -->
+                <view class="quantity-section">
+                    <view class="quantity-title">数量</view>
+                    <view class="quantity-control">
+                        <view class="quantity-btn minus" @tap="decreaseQuantity"
+                            >-</view
+                        >
+                        <view class="quantity-value">{{ quantity }}</view>
+                        <view
+                            class="quantity-btn plus"
+                            @tap="increaseQuantity"
+                            style="background-color: #006de7; color: #fff"
+                            >+</view
+                        >
+                    </view>
                 </view>
-            </view>
+            </scroll-view>
 
-            <!-- 操作栏 -->
+            <!-- 操作栏 - 固定在底部 -->
             <view class="action-bar">
                 <view class="total-price">
                     总计：<text class="price-value">¥{{ totalPrice }}</text>
@@ -389,14 +391,30 @@ page {
     border-radius: 24rpx 24rpx 0 0;
     transition: all 0.3s ease;
     max-height: 85vh;
-    overflow-y: auto;
-    overflow-x: hidden;
     pointer-events: auto; /* 内容区域始终接收点击事件 */
     transform: translateY(100%);
+    display: flex;
+    flex-direction: column;
 }
 
 .popup-container.popup-show .popup-content {
     transform: translateY(0);
+}
+
+.action-bar {
+    display: flex;
+    align-items: center;
+    padding: 20rpx 30rpx;
+    background-color: #fff;
+    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 100;
+    width: 100%;
+    box-sizing: border-box;
+    height: 120rpx;
+    flex-shrink: 0;
+    // padding-bottom: calc(20rpx + constant(safe-area-inset-bottom));
+    // padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 }
 /* #endif */
 
@@ -429,17 +447,49 @@ page {
 .popup-content {
     background-color: #fff;
     border-radius: 20rpx 20rpx 0 0;
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
     transition: transform 0.3s ease;
     max-height: 85vh;
-    overflow-y: auto;
     transform: translateY(100%);
     pointer-events: auto; /* 内容区域始终接收点击事件 */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    max-height: calc(100vh - 50px); /* 留出tabBar的高度 */
 }
 
 .popup-show .popup-content {
     transform: translateY(0);
+}
+
+.action-bar {
+    display: flex;
+    align-items: center;
+    padding: 20rpx 30rpx;
+    background-color: #fff;
+    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.detail-scroll-area {
+    flex: 1;
+    max-height: calc(85vh - 120rpx);
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch; /* 增强iOS滚动体验 */
+}
+/* #endif */
+
+/* #ifdef MP-WEIXIN */
+.detail-scroll-area {
+    flex: 1;
+    height: calc(85vh - 120rpx); /* 减去操作栏高度 */
+    overflow-y: auto;
 }
 /* #endif */
 
@@ -575,14 +625,6 @@ page {
     width: 80rpx;
     text-align: center;
     font-size: 30rpx;
-}
-
-.action-bar {
-    display: flex;
-    align-items: center;
-    padding: 30rpx;
-    background-color: #fff;
-    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
 .total-price {

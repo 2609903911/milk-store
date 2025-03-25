@@ -71,6 +71,12 @@
                 "navigationBarTitleText" : "熊猫币商城",
                 "navigationStyle" : "custom"
             }
+        },
+        {
+            "path" : "pages/personal-data/personal-data",
+            "style" : {
+                "navigationBarTitleText" : "个人资料"
+            }
         }
     ],
     "globalStyle" : {

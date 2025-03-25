@@ -53,34 +53,5 @@ const loginUser = (phone, code = "000000") => {
     return { success: false, message: "登录过程中发生错误" };
   }
 };
-const updateUserProfile = (profileInfo) => {
-  try {
-    if (!profileInfo || typeof profileInfo !== "object") {
-      return { success: false, message: "无效的个人资料" };
-    }
-    const currentUser = utils_userStorage.getUserInfo();
-    if (!currentUser) {
-      return { success: false, message: "用户未登录" };
-    }
-    const allowedFields = ["nickname", "avatar", "gender", "birthday"];
-    const updateFields = {};
-    allowedFields.forEach((field) => {
-      if (profileInfo[field] !== void 0) {
-        updateFields[field] = profileInfo[field];
-      }
-    });
-    const updated = utils_userStorage.updateUserInfo(updateFields);
-    if (!updated) {
-      return { success: false, message: "更新个人资料失败" };
-    }
-    utils_userState.updateUserState(updateFields);
-    const updatedUser = utils_userStorage.getUserInfo();
-    return { success: true, userInfo: updatedUser };
-  } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userService.js:153", "更新个人资料失败", error);
-    return { success: false, message: "更新过程中发生错误" };
-  }
-};
 exports.loginUser = loginUser;
-exports.updateUserProfile = updateUserProfile;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/userService.js.map
