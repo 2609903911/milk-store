@@ -1,7 +1,7 @@
 <script>
 import { getUserInfo } from './utils/userStorage'
 import { createDefaultUserInfo } from './utils/userModel'
-import { initUserState } from './utils/userState'
+import { initUserState, userState } from './utils/userState'
 import { loginUser } from './utils/userService'
 
 export default {
@@ -25,10 +25,8 @@ export default {
         // 初始化用户信息
         initUserInfo() {
             try {
-                // 检查本地是否已有用户信息
-                const userInfo = getUserInfo()
-
-                if (!userInfo) {
+                // 检查全局用户状态是否已初始化
+                if (!userState || !userState.userId) {
                     console.log('未检测到用户信息，将使用访客模式')
                     // 如果是首次使用应用，可以考虑自动创建一个游客账号
                     this.createGuestUser()

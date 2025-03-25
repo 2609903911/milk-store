@@ -241,7 +241,7 @@ export const createDefaultUserInfo = () => {
   ];
   
   return {
-    userId: '', // 用户唯一标识
+    userId: 'guest_' + Date.now(), // 用户唯一标识
     nickname: '熊猫奶茶会员', // 用户昵称
     avatar: '/static/images/avatar.png', // 头像地址
     phone: '13027261672', // 手机号

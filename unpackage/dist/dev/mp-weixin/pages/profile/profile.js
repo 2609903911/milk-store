@@ -26,7 +26,11 @@ const _sfc_main = {
       { name: "团餐", icon: "../../static/images/service/group.png" },
       { name: "礼品卡", icon: "../../static/images/service/gift-card.png" },
       { name: "礼券兑换", icon: "../../static/images/service/certificate.png" },
-      { name: "我的徽章", icon: "../../static/images/service/medal.png" },
+      {
+        name: "我的徽章",
+        icon: "../../static/images/service/medal.png",
+        action: "medal"
+      },
       { name: "熊猫币商城", icon: "../../static/images/service/store.png" },
       { name: "加盟申请", icon: "../../static/images/service/franchise.png" },
       { name: "联系客服", icon: "../../static/images/service/contact.png" },
@@ -42,6 +46,12 @@ const _sfc_main = {
       if (item && item.action === "editProfile") {
         common_vendor.index.navigateTo({
           url: "/pages/personal-data/personal-data"
+        });
+        return;
+      }
+      if (item && item.action === "medal") {
+        common_vendor.index.navigateTo({
+          url: "/pages/order-medal/order-medal"
         });
         return;
       }

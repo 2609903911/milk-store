@@ -193,7 +193,11 @@ const serviceItems = reactive([
     { name: '团餐', icon: '../../static/images/service/group.png' },
     { name: '礼品卡', icon: '../../static/images/service/gift-card.png' },
     { name: '礼券兑换', icon: '../../static/images/service/certificate.png' },
-    { name: '我的徽章', icon: '../../static/images/service/medal.png' },
+    {
+        name: '我的徽章',
+        icon: '../../static/images/service/medal.png',
+        action: 'medal'
+    },
     { name: '熊猫币商城', icon: '../../static/images/service/store.png' },
     { name: '加盟申请', icon: '../../static/images/service/franchise.png' },
     { name: '联系客服', icon: '../../static/images/service/contact.png' },
@@ -214,6 +218,15 @@ const handleServiceClick = (serviceName) => {
         // 跳转到个人资料编辑页面
         uni.navigateTo({
             url: '/pages/personal-data/personal-data'
+        })
+        return
+    }
+
+    // 处理我的徽章点击事件
+    if (item && item.action === 'medal') {
+        // 跳转到勋章墙页面
+        uni.navigateTo({
+            url: '/pages/order-medal/order-medal'
         })
         return
     }

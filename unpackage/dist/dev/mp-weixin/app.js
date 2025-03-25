@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
-const utils_userStorage = require("./utils/userStorage.js");
 const utils_userState = require("./utils/userState.js");
 const utils_userService = require("./utils/userService.js");
 if (!Math) {
@@ -34,15 +33,14 @@ const _sfc_main = {
     // 初始化用户信息
     initUserInfo() {
       try {
-        const userInfo = utils_userStorage.getUserInfo();
-        if (!userInfo) {
-          common_vendor.index.__f__("log", "at App.vue:32", "未检测到用户信息，将使用访客模式");
+        if (!utils_userState.userState || !utils_userState.userState.userId) {
+          common_vendor.index.__f__("log", "at App.vue:30", "未检测到用户信息，将使用访客模式");
           this.createGuestUser();
         } else {
-          common_vendor.index.__f__("log", "at App.vue:36", "已加载用户信息");
+          common_vendor.index.__f__("log", "at App.vue:34", "已加载用户信息");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at App.vue:39", "初始化用户信息失败", error);
+        common_vendor.index.__f__("error", "at App.vue:37", "初始化用户信息失败", error);
       }
     },
     // 创建游客用户（可选功能）
@@ -50,9 +48,9 @@ const _sfc_main = {
       const phoneNumber = "guest_" + Date.now();
       const { success, userInfo } = utils_userService.loginUser(phoneNumber);
       if (success) {
-        common_vendor.index.__f__("log", "at App.vue:50", "已创建游客账号");
+        common_vendor.index.__f__("log", "at App.vue:48", "已创建游客账号");
       } else {
-        common_vendor.index.__f__("error", "at App.vue:52", "创建游客账号失败");
+        common_vendor.index.__f__("error", "at App.vue:50", "创建游客账号失败");
       }
     }
   }

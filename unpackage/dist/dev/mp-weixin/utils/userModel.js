@@ -237,7 +237,7 @@ const createDefaultUserInfo = () => {
     }
   ];
   return {
-    userId: "",
+    userId: "guest_" + Date.now(),
     // 用户唯一标识
     nickname: "熊猫奶茶会员",
     // 用户昵称
