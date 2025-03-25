@@ -153,10 +153,17 @@
     margin-right: 10rpx;
 }
 .coupon-action.data-v-e7689724 {
+    color: #ff6a6a;
     display: flex;
     align-items: center;
-    color: #ff6a6a;
     font-size: 28rpx;
+}
+.selected-coupon.data-v-e7689724 {
+    color: #006de7;
+}
+.discount-amount.data-v-e7689724 {
+    color: #ff6a6a;
+    margin-left: 10rpx;
 }
 .arrow.data-v-e7689724 {
     margin-left: 10rpx;
@@ -250,10 +257,10 @@
     color: #333;
 }
 .pay-button.data-v-e7689724 {
-    background-color: #0066cc;
+    background-color: #2a88e6;
     color: #fff;
     font-size: 32rpx;
     padding: 15rpx 60rpx;
-    border-radius: 100rpx;
+    border-radius: 20rpx;
     margin-right: 40rpx;
 }

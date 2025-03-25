@@ -122,7 +122,7 @@
                         class="empty-tip"
                     >
                         <image
-                            src="/static/images/empty-coupon.png"
+                            src="/static/images/medal/empty-icon.png"
                             mode="aspectFit"
                         ></image>
                         <text>暂无可用的优惠券</text>
@@ -157,6 +157,10 @@ const props = defineProps({
     orderAmount: {
         type: Number,
         default: 0
+    },
+    orderItems: {
+        type: Array,
+        default: () => []
     }
 })
 
@@ -177,7 +181,28 @@ const availableCoupons = computed(() => {
         // 检查订单金额是否满足优惠券使用条件
         const meetsAmount = props.orderAmount >= coupon.minOrderAmount
 
-        return !isExpired && !isUsed && !isDeleted && meetsAmount
+        // 基本条件检查
+        const basicConditions =
+            !isExpired && !isUsed && !isDeleted && meetsAmount
+
+        // 如果不满足基本条件，直接返回false
+        if (!basicConditions) return false
+
+        // 特价券需要检查商品ID匹配
+        if (
+            coupon.type === 'SPECIAL_PRICE' &&
+            coupon.scopeIds &&
+            coupon.scopeIds.length > 0
+        ) {
+            // 检查订单中是否有匹配的商品
+            const hasMatchingProduct = props.orderItems.some((item) =>
+                coupon.scopeIds.includes(item.id)
+            )
+            return hasMatchingProduct
+        }
+
+        // 其他类型的优惠券直接返回true
+        return true
     })
 })
 
@@ -238,7 +263,7 @@ const close = () => {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 999;
+    z-index: 1000;
     display: flex;
     align-items: flex-end;
 }
@@ -277,11 +302,11 @@ const close = () => {
 
 .coupon-list-scroll {
     flex: 1;
-    padding: 20rpx;
+    height: calc(80vh - 180rpx); /* 减去头部和底部的高度 */
 }
 
 .coupon-list {
-    padding-bottom: 20rpx;
+    padding: 20rpx;
 }
 
 .coupon-item {
@@ -334,7 +359,7 @@ const close = () => {
 }
 
 .coupon-value .value {
-    font-size: 56rpx;
+    font-size: 40rpx;
     font-weight: bold;
 }
 
@@ -457,6 +482,9 @@ const close = () => {
     padding: 20rpx 30rpx;
     background-color: #fff;
     border-top: 1px solid #eee;
+    height: 120rpx;
+    box-sizing: border-box;
+    transform: translateY(-50rpx);
 }
 
 .confirm-btn {
@@ -466,7 +494,7 @@ const close = () => {
     background-color: #006de7;
     color: #fff;
     font-size: 32rpx;
-    border-radius: 40rpx;
+    border-radius: 20rpx;
 }
 
 .confirm-btn[disabled] {

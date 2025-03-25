@@ -9,6 +9,20 @@
     "miniprogram": {
       "list": [
         {
+          "name": "pages/order-confirm/order-confirm",
+          "pathName": "pages/order-confirm/order-confirm",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/order-confirm/order-confirm",
+          "pathName": "pages/order-confirm/order-confirm",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/home/home",
           "pathName": "pages/home/home",
           "query": "",

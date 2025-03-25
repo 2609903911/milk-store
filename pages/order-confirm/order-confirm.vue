@@ -67,13 +67,26 @@
                         <text>优惠券</text>
                     </view>
                     <view class="coupon-action">
-                        <text>{{
-                            selectedCoupon ? selectedCoupon.title : '暂不可用'
-                        }}</text>
+                        <text v-if="selectedCoupon" class="selected-coupon">
+                            已选择: {{ selectedCoupon.title }}
+                            <text class="discount-amount"
+                                >(-¥{{ discountAmount }})</text
+                            >
+                        </text>
+                        <text v-else>
+                            {{
+                                availableCoupons.length > 0
+                                    ? `${availableCoupons.length}张优惠券可用`
+                                    : '暂无可用优惠券'
+                            }}
+                        </text>
                         <uni-icons
                             class="arrow"
                             :style="{
-                                color: selectedCoupon ? '#006de7' : '#999'
+                                color:
+                                    availableCoupons.length > 0
+                                        ? '#006de7'
+                                        : '#999'
                             }"
                             type="right"
                             size="16"
@@ -85,6 +98,7 @@
                 <coupon-select
                     :show="showCouponSelect"
                     :order-amount="totalAmount"
+                    :order-items="orderItems"
                     @update:show="showCouponSelect = $event"
                     @select="handleCouponSelect"
                 />
@@ -134,8 +148,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import CouponSelect from '../components/coupon-select.vue'
+import { userState } from '../../utils/userState'
 
 // 定义数据
 const orderItems = ref([])
@@ -153,6 +168,26 @@ const showCouponSelect = ref(false)
 const selectedCoupon = ref(null)
 const totalAmount = ref(0)
 
+// 可用优惠券列表
+const availableCoupons = computed(() => {
+    return (userState.coupons || []).filter((coupon) => {
+        // 检查优惠券是否可用
+        const now = Date.now()
+        const isExpired = now > coupon.endTime
+        const isUsed = coupon.status === 'used'
+        const isDeleted = coupon.isDeleted
+
+        // 检查订单金额是否满足优惠券使用条件
+        const meetsAmount = totalAmount.value >= coupon.minOrderAmount
+
+        return !isExpired && !isUsed && !isDeleted && meetsAmount
+    })
+})
+
+// 优惠券折扣金额
+const discountAmount = ref('0.00')
+const originalPrice = ref('0.00')
+
 // 获取传递的数据
 onMounted(() => {
     try {
@@ -163,6 +198,10 @@ onMounted(() => {
             console.log('从本地存储获取订单数据:', orderData)
             orderItems.value = orderData.items || []
             totalPrice.value = orderData.totalPrice || '0.00'
+            originalPrice.value = orderData.totalPrice || '0.00'
+
+            // 计算总金额
+            calculateTotalAmount()
 
             if (orderData.store) {
                 storeInfo.value = orderData.store
@@ -280,15 +319,61 @@ const openCouponSelect = () => {
 
 // 处理优惠券选择
 const handleCouponSelect = (coupon) => {
-    selectedCoupon.value = coupon
+    console.log('优惠券选择:', coupon)
+    // 重置价格为原始价格
+    totalPrice.value = originalPrice.value
+    let finalPrice = parseFloat(totalPrice.value)
+    let discount = 0
+
     if (coupon) {
-        let finalPrice = parseFloat(totalPrice.value)
-        if (coupon.type === 'CASH') {
-            finalPrice = Math.max(0, finalPrice - coupon.value)
-        } else if (coupon.type === 'DISCOUNT') {
-            finalPrice = finalPrice * (coupon.value / 10)
+        selectedCoupon.value = coupon
+
+        if (coupon.type === 'cash') {
+            // 满减券：直接减去value值
+            discount = coupon.value
+            console.log('减去的价格：', discount)
+            finalPrice = Math.max(0, finalPrice - discount)
+        } else if (coupon.type === 'discount') {
+            // 折扣券：按折扣比例计算
+            const originalAmount = parseFloat(originalPrice.value)
+            const discountedAmount = originalAmount * (coupon.value / 10)
+            discount = originalAmount - discountedAmount
+            finalPrice = discountedAmount
+        } else if (coupon.type === 'specialPrice') {
+            // 特价券：将原价替换为特价
+            const matchingItem = orderItems.value.find(
+                (item) => coupon.scopeIds && coupon.scopeIds.includes(item.id)
+            )
+            if (matchingItem) {
+                // 记录原价
+                const originalItemPrice = matchingItem.price
+                // 计算所有符合条件商品的总原价
+                const originalItemsTotal =
+                    originalItemPrice * matchingItem.quantity
+                // 计算所有符合条件商品的总特价
+                const specialItemsTotal = coupon.value * matchingItem.quantity
+                // 计算折扣金额
+                discount = originalItemsTotal - specialItemsTotal
+                // 从总价中减去折扣金额
+                finalPrice = Math.max(0, finalPrice - discount)
+            }
         }
+
+        // 更新折扣金额和最终价格
+        discountAmount.value = discount.toFixed(2)
         totalPrice.value = finalPrice.toFixed(2)
+
+        console.log('应用优惠券后:', {
+            优惠券: coupon.title,
+            原价: originalPrice.value,
+            折扣: discountAmount.value,
+            最终价格: totalPrice.value
+        })
+    } else {
+        // 如果取消选择优惠券，恢复原价
+        selectedCoupon.value = null
+        discountAmount.value = '0.00'
+        totalPrice.value = originalPrice.value
     }
 }
 </script>
@@ -473,10 +558,19 @@ const handleCouponSelect = (coupon) => {
 }
 
 .coupon-action {
+    color: #ff6a6a;
     display: flex;
     align-items: center;
-    color: #ff6a6a;
     font-size: 28rpx;
+}
+
+.selected-coupon {
+    color: #006de7;
+}
+
+.discount-amount {
+    color: #ff6a6a;
+    margin-left: 10rpx;
 }
 
 .arrow {
@@ -583,11 +677,11 @@ const handleCouponSelect = (coupon) => {
 }
 
 .pay-button {
-    background-color: #0066cc;
+    background-color: #2a88e6;
     color: #fff;
     font-size: 32rpx;
     padding: 15rpx 60rpx;
-    border-radius: 100rpx;
+    border-radius: 20rpx;
     margin-right: 40rpx;
 }
 </style>

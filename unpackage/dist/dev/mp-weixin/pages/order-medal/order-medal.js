@@ -263,7 +263,7 @@ const _sfc_main = {
             f: index
           };
         }),
-        l: common_assets._imports_3$3,
+        l: common_assets._imports_0$7,
         m: common_vendor.f(levelMedals, (item, index, i0) => {
           return {
             a: item.icon,

@@ -30,7 +30,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  z-index: 999;
+  z-index: 1000;
   display: flex;
   align-items: flex-end;
 }
@@ -64,10 +64,11 @@
 }
 .coupon-list-scroll.data-v-e5e865b0 {
   flex: 1;
-  padding: 20rpx;
+  height: calc(80vh - 180rpx);
+  /* 减去头部和底部的高度 */
 }
 .coupon-list.data-v-e5e865b0 {
-  padding-bottom: 20rpx;
+  padding: 20rpx;
 }
 .coupon-item.data-v-e5e865b0 {
   display: flex;
@@ -112,7 +113,7 @@
   margin-right: 4rpx;
 }
 .coupon-value .value.data-v-e5e865b0 {
-  font-size: 56rpx;
+  font-size: 40rpx;
   font-weight: bold;
 }
 .coupon-value .unit.data-v-e5e865b0 {
@@ -209,6 +210,9 @@
   padding: 20rpx 30rpx;
   background-color: #fff;
   border-top: 1px solid #eee;
+  height: 120rpx;
+  box-sizing: border-box;
+  transform: translateY(-50rpx);
 }
 .confirm-btn.data-v-e5e865b0 {
   width: 100%;
@@ -217,7 +221,7 @@
   background-color: #006de7;
   color: #fff;
   font-size: 32rpx;
-  border-radius: 40rpx;
+  border-radius: 20rpx;
 }
 .confirm-btn[disabled].data-v-e5e865b0 {
   background-color: #ccc;

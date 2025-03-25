@@ -21,6 +21,10 @@ const _sfc_main = {
     orderAmount: {
       type: Number,
       default: 0
+    },
+    orderItems: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ["update:show", "select"],
@@ -35,7 +39,16 @@ const _sfc_main = {
         const isUsed = coupon.status === "used";
         const isDeleted = coupon.isDeleted;
         const meetsAmount = props.orderAmount >= coupon.minOrderAmount;
-        return !isExpired && !isUsed && !isDeleted && meetsAmount;
+        const basicConditions = !isExpired && !isUsed && !isDeleted && meetsAmount;
+        if (!basicConditions)
+          return false;
+        if (coupon.type === "SPECIAL_PRICE" && coupon.scopeIds && coupon.scopeIds.length > 0) {
+          const hasMatchingProduct = props.orderItems.some(
+            (item) => coupon.scopeIds.includes(item.id)
+          );
+          return hasMatchingProduct;
+        }
+        return true;
       });
     });
     const getCouponColorClass = (type) => {

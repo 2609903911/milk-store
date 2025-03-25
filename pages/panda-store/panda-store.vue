@@ -807,7 +807,7 @@ const goBack = () => {
 }
 
 .coupon-value .value {
-    font-size: 56rpx;
+    font-size: 45rpx;
     font-weight: bold;
 }
 

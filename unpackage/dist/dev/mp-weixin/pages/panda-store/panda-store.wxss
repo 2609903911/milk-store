@@ -255,7 +255,7 @@
   margin-right: 4rpx;
 }
 .coupon-value .value.data-v-21c67e85 {
-  font-size: 56rpx;
+  font-size: 45rpx;
   font-weight: bold;
 }
 .coupon-value .unit.data-v-21c67e85 {
