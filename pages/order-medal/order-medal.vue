@@ -18,12 +18,9 @@
             <view class="user-info-left">
                 <view class="username">
                     <view class="avatar">
-                        <image
-                            class="avatar-image"
-                            src="../../static/images/avatar.png"
-                        ></image>
+                        <image class="avatar-image" :src="userAvatar"></image>
                     </view>
-                    <text>醇厚的生椰西瓜</text>
+                    <text>{{ userNickname }}</text>
                     <view class="user-level">Lv{{ userLevel }}</view>
                 </view>
                 <view class="medal-count">已获得微章</view>
@@ -34,7 +31,7 @@
             <view class="recent-medal">
                 <image
                     class="medal-image"
-                    src="../../static/images/medal/recent-medal.png"
+                    :src="lastAcquiredMedal?.icon"
                 ></image>
                 <view class="recent-tag">最近获得</view>
             </view>
@@ -219,10 +216,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { userState } from '../../utils/userState'
+import { getUserMedalsByType } from '../../utils/userModel'
 
 // 当前用户等级
-const userLevel = ref(4)
+const userLevel = ref(userState?.memberLevel || 1)
+// 用户昵称
+const userNickname = ref(userState?.nickname || '熊猫奶茶会员')
+// 用户头像
+const userAvatar = ref(userState?.avatar || '/static/images/avatar.png')
 
 // 当前选中的类型索引
 const currentType = ref(0)
@@ -237,194 +240,279 @@ const medalTypes = reactive([
     '等级徽章'
 ])
 
-// 季节勋章
-const seasonalMedals = reactive([
+// 季节勋章列表 - 所有可能的勋章
+const allSeasonalMedals = reactive([
     {
+        id: 'season_01',
         name: '节气 · 立春',
         icon: '../../static/images/medal/season01.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'season_02',
         name: '节气 · 雨水',
         icon: '../../static/images/medal/season02.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'season_03',
         name: '节气 · 惊蛰',
         icon: '../../static/images/medal/season03.png',
         isActive: false
     },
     {
+        id: 'season_04',
         name: '节气 · 春分',
         icon: '../../static/images/medal/season04.png',
         isActive: false
     },
     {
+        id: 'season_05',
         name: '节气 · 清明',
         icon: '../../static/images/medal/season05.png',
         isActive: false
     },
     {
+        id: 'season_06',
         name: '节气 · 谷雨',
         icon: '../../static/images/medal/season06.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'season_07',
         name: '节气 · 立夏',
         icon: '../../static/images/medal/season07.png',
         isActive: false
     },
     {
+        id: 'season_08',
         name: '节气 · 小满',
         icon: '../../static/images/medal/season08.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'season_09',
         name: '节气 · 芒种',
         icon: '../../static/images/medal/season09.png',
         isActive: false
     },
     {
+        id: 'season_10',
         name: '节气 · 夏至',
         icon: '../../static/images/medal/season10.png',
         isActive: false
     },
     {
+        id: 'season_11',
         name: '节气 · 小暑',
         icon: '../../static/images/medal/season11.png',
         isActive: false
     },
     {
+        id: 'season_12',
         name: '节气 · 大暑',
         icon: '../../static/images/medal/season12.png',
         isActive: false
     },
     {
+        id: 'season_13',
         name: '节气 · 立秋',
         icon: '../../static/images/medal/season13.png',
         isActive: false
     },
     {
+        id: 'season_14',
         name: '节气 · 处暑',
         icon: '../../static/images/medal/season14.png',
         isActive: false
     },
     {
+        id: 'season_15',
         name: '节气 · 白露',
         icon: '../../static/images/medal/season15.png',
         isActive: false
     },
     {
+        id: 'season_16',
         name: '节气 · 秋分',
         icon: '../../static/images/medal/season16.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'season_17',
         name: '节气 · 寒露',
         icon: '../../static/images/medal/season17.png',
         isActive: false
     },
     {
+        id: 'season_18',
         name: '节气 · 霜降',
         icon: '../../static/images/medal/season18.png',
         isActive: false
     },
     {
+        id: 'season_19',
         name: '节气 · 立冬',
         icon: '../../static/images/medal/season19.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'season_20',
         name: '节气 · 小雪',
         icon: '../../static/images/medal/season20.png',
         isActive: false
     }
 ])
 
-// 大自然限定微章
-const natureMedals = reactive([
+// 大自然限定微章 - 所有可能的勋章
+const allNatureMedals = reactive([
     {
+        id: 'nature_bee',
         name: '大自然 · 蜜蜂',
         icon: '../../static/images/medal/nature-bee.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'nature_butterfly',
         name: '大自然 · 蝴蝶',
         icon: '../../static/images/medal/nature-butterfly.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'nature_bird',
         name: '大自然 · 小鸟',
         icon: '../../static/images/medal/nature-bird.png',
         isActive: false
     },
     {
+        id: 'nature_dragonfly',
         name: '大自然 · 蜻蜓',
         icon: '../../static/images/medal/nature-dragonfly.png',
         isActive: false
     },
     {
+        id: 'nature_cactus',
         name: '大自然 · 仙人掌',
         icon: '../../static/images/medal/nature-cactus.png',
-        isActive: true
+        isActive: false
     },
     {
+        id: 'nature_mouse',
         name: '大自然 · 老鼠',
         icon: '../../static/images/medal/nature-mouse.png',
         isActive: false
     },
     {
+        id: 'nature_duck',
         name: '大自然 · 鸭子',
         icon: '../../static/images/medal/nature-duck.png',
         isActive: false
     }
 ])
 
-// 等级徽章
-const levelMedals = reactive([
+// 等级徽章 - 所有可能的勋章
+const allLevelMedals = reactive([
     {
+        id: 'rank_01',
         name: '等级 · Lv1',
         icon: '../../static/images/medal/rank01.png',
-        isActive: userLevel.value >= 1
+        isActive: false
     },
     {
+        id: 'rank_02',
         name: '等级 · Lv2',
         icon: '../../static/images/medal/rank02.png',
-        isActive: userLevel.value >= 2
+        isActive: false
     },
     {
+        id: 'rank_03',
         name: '等级 · Lv3',
         icon: '../../static/images/medal/rank03.png',
-        isActive: userLevel.value >= 3
+        isActive: false
     },
     {
+        id: 'rank_04',
         name: '等级 · Lv4',
         icon: '../../static/images/medal/rank04.png',
-        isActive: userLevel.value >= 4
+        isActive: false
     },
     {
+        id: 'rank_05',
         name: '等级 · Lv5',
         icon: '../../static/images/medal/rank05.png',
-        isActive: userLevel.value >= 5
+        isActive: false
     },
     {
+        id: 'rank_06',
         name: '等级 · Lv6',
         icon: '../../static/images/medal/rank06.png',
-        isActive: userLevel.value >= 6
+        isActive: false
     }
 ])
+
+// 用户的勋章数据
+const seasonalMedals = ref([...allSeasonalMedals])
+const natureMedals = ref([...allNatureMedals])
+const levelMedals = ref([...allLevelMedals])
+const lastAcquiredMedal = ref(null)
 
 // 计算已获得的勋章总数
 const totalActiveMedals = computed(() => {
     // 统计所有类型勋章中已激活的数量
-    const seasonalActive = seasonalMedals.filter(
+    const seasonalActive = seasonalMedals.value.filter(
         (medal) => medal.isActive
     ).length
-    const natureActive = natureMedals.filter((medal) => medal.isActive).length
-    const levelActive = levelMedals.filter((medal) => medal.isActive).length
+    const natureActive = natureMedals.value.filter(
+        (medal) => medal.isActive
+    ).length
+    const levelActive = levelMedals.value.filter(
+        (medal) => medal.isActive
+    ).length
 
     // 返回总数
     return seasonalActive + natureActive + levelActive
+})
+
+// 初始化用户勋章数据
+const initUserMedals = () => {
+    if (!userState || !userState.medals || !Array.isArray(userState.medals)) {
+        return
+    }
+
+    // 获取用户各类型勋章
+    const userSeasonalMedals = getUserMedalsByType(userState.medals, 'seasonal')
+    const userNatureMedals = getUserMedalsByType(userState.medals, 'nature')
+    const userLevelMedals = getUserMedalsByType(userState.medals, 'level')
+
+    // 更新季节勋章激活状态
+    seasonalMedals.value.forEach((medal) => {
+        const userMedal = userSeasonalMedals.find((m) => m.id === medal.id)
+        medal.isActive = !!userMedal
+    })
+
+    // 更新自然勋章激活状态
+    natureMedals.value.forEach((medal) => {
+        const userMedal = userNatureMedals.find((m) => m.id === medal.id)
+        medal.isActive = !!userMedal
+    })
+
+    // 更新等级勋章激活状态
+    levelMedals.value.forEach((medal, index) => {
+        medal.isActive = userLevel.value >= index + 1
+    })
+
+    // 设置最近获得的勋章（按获取时间排序）
+    if (userState.medals.length > 0) {
+        const sortedMedals = [...userState.medals].sort(
+            (a, b) => b.acquireTime - a.acquireTime
+        )
+        lastAcquiredMedal.value = sortedMedals[0]
+    }
+}
+
+// 页面加载时初始化用户勋章
+onMounted(() => {
+    initUserMedals()
 })
 
 // 切换类型方法
@@ -459,16 +547,6 @@ const swiperChange = (e) => {
 // 返回上一页
 const goBack = () => {
     uni.navigateBack()
-}
-
-// 修改用户等级
-const changeUserLevel = (level) => {
-    // 此方法保留但不再由用户触发，仅供系统内部使用
-    userLevel.value = level
-    // 更新等级徽章的激活状态
-    levelMedals.forEach((medal, index) => {
-        medal.isActive = userLevel.value >= index + 1
-    })
 }
 </script>
 

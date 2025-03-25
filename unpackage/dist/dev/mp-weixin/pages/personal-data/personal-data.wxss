@@ -75,7 +75,6 @@
   width: 160rpx;
   height: 160rpx;
   border-radius: 80rpx;
-  overflow: hidden;
 }
 .avatar.data-v-7f356bf5 {
   width: 100%;

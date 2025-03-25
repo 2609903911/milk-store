@@ -1,6 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const utils_userState = require("../../utils/userState.js");
+const utils_userModel = require("../../utils/userModel.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -12,7 +14,10 @@ if (!Math) {
 const _sfc_main = {
   __name: "order-medal",
   setup(__props) {
-    const userLevel = common_vendor.ref(4);
+    var _a, _b, _c;
+    const userLevel = common_vendor.ref(((_a = utils_userState.userState) == null ? void 0 : _a.memberLevel) || 1);
+    const userNickname = common_vendor.ref(((_b = utils_userState.userState) == null ? void 0 : _b.nickname) || "熊猫奶茶会员");
+    const userAvatar = common_vendor.ref(((_c = utils_userState.userState) == null ? void 0 : _c.avatar) || "/static/images/avatar.png");
     const currentType = common_vendor.ref(0);
     const navScrollLeft = common_vendor.ref(0);
     const medalTypes = common_vendor.reactive([
@@ -21,184 +26,253 @@ const _sfc_main = {
       "鲜果限定",
       "等级徽章"
     ]);
-    const seasonalMedals = common_vendor.reactive([
+    const allSeasonalMedals = common_vendor.reactive([
       {
+        id: "season_01",
         name: "节气 · 立春",
         icon: "../../static/images/medal/season01.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "season_02",
         name: "节气 · 雨水",
         icon: "../../static/images/medal/season02.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "season_03",
         name: "节气 · 惊蛰",
         icon: "../../static/images/medal/season03.png",
         isActive: false
       },
       {
+        id: "season_04",
         name: "节气 · 春分",
         icon: "../../static/images/medal/season04.png",
         isActive: false
       },
       {
+        id: "season_05",
         name: "节气 · 清明",
         icon: "../../static/images/medal/season05.png",
         isActive: false
       },
       {
+        id: "season_06",
         name: "节气 · 谷雨",
         icon: "../../static/images/medal/season06.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "season_07",
         name: "节气 · 立夏",
         icon: "../../static/images/medal/season07.png",
         isActive: false
       },
       {
+        id: "season_08",
         name: "节气 · 小满",
         icon: "../../static/images/medal/season08.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "season_09",
         name: "节气 · 芒种",
         icon: "../../static/images/medal/season09.png",
         isActive: false
       },
       {
+        id: "season_10",
         name: "节气 · 夏至",
         icon: "../../static/images/medal/season10.png",
         isActive: false
       },
       {
+        id: "season_11",
         name: "节气 · 小暑",
         icon: "../../static/images/medal/season11.png",
         isActive: false
       },
       {
+        id: "season_12",
         name: "节气 · 大暑",
         icon: "../../static/images/medal/season12.png",
         isActive: false
       },
       {
+        id: "season_13",
         name: "节气 · 立秋",
         icon: "../../static/images/medal/season13.png",
         isActive: false
       },
       {
+        id: "season_14",
         name: "节气 · 处暑",
         icon: "../../static/images/medal/season14.png",
         isActive: false
       },
       {
+        id: "season_15",
         name: "节气 · 白露",
         icon: "../../static/images/medal/season15.png",
         isActive: false
       },
       {
+        id: "season_16",
         name: "节气 · 秋分",
         icon: "../../static/images/medal/season16.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "season_17",
         name: "节气 · 寒露",
         icon: "../../static/images/medal/season17.png",
         isActive: false
       },
       {
+        id: "season_18",
         name: "节气 · 霜降",
         icon: "../../static/images/medal/season18.png",
         isActive: false
       },
       {
+        id: "season_19",
         name: "节气 · 立冬",
         icon: "../../static/images/medal/season19.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "season_20",
         name: "节气 · 小雪",
         icon: "../../static/images/medal/season20.png",
         isActive: false
       }
     ]);
-    const natureMedals = common_vendor.reactive([
+    const allNatureMedals = common_vendor.reactive([
       {
+        id: "nature_bee",
         name: "大自然 · 蜜蜂",
         icon: "../../static/images/medal/nature-bee.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "nature_butterfly",
         name: "大自然 · 蝴蝶",
         icon: "../../static/images/medal/nature-butterfly.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "nature_bird",
         name: "大自然 · 小鸟",
         icon: "../../static/images/medal/nature-bird.png",
         isActive: false
       },
       {
+        id: "nature_dragonfly",
         name: "大自然 · 蜻蜓",
         icon: "../../static/images/medal/nature-dragonfly.png",
         isActive: false
       },
       {
+        id: "nature_cactus",
         name: "大自然 · 仙人掌",
         icon: "../../static/images/medal/nature-cactus.png",
-        isActive: true
+        isActive: false
       },
       {
+        id: "nature_mouse",
         name: "大自然 · 老鼠",
         icon: "../../static/images/medal/nature-mouse.png",
         isActive: false
       },
       {
+        id: "nature_duck",
         name: "大自然 · 鸭子",
         icon: "../../static/images/medal/nature-duck.png",
         isActive: false
       }
     ]);
-    const levelMedals = common_vendor.reactive([
+    const allLevelMedals = common_vendor.reactive([
       {
+        id: "rank_01",
         name: "等级 · Lv1",
         icon: "../../static/images/medal/rank01.png",
-        isActive: userLevel.value >= 1
+        isActive: false
       },
       {
+        id: "rank_02",
         name: "等级 · Lv2",
         icon: "../../static/images/medal/rank02.png",
-        isActive: userLevel.value >= 2
+        isActive: false
       },
       {
+        id: "rank_03",
         name: "等级 · Lv3",
         icon: "../../static/images/medal/rank03.png",
-        isActive: userLevel.value >= 3
+        isActive: false
       },
       {
+        id: "rank_04",
         name: "等级 · Lv4",
         icon: "../../static/images/medal/rank04.png",
-        isActive: userLevel.value >= 4
+        isActive: false
       },
       {
+        id: "rank_05",
         name: "等级 · Lv5",
         icon: "../../static/images/medal/rank05.png",
-        isActive: userLevel.value >= 5
+        isActive: false
       },
       {
+        id: "rank_06",
         name: "等级 · Lv6",
         icon: "../../static/images/medal/rank06.png",
-        isActive: userLevel.value >= 6
+        isActive: false
       }
     ]);
+    const seasonalMedals = common_vendor.ref([...allSeasonalMedals]);
+    const natureMedals = common_vendor.ref([...allNatureMedals]);
+    const levelMedals = common_vendor.ref([...allLevelMedals]);
+    const lastAcquiredMedal = common_vendor.ref(null);
     const totalActiveMedals = common_vendor.computed(() => {
-      const seasonalActive = seasonalMedals.filter(
+      const seasonalActive = seasonalMedals.value.filter(
         (medal) => medal.isActive
       ).length;
-      const natureActive = natureMedals.filter((medal) => medal.isActive).length;
-      const levelActive = levelMedals.filter((medal) => medal.isActive).length;
+      const natureActive = natureMedals.value.filter(
+        (medal) => medal.isActive
+      ).length;
+      const levelActive = levelMedals.value.filter(
+        (medal) => medal.isActive
+      ).length;
       return seasonalActive + natureActive + levelActive;
+    });
+    const initUserMedals = () => {
+      if (!utils_userState.userState || !utils_userState.userState.medals || !Array.isArray(utils_userState.userState.medals)) {
+        return;
+      }
+      const userSeasonalMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "seasonal");
+      const userNatureMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "nature");
+      utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "level");
+      seasonalMedals.value.forEach((medal) => {
+        const userMedal = userSeasonalMedals.find((m) => m.id === medal.id);
+        medal.isActive = !!userMedal;
+      });
+      natureMedals.value.forEach((medal) => {
+        const userMedal = userNatureMedals.find((m) => m.id === medal.id);
+        medal.isActive = !!userMedal;
+      });
+      levelMedals.value.forEach((medal, index) => {
+        medal.isActive = userLevel.value >= index + 1;
+      });
+      if (utils_userState.userState.medals.length > 0) {
+        const sortedMedals = [...utils_userState.userState.medals].sort(
+          (a, b) => b.acquireTime - a.acquireTime
+        );
+        lastAcquiredMedal.value = sortedMedals[0];
+      }
+    };
+    common_vendor.onMounted(() => {
+      initUserMedals();
     });
     const switchType = (index) => {
       currentType.value = index;
@@ -222,6 +296,7 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     };
     return (_ctx, _cache) => {
+      var _a2;
       return {
         a: common_assets._imports_0$6,
         b: common_vendor.p({
@@ -230,11 +305,12 @@ const _sfc_main = {
           color: "#fff"
         }),
         c: common_vendor.o(goBack),
-        d: common_assets._imports_1$4,
-        e: common_vendor.t(userLevel.value),
-        f: common_vendor.t(totalActiveMedals.value),
-        g: common_assets._imports_2$3,
-        h: common_vendor.f(medalTypes, (item, index, i0) => {
+        d: userAvatar.value,
+        e: common_vendor.t(userNickname.value),
+        f: common_vendor.t(userLevel.value),
+        g: common_vendor.t(totalActiveMedals.value),
+        h: (_a2 = lastAcquiredMedal.value) == null ? void 0 : _a2.icon,
+        i: common_vendor.f(medalTypes, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index,
@@ -242,8 +318,8 @@ const _sfc_main = {
             d: common_vendor.o(($event) => switchType(index), index)
           };
         }),
-        i: navScrollLeft.value,
-        j: common_vendor.f(seasonalMedals, (item, index, i0) => {
+        j: navScrollLeft.value,
+        k: common_vendor.f(seasonalMedals.value, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -253,7 +329,7 @@ const _sfc_main = {
             f: index
           };
         }),
-        k: common_vendor.f(natureMedals, (item, index, i0) => {
+        l: common_vendor.f(natureMedals.value, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -263,8 +339,8 @@ const _sfc_main = {
             f: index
           };
         }),
-        l: common_assets._imports_0$7,
-        m: common_vendor.f(levelMedals, (item, index, i0) => {
+        m: common_assets._imports_0$7,
+        n: common_vendor.f(levelMedals.value, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -274,9 +350,9 @@ const _sfc_main = {
             f: index
           };
         }),
-        n: currentType.value,
-        o: common_vendor.o(swiperChange),
-        p: common_vendor.f(medalTypes, (item, index, i0) => {
+        o: currentType.value,
+        p: common_vendor.o(swiperChange),
+        q: common_vendor.f(medalTypes, (item, index, i0) => {
           return {
             a: index,
             b: currentType.value === index ? 1 : ""

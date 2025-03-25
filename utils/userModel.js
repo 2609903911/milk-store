@@ -114,15 +114,144 @@ export const createDefaultUserInfo = () => {
     }
   ];
   
+  // 创建默认拥有的勋章
+  const defaultMedals = [
+    // 季节勋章
+    {
+      id: 'season_01',
+      name: '节气 · 立春',
+      icon: '/static/images/medal/season01.png',
+      type: 'seasonal',
+      isActive: true,
+      acquireTime: now - 60 * 24 * 60 * 60 * 1000,
+      description: '在立春节气期间下单获得'
+    },
+    {
+      id: 'season_02',
+      name: '节气 · 雨水',
+      icon: '/static/images/medal/season02.png',
+      type: 'seasonal',
+      isActive: true,
+      acquireTime: now - 45 * 24 * 60 * 60 * 1000,
+      description: '在雨水节气期间下单获得'
+    },
+    {
+      id: 'season_06',
+      name: '节气 · 谷雨',
+      icon: '/static/images/medal/season06.png',
+      type: 'seasonal',
+      isActive: true,
+      acquireTime: now - 20 * 24 * 60 * 60 * 1000,
+      description: '在谷雨节气期间下单获得'
+    },
+    {
+      id: 'season_08',
+      name: '节气 · 小满',
+      icon: '/static/images/medal/season08.png',
+      type: 'seasonal',
+      isActive: true,
+      acquireTime: now - 10 * 24 * 60 * 60 * 1000,
+      description: '在小满节气期间下单获得'
+    },
+    {
+      id: 'season_16',
+      name: '节气 · 秋分',
+      icon: '/static/images/medal/season16.png',
+      type: 'seasonal',
+      isActive: true,
+      acquireTime: now - 5 * 24 * 60 * 60 * 1000,
+      description: '在秋分节气期间下单获得'
+    },
+    {
+      id: 'season_19',
+      name: '节气 · 立冬',
+      icon: '/static/images/medal/season19.png',
+      type: 'seasonal',
+      isActive: true,
+      acquireTime: now - 2 * 24 * 60 * 60 * 1000,
+      description: '在立冬节气期间下单获得'
+    },
+    
+    // 大自然限定勋章
+    {
+      id: 'nature_bee',
+      name: '大自然 · 蜜蜂',
+      icon: '/static/images/medal/nature-bee.png',
+      type: 'nature',
+      isActive: true,
+      acquireTime: now - 30 * 24 * 60 * 60 * 1000,
+      description: '购买蜂蜜相关饮品获得'
+    },
+    {
+      id: 'nature_butterfly',
+      name: '大自然 · 蝴蝶',
+      icon: '/static/images/medal/nature-butterfly.png',
+      type: 'nature',
+      isActive: true,
+      acquireTime: now - 25 * 24 * 60 * 60 * 1000,
+      description: '夏季限定活动获得'
+    },
+    {
+      id: 'nature_cactus',
+      name: '大自然 · 仙人掌',
+      icon: '/static/images/medal/nature-cactus.png',
+      type: 'nature',
+      isActive: true,
+      acquireTime: now - 15 * 24 * 60 * 60 * 1000,
+      description: '沙漠主题活动获得'
+    },
+    
+    // 等级勋章
+    {
+      id: 'rank_01',
+      name: '等级 · Lv1',
+      icon: '/static/images/medal/rank01.png',
+      type: 'level',
+      isActive: true,
+      acquireTime: now - 90 * 24 * 60 * 60 * 1000,
+      description: '成为熊猫奶茶会员'
+    },
+    {
+      id: 'rank_02',
+      name: '等级 · Lv2',
+      icon: '/static/images/medal/rank02.png',
+      type: 'level',
+      isActive: true,
+      acquireTime: now - 75 * 24 * 60 * 60 * 1000,
+      description: '会员等级达到2级'
+    },
+    {
+      id: 'rank_03',
+      name: '等级 · Lv3',
+      icon: '/static/images/medal/rank03.png',
+      type: 'level',
+      isActive: true,
+      acquireTime: now - 50 * 24 * 60 * 60 * 1000,
+      description: '会员等级达到3级'
+    },
+    {
+      id: 'rank_04',
+      name: '等级 · Lv4',
+      icon: '/static/images/medal/rank04.png',
+      type: 'level',
+      isActive: true,
+      acquireTime: now - 30 * 24 * 60 * 60 * 1000,
+      description: '会员等级达到4级'
+    }
+  ];
+  
   return {
     userId: '', // 用户唯一标识
     nickname: '熊猫奶茶会员', // 用户昵称
     avatar: '/static/images/avatar.png', // 头像地址
-    phone: '', // 手机号
-    pandaCoins: 237, // 熊猫币
+    phone: '13027261672', // 手机号
+    gender: 'male', // 性别：male-男，female-女
+    birthday: '', // 生日，格式：YYYY-MM-DD
+    addresses: [], // 收货地址列表
+    pandaCoins: 856, // 熊猫币
     coupons: exampleCoupons, // 优惠券列表，默认赠送六种不同类型的优惠券
-    medals: [], // 勋章列表
-    memberLevel: 0, // 会员等级
+    medals: defaultMedals, // 勋章列表，默认赠送部分勋章
+    memberLevel: 4, // 会员等级
     createTime: now, // 创建时间
     lastLoginTime: now, // 最后登录时间
   };
@@ -143,10 +272,13 @@ export const validateUserInfo = (userInfo) => {
   if (userInfo.nickname && typeof userInfo.nickname !== 'string') return false;
   if (userInfo.phone && typeof userInfo.phone !== 'string') return false;
   if (userInfo.pandaCoins !== undefined && typeof userInfo.pandaCoins !== 'number') return false;
+  if (userInfo.gender && !['male', 'female'].includes(userInfo.gender)) return false;
+  if (userInfo.birthday && typeof userInfo.birthday !== 'string') return false;
   
   // 数组类型验证
   if (userInfo.coupons && !Array.isArray(userInfo.coupons)) return false;
   if (userInfo.medals && !Array.isArray(userInfo.medals)) return false;
+  if (userInfo.addresses && !Array.isArray(userInfo.addresses)) return false;
   
   return true;
 };
@@ -159,4 +291,15 @@ export const validateUserInfo = (userInfo) => {
 export const mergeWithDefaultUserInfo = (userInfo = {}) => {
   const defaultInfo = createDefaultUserInfo();
   return { ...defaultInfo, ...userInfo };
+};
+
+/**
+ * 根据类型获取用户勋章
+ * @param {Array} medals - 用户拥有的勋章数组
+ * @param {String} type - 勋章类型：seasonal(季节), nature(大自然), level(等级)
+ * @returns {Array} 指定类型的勋章数组
+ */
+export const getUserMedalsByType = (medals = [], type) => {
+  if (!Array.isArray(medals)) return [];
+  return medals.filter(medal => medal.type === type && medal.isActive);
 }; 

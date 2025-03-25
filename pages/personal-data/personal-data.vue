@@ -262,7 +262,6 @@ const switchAccount = () => {
     width: 160rpx;
     height: 160rpx;
     border-radius: 80rpx;
-    overflow: hidden;
 }
 
 .avatar {

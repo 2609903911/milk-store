@@ -286,7 +286,7 @@ const _sfc_main = {
         j: common_assets._imports_1$3,
         k: couponList.value.length === 0
       }, couponList.value.length === 0 ? {
-        l: common_assets._imports_2$4
+        l: common_assets._imports_2$3
       } : {}, {
         m: showSuccessPopup.value
       }, showSuccessPopup.value ? {
