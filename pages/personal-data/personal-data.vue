@@ -5,12 +5,14 @@
             <view class="user-form">
                 <!-- 头像部分 -->
                 <view class="form-item avatar-item">
-                    <view class="avatar-container">
-                        <image
-                            class="avatar"
-                            :src="userInfo.avatar"
-                            mode="aspectFill"
-                        ></image>
+                    <view class="avatar-wrapper">
+                        <view class="avatar-container" @tap="chooseAvatar">
+                            <image
+                                class="avatar"
+                                :src="userInfo.avatar"
+                                mode="aspectFill"
+                            ></image>
+                        </view>
                         <view class="camera-icon">
                             <image
                                 src="/static/images/camera.png"
@@ -103,11 +105,59 @@
 
         <!-- 保存按钮 -->
         <view class="save-btn" @tap="saveUserInfo">保存</view>
+
+        <!-- 日期选择器弹窗 -->
+        <view
+            class="date-picker-mask"
+            v-if="isDatePickerVisible"
+            @tap="hideDatePicker"
+        >
+            <view class="date-picker-container" @tap.stop>
+                <view class="date-picker-header">
+                    <text class="cancel-btn" @tap="hideDatePicker">取消</text>
+                    <text class="title">选择生日</text>
+                    <text class="confirm-btn" @tap="confirmDateSelection"
+                        >确定</text
+                    >
+                </view>
+                <picker-view
+                    class="date-picker"
+                    :indicator-style="'height: 50px;'"
+                    :value="datePickerValue"
+                    @change="onDatePickerChange"
+                >
+                    <picker-view-column>
+                        <view
+                            class="picker-item"
+                            v-for="(year, index) in years"
+                            :key="'year-' + index"
+                            >{{ year }}年</view
+                        >
+                    </picker-view-column>
+                    <picker-view-column>
+                        <view
+                            class="picker-item"
+                            v-for="(month, index) in months"
+                            :key="'month-' + index"
+                            >{{ month }}月</view
+                        >
+                    </picker-view-column>
+                    <picker-view-column>
+                        <view
+                            class="picker-item"
+                            v-for="(day, index) in days"
+                            :key="'day-' + index"
+                            >{{ day }}日</view
+                        >
+                    </picker-view-column>
+                </picker-view>
+            </view>
+        </view>
     </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { userState, updateUserState } from '../../utils/userState'
 
 // 用户信息
@@ -119,6 +169,45 @@ const userInfo = ref({
     birthday: ''
 })
 
+// 日期选择器相关数据
+const isDatePickerVisible = ref(false)
+
+// 获取今天的日期
+const today = new Date()
+const todayYear = today.getFullYear()
+const todayMonth = today.getMonth() + 1 // JavaScript月份从0开始
+const todayDay = today.getDate()
+
+// 初始化为今天的日期
+const selectedYear = ref(todayYear)
+const selectedMonth = ref(todayMonth)
+const selectedDay = ref(todayDay)
+
+// 生成年份数据（1950-当前年份）
+const currentYear = todayYear
+const years = Array.from({ length: currentYear - 1949 }, (_, i) => i + 1950)
+
+// 生成月份数据（1-12月）
+const months = Array.from({ length: 12 }, (_, i) => i + 1)
+
+// 根据年月计算当月天数
+const days = computed(() => {
+    const daysInMonth = new Date(
+        selectedYear.value,
+        selectedMonth.value,
+        0
+    ).getDate()
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1)
+})
+
+// 计算默认的日期选择器位置索引
+const defaultDatePickerValue = [
+    years.findIndex((y) => y === todayYear),
+    todayMonth - 1,
+    todayDay - 1
+]
+const datePickerValue = ref(defaultDatePickerValue)
+
 // 初始化数据
 onMounted(() => {
     // 从本地存储获取用户信息
@@ -129,6 +218,23 @@ onMounted(() => {
             phone: userState.phone || '13012341234',
             gender: userState.gender || 'male',
             birthday: userState.birthday || ''
+        }
+
+        // 如果存在生日，初始化日期选择器的值
+        if (userInfo.value.birthday) {
+            const [year, month, day] = userInfo.value.birthday
+                .split('-')
+                .map(Number)
+            selectedYear.value = year
+            selectedMonth.value = month
+            selectedDay.value = day
+
+            // 设置选择器初始位置
+            datePickerValue.value = [
+                years.findIndex((y) => y === year),
+                months.findIndex((m) => m === month),
+                days.value.findIndex((d) => d === day)
+            ]
         }
     }
 })
@@ -170,10 +276,65 @@ const saveUserInfo = () => {
 
 // 显示日期选择器
 const showDatePicker = () => {
-    uni.showToast({
-        title: '日期选择功能即将上线',
-        icon: 'none'
-    })
+    // 如果用户已设置生日，使用已设置的日期
+    if (userInfo.value.birthday) {
+        const [year, month, day] = userInfo.value.birthday
+            .split('-')
+            .map(Number)
+        selectedYear.value = year
+        selectedMonth.value = month
+        selectedDay.value = day
+
+        // 设置选择器初始位置
+        datePickerValue.value = [
+            years.findIndex((y) => y === year),
+            months.findIndex((m) => m === month),
+            days.value.findIndex((d) => d === day)
+        ]
+    } else {
+        // 如果用户未设置生日，使用今天的日期
+        selectedYear.value = todayYear
+        selectedMonth.value = todayMonth
+        selectedDay.value = todayDay
+        datePickerValue.value = defaultDatePickerValue
+    }
+
+    isDatePickerVisible.value = true
+}
+
+// 隐藏日期选择器
+const hideDatePicker = () => {
+    isDatePickerVisible.value = false
+}
+
+// 日期选择器值变化
+const onDatePickerChange = (e) => {
+    const values = e.detail.value
+    selectedYear.value = years[values[0]]
+    selectedMonth.value = months[values[1]]
+
+    // 确保选择的日期有效（比如2月份的日期）
+    const daysInSelectedMonth = new Date(
+        selectedYear.value,
+        selectedMonth.value,
+        0
+    ).getDate()
+    if (values[2] >= daysInSelectedMonth) {
+        values[2] = daysInSelectedMonth - 1
+    }
+
+    selectedDay.value = days.value[values[2]]
+    datePickerValue.value = values
+}
+
+// 确认日期选择
+const confirmDateSelection = () => {
+    // 格式化日期为YYYY-MM-DD格式
+    const formatMonth = selectedMonth.value.toString().padStart(2, '0')
+    const formatDay = selectedDay.value.toString().padStart(2, '0')
+    userInfo.value.birthday = `${selectedYear.value}-${formatMonth}-${formatDay}`
+
+    hideDatePicker()
 }
 
 // 绑定手机号
@@ -197,6 +358,39 @@ const switchAccount = () => {
     uni.showToast({
         title: '切换账号功能即将上线',
         icon: 'none'
+    })
+}
+
+// 选择头像图片
+const chooseAvatar = () => {
+    uni.chooseImage({
+        count: 1, // 默认9，设置为1表示一次只能选择一张图片
+        sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有，这里使用压缩图
+        sourceType: ['album', 'camera'], // 从相册选择或使用相机拍摄
+        success: function (res) {
+            // 获取选择的图片临时路径
+            const tempFilePath = res.tempFilePaths[0]
+
+            // 预览裁剪
+            uni.navigateTo({
+                url: `/pages/image-cropper/image-cropper?src=${encodeURIComponent(
+                    tempFilePath
+                )}&type=avatar`,
+                events: {
+                    // 接收裁剪后的图片
+                    cropImage: function (data) {
+                        if (data.path) {
+                            // 更新头像
+                            userInfo.value.avatar = data.path
+                        }
+                    }
+                },
+                fail: () => {
+                    // 如果没有裁剪页面，直接使用选择的图片
+                    userInfo.value.avatar = tempFilePath
+                }
+            })
+        }
     })
 }
 </script>
@@ -257,11 +451,17 @@ const switchAccount = () => {
     padding: 40rpx 0;
 }
 
-.avatar-container {
+.avatar-wrapper {
     position: relative;
     width: 160rpx;
     height: 160rpx;
+}
+
+.avatar-container {
+    width: 160rpx;
+    height: 160rpx;
     border-radius: 80rpx;
+    overflow: hidden;
 }
 
 .avatar {
@@ -280,6 +480,7 @@ const switchAccount = () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
 }
 
 .camera-icon image {
@@ -375,6 +576,67 @@ input {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 45rpx;
+    border-radius: 20rpx;
+}
+
+// 日期选择器样式
+.date-picker-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: flex;
+    align-items: flex-end;
+}
+
+.date-picker-container {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 20rpx 20rpx 0 0;
+    overflow: hidden;
+}
+
+.date-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20rpx 30rpx;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cancel-btn,
+.confirm-btn {
+    font-size: 30rpx;
+    padding: 10rpx;
+}
+
+.cancel-btn {
+    color: #999;
+}
+
+.confirm-btn {
+    color: #007aff;
+    font-weight: 500;
+}
+
+.title {
+    font-size: 30rpx;
+    color: #333;
+    font-weight: 500;
+}
+
+.date-picker {
+    width: 100%;
+    height: 400rpx;
+}
+
+.picker-item {
+    line-height: 50px;
+    text-align: center;
+    font-size: 28rpx;
+    color: #333;
 }
 </style> 

@@ -21,6 +21,31 @@ const _sfc_main = {
       // male或female
       birthday: ""
     });
+    const isDatePickerVisible = common_vendor.ref(false);
+    const today = /* @__PURE__ */ new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth() + 1;
+    const todayDay = today.getDate();
+    const selectedYear = common_vendor.ref(todayYear);
+    const selectedMonth = common_vendor.ref(todayMonth);
+    const selectedDay = common_vendor.ref(todayDay);
+    const currentYear = todayYear;
+    const years = Array.from({ length: currentYear - 1949 }, (_, i) => i + 1950);
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const days = common_vendor.computed(() => {
+      const daysInMonth = new Date(
+        selectedYear.value,
+        selectedMonth.value,
+        0
+      ).getDate();
+      return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    });
+    const defaultDatePickerValue = [
+      years.findIndex((y) => y === todayYear),
+      todayMonth - 1,
+      todayDay - 1
+    ];
+    const datePickerValue = common_vendor.ref(defaultDatePickerValue);
     common_vendor.onMounted(() => {
       if (utils_userState.userState) {
         userInfo.value = {
@@ -30,6 +55,17 @@ const _sfc_main = {
           gender: utils_userState.userState.gender || "male",
           birthday: utils_userState.userState.birthday || ""
         };
+        if (userInfo.value.birthday) {
+          const [year, month, day] = userInfo.value.birthday.split("-").map(Number);
+          selectedYear.value = year;
+          selectedMonth.value = month;
+          selectedDay.value = day;
+          datePickerValue.value = [
+            years.findIndex((y) => y === year),
+            months.findIndex((m) => m === month),
+            days.value.findIndex((d) => d === day)
+          ];
+        }
       }
     });
     const formatPhone = (phone) => {
@@ -54,10 +90,47 @@ const _sfc_main = {
       }, 1500);
     };
     const showDatePicker = () => {
-      common_vendor.index.showToast({
-        title: "日期选择功能即将上线",
-        icon: "none"
-      });
+      if (userInfo.value.birthday) {
+        const [year, month, day] = userInfo.value.birthday.split("-").map(Number);
+        selectedYear.value = year;
+        selectedMonth.value = month;
+        selectedDay.value = day;
+        datePickerValue.value = [
+          years.findIndex((y) => y === year),
+          months.findIndex((m) => m === month),
+          days.value.findIndex((d) => d === day)
+        ];
+      } else {
+        selectedYear.value = todayYear;
+        selectedMonth.value = todayMonth;
+        selectedDay.value = todayDay;
+        datePickerValue.value = defaultDatePickerValue;
+      }
+      isDatePickerVisible.value = true;
+    };
+    const hideDatePicker = () => {
+      isDatePickerVisible.value = false;
+    };
+    const onDatePickerChange = (e) => {
+      const values = e.detail.value;
+      selectedYear.value = years[values[0]];
+      selectedMonth.value = months[values[1]];
+      const daysInSelectedMonth = new Date(
+        selectedYear.value,
+        selectedMonth.value,
+        0
+      ).getDate();
+      if (values[2] >= daysInSelectedMonth) {
+        values[2] = daysInSelectedMonth - 1;
+      }
+      selectedDay.value = days.value[values[2]];
+      datePickerValue.value = values;
+    };
+    const confirmDateSelection = () => {
+      const formatMonth = selectedMonth.value.toString().padStart(2, "0");
+      const formatDay = selectedDay.value.toString().padStart(2, "0");
+      userInfo.value.birthday = `${selectedYear.value}-${formatMonth}-${formatDay}`;
+      hideDatePicker();
     };
     const bindPhone = () => {
       common_vendor.index.showToast({
@@ -77,34 +150,91 @@ const _sfc_main = {
         icon: "none"
       });
     };
+    const chooseAvatar = () => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        // 默认9，设置为1表示一次只能选择一张图片
+        sizeType: ["compressed"],
+        // 可以指定是原图还是压缩图，默认二者都有，这里使用压缩图
+        sourceType: ["album", "camera"],
+        // 从相册选择或使用相机拍摄
+        success: function(res) {
+          const tempFilePath = res.tempFilePaths[0];
+          common_vendor.index.navigateTo({
+            url: `/pages/image-cropper/image-cropper?src=${encodeURIComponent(
+              tempFilePath
+            )}&type=avatar`,
+            events: {
+              // 接收裁剪后的图片
+              cropImage: function(data) {
+                if (data.path) {
+                  userInfo.value.avatar = data.path;
+                }
+              }
+            },
+            fail: () => {
+              userInfo.value.avatar = tempFilePath;
+            }
+          });
+        }
+      });
+    };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: userInfo.value.avatar,
-        b: common_assets._imports_0$9,
-        c: userInfo.value.nickname,
-        d: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
-        e: common_vendor.t(formatPhone(userInfo.value.phone)),
-        f: common_vendor.o(bindPhone),
-        g: userInfo.value.gender === "male" ? 1 : "",
-        h: common_vendor.o(($event) => userInfo.value.gender = "male"),
-        i: userInfo.value.gender === "female" ? 1 : "",
-        j: common_vendor.o(($event) => userInfo.value.gender = "female"),
-        k: common_vendor.t(userInfo.value.birthday || "未设置"),
-        l: common_vendor.o(showDatePicker),
-        m: common_vendor.p({
+        b: common_vendor.o(chooseAvatar),
+        c: common_assets._imports_0$9,
+        d: userInfo.value.nickname,
+        e: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
+        f: common_vendor.t(formatPhone(userInfo.value.phone)),
+        g: common_vendor.o(bindPhone),
+        h: userInfo.value.gender === "male" ? 1 : "",
+        i: common_vendor.o(($event) => userInfo.value.gender = "male"),
+        j: userInfo.value.gender === "female" ? 1 : "",
+        k: common_vendor.o(($event) => userInfo.value.gender = "female"),
+        l: common_vendor.t(userInfo.value.birthday || "未设置"),
+        m: common_vendor.o(showDatePicker),
+        n: common_vendor.p({
           type: "right",
           size: "20",
           color: "#ccc"
         }),
-        n: common_vendor.o(goToAddressManage),
-        o: common_vendor.p({
+        o: common_vendor.o(goToAddressManage),
+        p: common_vendor.p({
           type: "right",
           size: "20",
           color: "#ccc"
         }),
-        p: common_vendor.o(switchAccount),
-        q: common_vendor.o(saveUserInfo)
-      };
+        q: common_vendor.o(switchAccount),
+        r: common_vendor.o(saveUserInfo),
+        s: isDatePickerVisible.value
+      }, isDatePickerVisible.value ? {
+        t: common_vendor.o(hideDatePicker),
+        v: common_vendor.o(confirmDateSelection),
+        w: common_vendor.f(common_vendor.unref(years), (year, index, i0) => {
+          return {
+            a: common_vendor.t(year),
+            b: "year-" + index
+          };
+        }),
+        x: common_vendor.f(common_vendor.unref(months), (month, index, i0) => {
+          return {
+            a: common_vendor.t(month),
+            b: "month-" + index
+          };
+        }),
+        y: common_vendor.f(days.value, (day, index, i0) => {
+          return {
+            a: common_vendor.t(day),
+            b: "day-" + index
+          };
+        }),
+        z: datePickerValue.value,
+        A: common_vendor.o(onDatePickerChange),
+        B: common_vendor.o(() => {
+        }),
+        C: common_vendor.o(hideDatePicker)
+      } : {});
     };
   }
 };
