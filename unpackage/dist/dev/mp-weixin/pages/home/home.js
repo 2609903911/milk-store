@@ -5,6 +5,7 @@ const utils_userState = require("../../utils/userState.js");
 const _sfc_main = {
   __name: "home",
   setup(__props) {
+    common_vendor.index.__f__("log", "at pages/home/home.vue:257", utils_userState.userState);
     const currentSwiper = common_vendor.ref(0);
     const bannerList = common_vendor.ref([
       {

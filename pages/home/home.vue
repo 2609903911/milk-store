@@ -254,6 +254,8 @@
 import { ref } from 'vue'
 import { userState } from '../../utils/userState'
 
+console.log(userState)
+
 const currentSwiper = ref(0)
 
 // 轮播图数据

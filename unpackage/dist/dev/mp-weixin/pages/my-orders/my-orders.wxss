@@ -162,3 +162,14 @@
     color: #ff3030;
     border-color: #ffdddd;
 }
+.panda-coins {
+    font-size: 24rpx;
+    color: #ff9500;
+    margin-top: 6rpx;
+}
+.panda-coins-text {
+    display: inline-block;
+    background-color: #fff8e6;
+    padding: 4rpx 8rpx;
+    border-radius: 4rpx;
+}

@@ -233,6 +233,22 @@
     color: #999;
     margin-bottom: 16rpx;
 }
+.panda-coins-info.data-v-71729483 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10rpx;
+}
+.panda-coins-label.data-v-71729483 {
+    font-size: 26rpx;
+    color: #666;
+}
+.panda-coins-value.data-v-71729483 {
+    font-size: 26rpx;
+    color: #ff9500;
+    background-color: #fff8e6;
+    padding: 4rpx 8rpx;
+    border-radius: 4rpx;
+}
 .total-price.data-v-71729483 {
     display: flex;
     justify-content: flex-end;

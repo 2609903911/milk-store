@@ -1,16 +1,51 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const utils_userState = require("../../utils/userState.js");
 const _sfc_main = {
   __name: "my-orders",
-  setup(__props) {
+  setup(__props, { expose: __expose }) {
+    common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:116", utils_userState.userState);
     const hasOrders = common_vendor.ref(false);
     const orders = common_vendor.ref([]);
-    common_vendor.onMounted(() => {
+    const refreshOrders = () => {
       const savedOrders = common_vendor.index.getStorageSync("savedOrders");
       if (savedOrders && savedOrders.length) {
+        let totalCoinsToAdd = 0;
+        savedOrders.forEach((order) => {
+          var _a;
+          if (order.status !== "cancelled" && !order.pandaCoins) {
+            const coinsForOrder = getPandaCoins(
+              order.totalPrice,
+              ((_a = order.discount) == null ? void 0 : _a.amount) || 0
+            );
+            order.pandaCoins = coinsForOrder;
+            totalCoinsToAdd += coinsForOrder;
+          }
+        });
+        if (totalCoinsToAdd > 0) {
+          utils_userState.userState.pandaCoins += totalCoinsToAdd;
+          utils_userState.updateUserState({ pandaCoins: utils_userState.userState.pandaCoins });
+          common_vendor.index.setStorageSync("savedOrders", savedOrders);
+          common_vendor.index.__f__(
+            "log",
+            "at pages/my-orders/my-orders.vue:158",
+            `已添加${totalCoinsToAdd}熊猫币，当前总数：${utils_userState.userState.pandaCoins}`
+          );
+        }
         orders.value = savedOrders;
         hasOrders.value = true;
+      } else {
+        orders.value = [];
+        hasOrders.value = false;
+      }
+    };
+    common_vendor.onMounted(() => {
+      refreshOrders();
+    });
+    __expose({
+      onShow() {
+        refreshOrders();
       }
     });
     const goToOrder = () => {
@@ -37,7 +72,12 @@ const _sfc_main = {
     const getTotalQuantity = (order) => {
       return order.items.reduce((total, item) => total + item.quantity, 0);
     };
+    const getPandaCoins = (price, discount = 0) => {
+      const originalPrice = Number(price) + Number(discount);
+      return Math.ceil(originalPrice);
+    };
     const reorder = (order) => {
+      var _a;
       const orderData = {
         items: order.items,
         totalPrice: order.totalPrice,
@@ -45,15 +85,33 @@ const _sfc_main = {
           name: order.storeName
           // 其他门店信息可以在实际应用中补充
         },
-        deliveryType: order.deliveryType
+        deliveryType: order.deliveryType,
+        // 计算将要获得的熊猫币数量
+        pandaCoins: getPandaCoins(order.totalPrice, ((_a = order.discount) == null ? void 0 : _a.amount) || 0)
       };
       common_vendor.index.setStorageSync("orderConfirmData", orderData);
       common_vendor.index.navigateTo({
-        url: "/pages/order-confirm/order-confirm"
+        url: "/pages/order-confirm/order-confirm?fromReorder=true"
       });
     };
     const viewOrderDetail = (order) => {
-      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:173", "查看订单详情:", order.id);
+      var _a;
+      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:250", "查看订单详情:", order.id);
+      if (!order.pandaCoins && order.status !== "cancelled") {
+        const coinsToAdd = getPandaCoins(
+          order.totalPrice,
+          ((_a = order.discount) == null ? void 0 : _a.amount) || 0
+        );
+        order.pandaCoins = coinsToAdd;
+        utils_userState.userState.pandaCoins += coinsToAdd;
+        common_vendor.index.setStorageSync("savedOrders", orders.value);
+        utils_userState.updateUserState({ pandaCoins: utils_userState.userState.pandaCoins });
+        common_vendor.index.__f__(
+          "log",
+          "at pages/my-orders/my-orders.vue:272",
+          `已添加${coinsToAdd}熊猫币，当前总数：${utils_userState.userState.pandaCoins}`
+        );
+      }
       common_vendor.index.setStorageSync("currentOrderDetail", order);
       common_vendor.index.navigateTo({
         url: `/pages/order-detail/order-detail?orderId=${order.id}`
@@ -66,6 +124,9 @@ const _sfc_main = {
         success: function(res) {
           if (res.confirm) {
             orders.value[index].status = "cancelled";
+            if (orders.value[index].pandaCoins) {
+              utils_userState.userState.pandaCoins -= orders.value[index].pandaCoins;
+            }
             common_vendor.index.setStorageSync("savedOrders", orders.value);
             common_vendor.index.showToast({
               title: "订单已取消",
@@ -104,6 +165,7 @@ const _sfc_main = {
         d: hasOrders.value
       }, hasOrders.value ? {
         e: common_vendor.f(orders.value, (order, index, i0) => {
+          var _a;
           return common_vendor.e({
             a: common_vendor.t(order.deliveryType === "self" ? "自取" : "外卖"),
             b: common_vendor.t(order.storeName),
@@ -119,23 +181,27 @@ const _sfc_main = {
           }, order.discount && order.discount.amount > 0 ? {
             j: common_vendor.t(order.discount.amount)
           } : {}, {
-            k: common_vendor.t(order.totalPrice),
-            l: common_vendor.t(getTotalQuantity(order)),
-            m: order.discount && order.discount.amount > 0
+            k: order.status !== "cancelled"
+          }, order.status !== "cancelled" ? {
+            l: common_vendor.t(order.pandaCoins || getPandaCoins(order.totalPrice, ((_a = order.discount) == null ? void 0 : _a.amount) || 0))
+          } : {}, {
+            m: common_vendor.t(order.totalPrice),
+            n: common_vendor.t(getTotalQuantity(order)),
+            o: order.discount && order.discount.amount > 0
           }, order.discount && order.discount.amount > 0 ? {
-            n: common_vendor.t(order.discount.originalPrice)
+            p: common_vendor.t(order.discount.originalPrice)
           } : {}, {
-            o: common_vendor.o(($event) => viewOrderDetail(order), index),
-            p: order.status === "completed"
+            q: common_vendor.o(($event) => viewOrderDetail(order), index),
+            r: order.status === "completed"
           }, order.status === "completed" ? {
-            q: common_vendor.o(($event) => reorder(order), index)
+            s: common_vendor.o(($event) => reorder(order), index)
           } : {}, {
-            r: order.status === "pending"
+            t: order.status === "pending"
           }, order.status === "pending" ? {
-            s: common_vendor.o(($event) => cancelOrder(index), index)
+            v: common_vendor.o(($event) => cancelOrder(index), index)
           } : {}, {
-            t: common_vendor.o(($event) => deleteOrder(index), index),
-            v: index
+            w: common_vendor.o(($event) => deleteOrder(index), index),
+            x: index
           });
         })
       } : {});

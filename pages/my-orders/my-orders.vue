@@ -54,6 +54,21 @@
                                 >已优惠: ¥{{ order.discount.amount }}</text
                             >
                         </view>
+                        <view
+                            class="panda-coins"
+                            v-if="order.status !== 'cancelled'"
+                        >
+                            <text class="panda-coins-text"
+                                >获得熊猫币:
+                                {{
+                                    order.pandaCoins ||
+                                    getPandaCoins(
+                                        order.totalPrice,
+                                        order.discount?.amount || 0
+                                    )
+                                }}</text
+                            >
+                        </view>
                     </view>
                     <view class="order-price">
                         <view class="price-tag">¥{{ order.totalPrice }}</view>
@@ -97,20 +112,73 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { userState, updateUserState } from '../../utils/userState'
+console.log(userState)
 
 // 页面数据
 const hasOrders = ref(false)
 const orders = ref([])
 
-// 初始化页面数据
-onMounted(() => {
+// 刷新订单数据
+const refreshOrders = () => {
     // 从本地存储获取订单数据
     const savedOrders = uni.getStorageSync('savedOrders')
     if (savedOrders && savedOrders.length) {
+        // 遍历所有订单，检查是否有未添加熊猫币的订单
+        let totalCoinsToAdd = 0
+
+        savedOrders.forEach((order) => {
+            // 只处理未取消且没有添加过熊猫币的订单
+            if (order.status !== 'cancelled' && !order.pandaCoins) {
+                // 计算熊猫币
+                const coinsForOrder = getPandaCoins(
+                    order.totalPrice,
+                    order.discount?.amount || 0
+                )
+
+                // 更新订单的熊猫币信息
+                order.pandaCoins = coinsForOrder
+
+                // 累计需要添加的熊猫币
+                totalCoinsToAdd += coinsForOrder
+            }
+        })
+
+        // 如果有新的熊猫币需要添加
+        if (totalCoinsToAdd > 0) {
+            // 更新用户熊猫币总数
+            userState.pandaCoins += totalCoinsToAdd
+
+            // 更新本地存储中的用户信息
+            updateUserState({ pandaCoins: userState.pandaCoins })
+
+            // 更新本地存储中的订单信息
+            uni.setStorageSync('savedOrders', savedOrders)
+
+            console.log(
+                `已添加${totalCoinsToAdd}熊猫币，当前总数：${userState.pandaCoins}`
+            )
+        }
+
         orders.value = savedOrders
         hasOrders.value = true
+    } else {
+        orders.value = []
+        hasOrders.value = false
     }
-    // 移除默认示例订单数据自动创建逻辑
+}
+
+// 初始化页面数据
+onMounted(() => {
+    refreshOrders()
+})
+
+// 定义页面生命周期函数
+defineExpose({
+    onShow() {
+        // 每次显示页面时刷新数据
+        refreshOrders()
+    }
 })
 
 // 跳转到点单页面
@@ -146,6 +214,13 @@ const getTotalQuantity = (order) => {
     return order.items.reduce((total, item) => total + item.quantity, 0)
 }
 
+// 计算获得的熊猫币数量（向上取整）
+const getPandaCoins = (price, discount = 0) => {
+    // 使用原价（折扣前价格）计算熊猫币
+    const originalPrice = Number(price) + Number(discount)
+    return Math.ceil(originalPrice)
+}
+
 // 再来一单
 const reorder = (order) => {
     // 复制当前订单信息
@@ -156,7 +231,9 @@ const reorder = (order) => {
             name: order.storeName
             // 其他门店信息可以在实际应用中补充
         },
-        deliveryType: order.deliveryType
+        deliveryType: order.deliveryType,
+        // 计算将要获得的熊猫币数量
+        pandaCoins: getPandaCoins(order.totalPrice, order.discount?.amount || 0)
     }
 
     // 保存到本地存储，供订单确认页使用
@@ -164,13 +241,38 @@ const reorder = (order) => {
 
     // 跳转到订单确认页
     uni.navigateTo({
-        url: '/pages/order-confirm/order-confirm'
+        url: '/pages/order-confirm/order-confirm?fromReorder=true'
     })
 }
 
 // 查看订单详情
 const viewOrderDetail = (order) => {
     console.log('查看订单详情:', order.id)
+
+    // 如果订单没有熊猫币信息，则添加
+    if (!order.pandaCoins && order.status !== 'cancelled') {
+        // 计算熊猫币
+        const coinsToAdd = getPandaCoins(
+            order.totalPrice,
+            order.discount?.amount || 0
+        )
+
+        // 更新订单的熊猫币信息
+        order.pandaCoins = coinsToAdd
+
+        // 更新用户熊猫币总数
+        userState.pandaCoins += coinsToAdd
+
+        // 更新本地存储中的订单信息
+        uni.setStorageSync('savedOrders', orders.value)
+
+        // 更新本地存储中的用户信息
+        updateUserState({ pandaCoins: userState.pandaCoins })
+
+        console.log(
+            `已添加${coinsToAdd}熊猫币，当前总数：${userState.pandaCoins}`
+        )
+    }
 
     // 将当前订单保存到本地存储，以便订单详情页面可以访问
     uni.setStorageSync('currentOrderDetail', order)
@@ -181,7 +283,7 @@ const viewOrderDetail = (order) => {
     })
 }
 
-// 取消订单
+// 更新订单取消函数
 const cancelOrder = (index) => {
     uni.showModal({
         title: '提示',
@@ -190,6 +292,11 @@ const cancelOrder = (index) => {
             if (res.confirm) {
                 // 更新订单状态
                 orders.value[index].status = 'cancelled'
+
+                // 更新熊猫币（取消订单时减去相应熊猫币）
+                if (orders.value[index].pandaCoins) {
+                    userState.pandaCoins -= orders.value[index].pandaCoins
+                }
 
                 // 更新本地存储
                 uni.setStorageSync('savedOrders', orders.value)
@@ -420,5 +527,18 @@ const deleteOrder = (index) => {
 .delete-btn {
     color: #ff3030;
     border-color: #ffdddd;
+}
+
+.panda-coins {
+    font-size: 24rpx;
+    color: #ff9500;
+    margin-top: 6rpx;
+}
+
+.panda-coins-text {
+    display: inline-block;
+    background-color: #fff8e6;
+    padding: 4rpx 8rpx;
+    border-radius: 4rpx;
 }
 </style> 

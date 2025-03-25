@@ -31,7 +31,7 @@
 
             <!-- 操作提示区域 - 压在顶部图片底部 -->
             <view class="action-tip-bar">
-                <view class="tip-area">
+                <view class="tip-area" @tap="navigateToPandaStore">
                     <image
                         class="tip-icon"
                         src="/static/images/coin.png"
@@ -102,6 +102,10 @@
                 <view class="discount-detail">
                     <text class="discount-desc">LV0新会员指定果茶...</text>
                 </view>
+                <view class="panda-coins-info">
+                    <text class="panda-coins-label">获得熊猫币</text>
+                    <text class="panda-coins-value">{{ pandaCoins }}</text>
+                </view>
                 <view class="total-price">
                     <text class="total-label"
                         >共计{{ totalQuantity }}件商品，合计</text
@@ -147,6 +151,7 @@ const orderItems = ref([])
 const totalPrice = ref('')
 const orderTime = ref('')
 const discount = ref('')
+const pandaCoins = ref('')
 
 // 获取商品总数量
 const totalQuantity = computed(() => {
@@ -166,6 +171,13 @@ const getStatusText = (status) => {
         cancelled: '已取消'
     }
     return statusMap[status] || '未知状态'
+}
+
+// 计算获得的熊猫币数量（向上取整）
+const getPandaCoins = (price, discount = 0) => {
+    // 如果有折扣，使用原价计算
+    const originalPrice = Number(price) + Number(discount)
+    return Math.ceil(originalPrice)
 }
 
 // 在页面加载时获取订单数据
@@ -213,6 +225,19 @@ onMounted(() => {
             orderItems.value = orderDetail.items || []
             totalPrice.value = orderDetail.totalPrice || '0.00'
             discount.value = orderDetail.discount.amount || '0.00'
+
+            // 获取熊猫币，如果没有则计算
+            if (orderDetail.pandaCoins) {
+                pandaCoins.value = orderDetail.pandaCoins
+            } else if (orderDetail.status !== 'cancelled') {
+                // 使用原价计算熊猫币
+                pandaCoins.value = getPandaCoins(
+                    totalPrice.value,
+                    discount.value
+                )
+            } else {
+                pandaCoins.value = 0
+            }
 
             console.log('店铺地址:', storeAddress.value)
 
@@ -276,7 +301,8 @@ const reorderItems = () => {
             name: storeName.value,
             address: storeAddress.value
         },
-        deliveryType: 'self' // 默认自取
+        deliveryType: 'self', // 默认自取
+        pandaCoins: getPandaCoins(totalPrice.value, discount.value) // 添加熊猫币信息
     }
 
     console.log('准备提交的订单数据:', orderData)
@@ -287,6 +313,14 @@ const reorderItems = () => {
     // 跳转到订单确认页
     uni.navigateTo({
         url: '/pages/order-confirm/order-confirm'
+    })
+}
+
+// 点击提示文本跳转到熊猫币商城页面
+const navigateToPandaStore = () => {
+    console.log('跳转到熊猫币商城页面')
+    uni.navigateTo({
+        url: '/pages/panda-store/panda-store'
     })
 }
 </script>
@@ -558,6 +592,25 @@ const reorderItems = () => {
     font-size: 24rpx;
     color: #999;
     margin-bottom: 16rpx;
+}
+
+.panda-coins-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10rpx;
+}
+
+.panda-coins-label {
+    font-size: 26rpx;
+    color: #666;
+}
+
+.panda-coins-value {
+    font-size: 26rpx;
+    color: #ff9500;
+    background-color: #fff8e6;
+    padding: 4rpx 8rpx;
+    border-radius: 4rpx;
 }
 
 .total-price {
