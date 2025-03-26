@@ -11,7 +11,8 @@
     "pages/order-medal/order-medal",
     "pages/coupons/coupons",
     "pages/panda-store/panda-store",
-    "pages/personal-data/personal-data"
+    "pages/personal-data/personal-data",
+    "pages/search/search"
   ],
   "window": {
     "navigationBarTextStyle": "black",

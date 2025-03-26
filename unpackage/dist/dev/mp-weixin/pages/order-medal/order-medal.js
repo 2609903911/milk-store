@@ -295,6 +295,9 @@ const _sfc_main = {
     const goBack = () => {
       common_vendor.index.navigateBack();
     };
+    const handleAvatarError = () => {
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:559", "头像加载失败，使用默认头像");
+    };
     return (_ctx, _cache) => {
       var _a2;
       return {
@@ -305,12 +308,13 @@ const _sfc_main = {
           color: "#fff"
         }),
         c: common_vendor.o(goBack),
-        d: userAvatar.value,
-        e: common_vendor.t(userNickname.value),
-        f: common_vendor.t(userLevel.value),
-        g: common_vendor.t(totalActiveMedals.value),
-        h: (_a2 = lastAcquiredMedal.value) == null ? void 0 : _a2.icon,
-        i: common_vendor.f(medalTypes, (item, index, i0) => {
+        d: userAvatar.value || "/static/images/avatar",
+        e: common_vendor.o(handleAvatarError),
+        f: common_vendor.t(userNickname.value),
+        g: common_vendor.t(userLevel.value),
+        h: common_vendor.t(totalActiveMedals.value),
+        i: (_a2 = lastAcquiredMedal.value) == null ? void 0 : _a2.icon,
+        j: common_vendor.f(medalTypes, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index,
@@ -318,8 +322,8 @@ const _sfc_main = {
             d: common_vendor.o(($event) => switchType(index), index)
           };
         }),
-        j: navScrollLeft.value,
-        k: common_vendor.f(seasonalMedals.value, (item, index, i0) => {
+        k: navScrollLeft.value,
+        l: common_vendor.f(seasonalMedals.value, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -329,7 +333,7 @@ const _sfc_main = {
             f: index
           };
         }),
-        l: common_vendor.f(natureMedals.value, (item, index, i0) => {
+        m: common_vendor.f(natureMedals.value, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -339,8 +343,8 @@ const _sfc_main = {
             f: index
           };
         }),
-        m: common_assets._imports_0$7,
-        n: common_vendor.f(levelMedals.value, (item, index, i0) => {
+        n: common_assets._imports_0$7,
+        o: common_vendor.f(levelMedals.value, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -350,9 +354,9 @@ const _sfc_main = {
             f: index
           };
         }),
-        o: currentType.value,
-        p: common_vendor.o(swiperChange),
-        q: common_vendor.f(medalTypes, (item, index, i0) => {
+        p: currentType.value,
+        q: common_vendor.o(swiperChange),
+        r: common_vendor.f(medalTypes, (item, index, i0) => {
           return {
             a: index,
             b: currentType.value === index ? 1 : ""

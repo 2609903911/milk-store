@@ -8,7 +8,7 @@
 
             <!-- 搜索栏 -->
             <view class="search-bar">
-                <view class="search-input">
+                <view class="search-input" @tap="goToSearch">
                     <!-- #ifdef H5 -->
                     <uni-icons type="search" size="18" color="#999"></uni-icons>
                     <!-- #endif -->
@@ -18,7 +18,7 @@
                         style="font-size: 36rpx; color: #999"
                     ></text>
                     <!-- #endif -->
-                    <input type="text" placeholder="搜索商品" />
+                    <input type="text" placeholder="搜索商品" disabled />
                 </view>
                 <view class="menu-btn">
                     <!-- #ifdef H5 -->
@@ -37,7 +37,10 @@
         <!-- 店铺信息和配送方式 -->
         <view class="shop-info">
             <view class="shop-location" @click="navigateToMap">
-                <view class="shop-name">{{ shopName }} ></view>
+                <view class="shop-name"
+                    >{{ shopName }}
+                    <uni-icons type="right" size="16" color="#333"></uni-icons>
+                </view>
                 <view class="shop-address">{{ shopAddress }}</view>
                 <view class="shop-distance">距离您{{ shopDistance }}</view>
             </view>
@@ -281,8 +284,17 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import {
+    ref,
+    nextTick,
+    onMounted,
+    onUnmounted,
+    watch,
+    reactive,
+    computed
+} from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { getProductData, initProductData } from '../../utils/productData'
 // 使用easycom自动注册组件，不需要手动导入
 // 组件名称已在pages.json中注册
 
@@ -322,6 +334,11 @@ onMounted(() => {
     if (savedDeliveryType) {
         deliveryType.value = savedDeliveryType
     }
+
+    // 初始化产品数据
+    initProductData()
+    // 加载产品数据
+    loadProductData()
 })
 
 // 轮播播报数据
@@ -378,148 +395,13 @@ watch(activeTab, (newValue) => {
 const currentCategoryId = ref('product-0')
 
 // 分类数据
-const categories = ref([
-    {
-        name: '招牌奶茶',
-        products: [
-            {
-                image: '/static/images/hot01.png',
-                name: '杨梅吐气',
-                desc: '杨梅与气泡水的完美融合',
-                price: 12.0
-            },
-            {
-                image: '/static/images/hot02.png',
-                name: '手作米麻薯',
-                desc: '手工制作的米麻薯，口感Q弹',
-                price: 10.0
-            },
-            {
-                image: '/static/images/hot03.png',
-                name: '满杯芭乐',
-                desc: '新鲜芭乐与气泡水的完美结合',
-                price: 15.0
-            },
-            {
-                image: '/static/images/hot04.png',
-                name: '抹茶奶绿',
-                desc: '抹茶与奶绿的清新搭配',
-                price: 10.0
-            },
-            {
-                image: '/static/images/hot05.png',
-                name: '喜凤梨',
-                desc: '凤梨与气泡水的甜蜜组合',
-                price: 12.0
-            }
-        ]
-    },
-    {
-        name: '真鲜奶茶',
-        products: [
-            {
-                image: '/static/images/new01.png',
-                name: '经典奶茶',
-                desc: '选用进口奶源，醇香浓郁',
-                price: 15.0
-            },
-            {
-                image: '/static/images/new02.png',
-                name: '红豆奶茶',
-                desc: '香甜红豆与奶茶的经典搭配',
-                price: 18.0
-            },
-            {
-                image: '/static/images/new03.png',
-                name: '布丁奶茶',
-                desc: 'Q弹布丁与香浓奶茶的融合',
-                price: 20.0
-            },
-            {
-                image: '/static/images/new04.png',
-                name: '珍珠奶茶',
-                desc: '嚼劲十足的珍珠与奶茶的完美融合',
-                price: 16.0
-            },
-            {
-                image: '/static/images/new05.png',
-                name: '芋圆奶茶',
-                desc: 'Q弹芋圆与丝滑奶茶的组合',
-                price: 14.0
-            }
-        ]
-    },
-    {
-        name: '新品种草',
-        products: [
-            {
-                image: '/static/images/classic01.png',
-                name: '芝芝莓莓',
-                desc: '草莓与芝士的梦幻搭配',
-                price: 22.0
-            },
-            {
-                image: '/static/images/classic02.png',
-                name: '多肉葡萄',
-                desc: '多肉与葡萄的创新组合',
-                price: 20.0
-            },
-            {
-                image: '/static/images/classic03.png',
-                name: '芒果雪冰',
-                desc: '新鲜芒果加上细腻雪冰',
-                price: 18.0
-            },
-            {
-                image: '/static/images/classic04.png',
-                name: '椰云拿铁',
-                desc: '丝滑拿铁与椰云的结合',
-                price: 16.0
-            },
-            {
-                image: '/static/images/classic05.png',
-                name: '桃桃乌龙',
-                desc: '乌龙茶与水蜜桃的清新口味',
-                price: 19.0
-            }
-        ]
-    },
-    {
-        name: '清爽鲜果茶',
-        products: [
-            {
-                image: '/static/images/fruit01.png',
-                name: '满杯百香',
-                desc: '新鲜百香果，酸甜可口',
-                price: 16.0
-            },
-            {
-                image: '/static/images/fruit02.png',
-                name: '柠檬绿茶',
-                desc: '清新柠檬与绿茶的搭配',
-                price: 14.0
-            },
-            {
-                image: '/static/images/fruit03.png',
-                name: '蜜桃乌龙',
-                desc: '香甜蜜桃与乌龙茶的结合',
-                price: 18.0
-            },
-            {
-                image: '/static/images/fruit04.png',
-                name: '金桔柠檬',
-                desc: '酸甜可口的金桔柠檬',
-                price: 15.0
-            },
-            {
-                image: '/static/images/fruit05.png',
-                name: '青提乌龙',
-                desc: '清爽青提与醇香乌龙茶',
-                price: 17.0
-            }
-        ]
-    }
-])
+const categories = ref([])
+
+// 加载产品数据
+const loadProductData = () => {
+    const productData = getProductData()
+    categories.value = productData
+}
 
 // 为每个分类及其产品计算高度，便于后续滚动计算
 const categoryHeights = ref([])
@@ -892,6 +774,13 @@ const refreshPage = () => {
     updateStoreInfo()
     // 这里可以添加其他需要刷新的数据
 }
+
+// 跳转到搜索页面
+const goToSearch = () => {
+    uni.navigateTo({
+        url: '/pages/search/search'
+    })
+}
 </script>
 
 <style lang="scss" scoped>
@@ -919,7 +808,7 @@ const refreshPage = () => {
 .search-bar {
     display: flex;
     align-items: center;
-    padding: 20rpx 30rpx;
+    padding: 40rpx 30rpx 20rpx 30rpx;
     background-color: #fff;
     position: relative;
     z-index: 100;
@@ -961,7 +850,7 @@ input {
     justify-content: space-between;
     align-items: center;
     padding: 20rpx 30rpx;
-    margin-top: 20rpx;
+    margin-top: 30rpx;
     background-color: #fff;
     border-bottom: 1rpx solid #f0f0f0;
 }

@@ -179,61 +179,65 @@ const _sfc_main = {
         }
       });
     };
+    const handleAvatarError = () => {
+      common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:403", "头像加载失败，使用默认头像");
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: userInfo.value.avatar,
-        b: common_vendor.o(chooseAvatar),
-        c: common_assets._imports_0$9,
-        d: userInfo.value.nickname,
-        e: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
-        f: common_vendor.t(formatPhone(userInfo.value.phone)),
-        g: common_vendor.o(bindPhone),
-        h: userInfo.value.gender === "male" ? 1 : "",
-        i: common_vendor.o(($event) => userInfo.value.gender = "male"),
-        j: userInfo.value.gender === "female" ? 1 : "",
-        k: common_vendor.o(($event) => userInfo.value.gender = "female"),
-        l: common_vendor.t(userInfo.value.birthday || "未设置"),
-        m: common_vendor.o(showDatePicker),
-        n: common_vendor.p({
+        a: userInfo.value.avatar || "/static/images/avatar",
+        b: common_vendor.o(handleAvatarError),
+        c: common_vendor.o(chooseAvatar),
+        d: common_assets._imports_0$9,
+        e: userInfo.value.nickname,
+        f: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
+        g: common_vendor.t(formatPhone(userInfo.value.phone)),
+        h: common_vendor.o(bindPhone),
+        i: userInfo.value.gender === "male" ? 1 : "",
+        j: common_vendor.o(($event) => userInfo.value.gender = "male"),
+        k: userInfo.value.gender === "female" ? 1 : "",
+        l: common_vendor.o(($event) => userInfo.value.gender = "female"),
+        m: common_vendor.t(userInfo.value.birthday || "未设置"),
+        n: common_vendor.o(showDatePicker),
+        o: common_vendor.p({
           type: "right",
           size: "20",
           color: "#ccc"
         }),
-        o: common_vendor.o(goToAddressManage),
-        p: common_vendor.p({
+        p: common_vendor.o(goToAddressManage),
+        q: common_vendor.p({
           type: "right",
           size: "20",
           color: "#ccc"
         }),
-        q: common_vendor.o(switchAccount),
-        r: common_vendor.o(saveUserInfo),
-        s: isDatePickerVisible.value
+        r: common_vendor.o(switchAccount),
+        s: common_vendor.o(saveUserInfo),
+        t: isDatePickerVisible.value
       }, isDatePickerVisible.value ? {
-        t: common_vendor.o(hideDatePicker),
-        v: common_vendor.o(confirmDateSelection),
-        w: common_vendor.f(common_vendor.unref(years), (year, index, i0) => {
+        v: common_vendor.o(hideDatePicker),
+        w: common_vendor.o(confirmDateSelection),
+        x: common_vendor.f(common_vendor.unref(years), (year, index, i0) => {
           return {
             a: common_vendor.t(year),
             b: "year-" + index
           };
         }),
-        x: common_vendor.f(common_vendor.unref(months), (month, index, i0) => {
+        y: common_vendor.f(common_vendor.unref(months), (month, index, i0) => {
           return {
             a: common_vendor.t(month),
             b: "month-" + index
           };
         }),
-        y: common_vendor.f(days.value, (day, index, i0) => {
+        z: common_vendor.f(days.value, (day, index, i0) => {
           return {
             a: common_vendor.t(day),
             b: "day-" + index
           };
         }),
-        z: datePickerValue.value,
-        A: common_vendor.o(onDatePickerChange),
-        B: common_vendor.o(() => {
+        A: datePickerValue.value,
+        B: common_vendor.o(onDatePickerChange),
+        C: common_vendor.o(() => {
         }),
-        C: common_vendor.o(hideDatePicker)
+        D: common_vendor.o(hideDatePicker)
       } : {});
     };
   }

@@ -477,6 +477,7 @@ onMounted(() => {
 const loadCoupons = () => {
     // 获取不同状态的优惠券
     validCoupons.value = getCouponsByStatus(COUPON_STATUS.VALID)
+    console.log(validCoupons.value)
     usedCoupons.value = getCouponsByStatus(COUPON_STATUS.USED)
     expiredCoupons.value = getCouponsByStatus(COUPON_STATUS.EXPIRED)
 }

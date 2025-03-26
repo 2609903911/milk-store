@@ -13,7 +13,11 @@
             <!-- 用户信息区域 -->
             <view class="user-info-section">
                 <view class="avatar-box">
-                    <image class="avatar" :src="userState.avatar"></image>
+                    <image
+                        class="avatar"
+                        :src="userState.avatar || '/static/images/avatar'"
+                        @error="handleAvatarError"
+                    ></image>
                 </view>
                 <view class="user-details">
                     <text class="nickname">{{ userState.nickname }}</text>
@@ -235,6 +239,12 @@ const handleServiceClick = (serviceName) => {
         title: `您点击了${serviceName}`,
         icon: 'none'
     })
+}
+
+// 处理头像加载错误
+const handleAvatarError = () => {
+    // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
+    console.log('头像加载失败，使用默认头像')
 }
 </script>
 

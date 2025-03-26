@@ -41,7 +41,7 @@
 .search-bar.data-v-93207a4f {
   display: flex;
   align-items: center;
-  padding: 20rpx 30rpx;
+  padding: 40rpx 30rpx 20rpx 30rpx;
   background-color: #fff;
   position: relative;
   z-index: 100;
@@ -76,7 +76,7 @@ input.data-v-93207a4f {
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 30rpx;
-  margin-top: 20rpx;
+  margin-top: 30rpx;
   background-color: #fff;
   border-bottom: 1rpx solid #f0f0f0;
 }

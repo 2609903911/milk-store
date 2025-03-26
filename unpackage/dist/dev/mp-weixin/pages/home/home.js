@@ -5,7 +5,7 @@ const utils_userState = require("../../utils/userState.js");
 const _sfc_main = {
   __name: "home",
   setup(__props) {
-    common_vendor.index.__f__("log", "at pages/home/home.vue:257", utils_userState.userState);
+    common_vendor.index.__f__("log", "at pages/home/home.vue:261", utils_userState.userState);
     const currentSwiper = common_vendor.ref(0);
     const bannerList = common_vendor.ref([
       {
@@ -59,6 +59,9 @@ const _sfc_main = {
         url: "/pages/panda-store/panda-store"
       });
     };
+    const handleAvatarError = () => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:326", "头像加载失败，使用默认头像");
+    };
     return (_ctx, _cache) => {
       return {
         a: common_vendor.f(bannerList.value, (item, index, i0) => {
@@ -96,20 +99,21 @@ const _sfc_main = {
             b: currentSwiper.value === index ? 1 : ""
           };
         }),
-        f: common_vendor.unref(utils_userState.userState).avatar,
-        g: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
-        h: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
-        i: common_vendor.o(navigateToCoupons),
-        j: common_assets._imports_0$1,
-        k: common_vendor.o(navigateToOrder),
-        l: common_assets._imports_1,
-        m: common_assets._imports_2,
-        n: common_vendor.o(navigateToPandaStore),
-        o: common_assets._imports_3,
-        p: common_assets._imports_4,
-        q: common_assets._imports_5,
-        r: common_assets._imports_6,
-        s: common_assets._imports_7
+        f: common_vendor.unref(utils_userState.userState).avatar || "/static/images/avatar",
+        g: common_vendor.o(handleAvatarError),
+        h: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
+        i: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
+        j: common_vendor.o(navigateToCoupons),
+        k: common_assets._imports_0$1,
+        l: common_vendor.o(navigateToOrder),
+        m: common_assets._imports_1,
+        n: common_assets._imports_2,
+        o: common_vendor.o(navigateToPandaStore),
+        p: common_assets._imports_3,
+        q: common_assets._imports_4,
+        r: common_assets._imports_5,
+        s: common_assets._imports_6,
+        t: common_assets._imports_7
       };
     };
   }

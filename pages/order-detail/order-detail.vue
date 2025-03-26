@@ -152,6 +152,7 @@ const totalPrice = ref('')
 const orderTime = ref('')
 const discount = ref('')
 const pandaCoins = ref('')
+const originalPrice = ref('')
 
 // 获取商品总数量
 const totalQuantity = computed(() => {
@@ -225,6 +226,7 @@ onMounted(() => {
             orderItems.value = orderDetail.items || []
             totalPrice.value = orderDetail.totalPrice || '0.00'
             discount.value = orderDetail.discount.amount || '0.00'
+            originalPrice.value = orderDetail.discount.originalPrice || '0.00'
 
             // 获取熊猫币，如果没有则计算
             if (orderDetail.pandaCoins) {
@@ -293,16 +295,18 @@ const copyOrderNumber = () => {
 const reorderItems = () => {
     console.log('再来一单')
 
+    console.log('originalPrice', originalPrice.value)
     // 复制当前订单信息
     const orderData = {
         items: orderItems.value,
-        totalPrice: totalPrice.value,
+        totalPrice: originalPrice.value,
+        originalPrice: originalPrice.value,
         store: {
             name: storeName.value,
             address: storeAddress.value
         },
         deliveryType: 'self', // 默认自取
-        pandaCoins: getPandaCoins(totalPrice.value, discount.value) // 添加熊猫币信息
+        pandaCoins: getPandaCoins(originalPrice.value, discount.value) // 添加熊猫币信息
     }
 
     console.log('准备提交的订单数据:', orderData)

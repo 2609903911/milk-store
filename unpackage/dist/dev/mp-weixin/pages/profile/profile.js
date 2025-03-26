@@ -60,23 +60,27 @@ const _sfc_main = {
         icon: "none"
       });
     };
+    const handleAvatarError = () => {
+      common_vendor.index.__f__("log", "at pages/profile/profile.vue:247", "头像加载失败，使用默认头像");
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0$3,
-        b: common_vendor.unref(utils_userState.userState).avatar,
-        c: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
-        d: common_assets._imports_1$1,
-        e: common_vendor.o(openMedalWall),
-        f: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
-        g: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
-        h: common_vendor.o(navigateToCoupons),
-        i: common_assets._imports_2$1,
-        j: common_vendor.o(goToMall),
-        k: common_assets._imports_3$1,
-        l: common_assets._imports_4$1,
-        m: common_assets._imports_5$1,
-        n: common_assets._imports_6$1,
-        o: common_vendor.f(serviceItems, (item, index, i0) => {
+        b: common_vendor.unref(utils_userState.userState).avatar || "/static/images/avatar",
+        c: common_vendor.o(handleAvatarError),
+        d: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
+        e: common_assets._imports_1$1,
+        f: common_vendor.o(openMedalWall),
+        g: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
+        h: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
+        i: common_vendor.o(navigateToCoupons),
+        j: common_assets._imports_2$1,
+        k: common_vendor.o(goToMall),
+        l: common_assets._imports_3$1,
+        m: common_assets._imports_4$1,
+        n: common_assets._imports_5$1,
+        o: common_assets._imports_6$1,
+        p: common_vendor.f(serviceItems, (item, index, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -84,7 +88,7 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleServiceClick(item.name), index)
           };
         }),
-        p: serviceItems.length % 4 !== 0
+        q: serviceItems.length % 4 !== 0
       }, serviceItems.length % 4 !== 0 ? {} : {});
     };
   }

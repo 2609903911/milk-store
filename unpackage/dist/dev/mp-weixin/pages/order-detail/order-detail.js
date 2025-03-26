@@ -21,6 +21,7 @@ const _sfc_main = {
     const orderTime = common_vendor.ref("");
     const discount = common_vendor.ref("");
     const pandaCoins = common_vendor.ref("");
+    const originalPrice = common_vendor.ref("");
     const totalQuantity = common_vendor.computed(() => {
       return orderItems.value.reduce((total, item) => total + item.quantity, 0);
     });
@@ -36,22 +37,22 @@ const _sfc_main = {
       return statusMap[status] || "未知状态";
     };
     const getPandaCoins = (price, discount2 = 0) => {
-      const originalPrice = Number(price) + Number(discount2);
-      return Math.ceil(originalPrice);
+      const originalPrice2 = Number(price) + Number(discount2);
+      return Math.ceil(originalPrice2);
     };
     common_vendor.onMounted(() => {
       var _a;
       try {
-        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:186", "订单详情页面已加载");
+        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:187", "订单详情页面已加载");
         let urlOrderId = "";
         const mpPages = getCurrentPages();
         if (mpPages && mpPages.length > 0) {
           const currentPage = mpPages[mpPages.length - 1];
           urlOrderId = ((_a = currentPage.options) == null ? void 0 : _a.orderId) || "";
-          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:198", "微信小程序环境，获取订单ID:", urlOrderId);
+          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:199", "微信小程序环境，获取订单ID:", urlOrderId);
         }
         const orderDetail = common_vendor.index.getStorageSync("currentOrderDetail");
-        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:213", "本地存储订单信息:", orderDetail);
+        common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:214", "本地存储订单信息:", orderDetail);
         if (orderDetail && (urlOrderId === "" || orderDetail.id === urlOrderId)) {
           orderId.value = orderDetail.id || "";
           orderStatus.value = orderDetail.status || "";
@@ -60,6 +61,7 @@ const _sfc_main = {
           orderItems.value = orderDetail.items || [];
           totalPrice.value = orderDetail.totalPrice || "0.00";
           discount.value = orderDetail.discount.amount || "0.00";
+          originalPrice.value = orderDetail.discount.originalPrice || "0.00";
           if (orderDetail.pandaCoins) {
             pandaCoins.value = orderDetail.pandaCoins;
           } else if (orderDetail.status !== "cancelled") {
@@ -70,7 +72,7 @@ const _sfc_main = {
           } else {
             pandaCoins.value = 0;
           }
-          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:242", "店铺地址:", storeAddress.value);
+          common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:244", "店铺地址:", storeAddress.value);
           if (orderDetail.time) {
             const date = new Date(orderDetail.time);
             orderTime.value = `${date.getFullYear()}-${String(
@@ -86,7 +88,7 @@ const _sfc_main = {
             )}`;
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:260", "订单ID不匹配或未找到订单信息");
+          common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:262", "订单ID不匹配或未找到订单信息");
           common_vendor.index.showToast({
             title: "未找到订单信息",
             icon: "none"
@@ -96,7 +98,7 @@ const _sfc_main = {
           }, 1500);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:272", "获取订单详情出错:", error);
+        common_vendor.index.__f__("error", "at pages/order-detail/order-detail.vue:274", "获取订单详情出错:", error);
         common_vendor.index.showToast({
           title: "获取订单信息失败",
           icon: "none"
@@ -114,27 +116,29 @@ const _sfc_main = {
       });
     };
     const reorderItems = () => {
-      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:294", "再来一单");
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:296", "再来一单");
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:298", "originalPrice", originalPrice.value);
       const orderData = {
         items: orderItems.value,
-        totalPrice: totalPrice.value,
+        totalPrice: originalPrice.value,
+        originalPrice: originalPrice.value,
         store: {
           name: storeName.value,
           address: storeAddress.value
         },
         deliveryType: "self",
         // 默认自取
-        pandaCoins: getPandaCoins(totalPrice.value, discount.value)
+        pandaCoins: getPandaCoins(originalPrice.value, discount.value)
         // 添加熊猫币信息
       };
-      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:308", "准备提交的订单数据:", orderData);
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:312", "准备提交的订单数据:", orderData);
       common_vendor.index.setStorageSync("orderConfirmData", orderData);
       common_vendor.index.navigateTo({
         url: "/pages/order-confirm/order-confirm"
       });
     };
     const navigateToPandaStore = () => {
-      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:321", "跳转到熊猫币商城页面");
+      common_vendor.index.__f__("log", "at pages/order-detail/order-detail.vue:325", "跳转到熊猫币商城页面");
       common_vendor.index.navigateTo({
         url: "/pages/panda-store/panda-store"
       });

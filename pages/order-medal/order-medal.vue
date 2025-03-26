@@ -18,7 +18,11 @@
             <view class="user-info-left">
                 <view class="username">
                     <view class="avatar">
-                        <image class="avatar-image" :src="userAvatar"></image>
+                        <image
+                            class="avatar-image"
+                            :src="userAvatar || '/static/images/avatar'"
+                            @error="handleAvatarError"
+                        ></image>
                     </view>
                     <text>{{ userNickname }}</text>
                     <view class="user-level">Lv{{ userLevel }}</view>
@@ -547,6 +551,12 @@ const swiperChange = (e) => {
 // 返回上一页
 const goBack = () => {
     uni.navigateBack()
+}
+
+// 处理头像加载错误
+const handleAvatarError = () => {
+    // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
+    console.log('头像加载失败，使用默认头像')
 }
 </script>
 

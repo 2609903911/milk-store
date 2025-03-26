@@ -78,7 +78,11 @@
             <view class="user-info-wrapper">
                 <view class="user-info">
                     <view class="avatar-container">
-                        <image class="avatar" :src="userState.avatar"></image>
+                        <image
+                            class="avatar"
+                            :src="userState.avatar || '/static/images/avatar'"
+                            @error="handleAvatarError"
+                        ></image>
                     </view>
                     <view class="user-greeting">
                         <text>Hi~{{ userState.nickname }}</text>
@@ -314,6 +318,12 @@ const navigateToPandaStore = () => {
     uni.navigateTo({
         url: '/pages/panda-store/panda-store'
     })
+}
+
+// 处理头像加载错误
+const handleAvatarError = () => {
+    // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
+    console.log('头像加载失败，使用默认头像')
 }
 </script>
 

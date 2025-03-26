@@ -27,6 +27,7 @@ const _sfc_main = {
     });
     const loadCoupons = () => {
       validCoupons.value = utils_couponService.getCouponsByStatus(utils_couponModel.COUPON_STATUS.VALID);
+      common_vendor.index.__f__("log", "at pages/coupons/coupons.vue:480", validCoupons.value);
       usedCoupons.value = utils_couponService.getCouponsByStatus(utils_couponModel.COUPON_STATUS.USED);
       expiredCoupons.value = utils_couponService.getCouponsByStatus(utils_couponModel.COUPON_STATUS.EXPIRED);
     };

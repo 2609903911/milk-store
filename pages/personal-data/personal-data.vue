@@ -9,8 +9,11 @@
                         <view class="avatar-container" @tap="chooseAvatar">
                             <image
                                 class="avatar"
-                                :src="userInfo.avatar"
+                                :src="
+                                    userInfo.avatar || '/static/images/avatar'
+                                "
                                 mode="aspectFill"
+                                @error="handleAvatarError"
                             ></image>
                         </view>
                         <view class="camera-icon">
@@ -392,6 +395,12 @@ const chooseAvatar = () => {
             })
         }
     })
+}
+
+// 处理头像加载错误
+const handleAvatarError = () => {
+    // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
+    console.log('头像加载失败，使用默认头像')
 }
 </script>
 

@@ -16,6 +16,7 @@ if (!Math) {
   "./pages/coupons/coupons.js";
   "./pages/panda-store/panda-store.js";
   "./pages/personal-data/personal-data.js";
+  "./pages/search/search.js";
 }
 const _sfc_main = {
   onLaunch: function() {
