@@ -17,6 +17,7 @@ if (!Math) {
   "./pages/panda-store/panda-store.js";
   "./pages/personal-data/personal-data.js";
   "./pages/search/search.js";
+  "./pages/ai-chat/index.js";
 }
 const _sfc_main = {
   onLaunch: function() {

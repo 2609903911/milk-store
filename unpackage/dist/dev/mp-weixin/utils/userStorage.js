@@ -8,9 +8,10 @@ const saveUserInfo = (userInfo) => {
       return false;
     }
     common_vendor.index.setStorageSync(USER_INFO_KEY, JSON.stringify(userInfo));
+    common_vendor.index.__f__("log", "at utils/userStorage.js:24", "已保存用户信息到本地存储");
     return true;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userStorage.js:26", "保存用户信息失败", error);
+    common_vendor.index.__f__("error", "at utils/userStorage.js:27", "保存用户信息失败", error);
     return false;
   }
 };
@@ -19,23 +20,42 @@ const getUserInfo = () => {
     const userInfoStr = common_vendor.index.getStorageSync(USER_INFO_KEY);
     if (!userInfoStr)
       return null;
-    return JSON.parse(userInfoStr);
+    const userInfo = JSON.parse(userInfoStr);
+    common_vendor.index.__f__("log", "at utils/userStorage.js:43", "已从本地存储获取用户信息");
+    return userInfo;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userStorage.js:42", "获取用户信息失败", error);
+    common_vendor.index.__f__("error", "at utils/userStorage.js:46", "获取用户信息失败", error);
     return null;
   }
 };
 const updateUserInfo = (partialInfo) => {
   try {
     if (!partialInfo || typeof partialInfo !== "object") {
-      common_vendor.index.__f__("error", "at utils/userStorage.js:55", "更新的用户信息格式不正确");
+      common_vendor.index.__f__("error", "at utils/userStorage.js:59", "更新的用户信息格式不正确");
       return false;
     }
+    if (partialInfo.userId && partialInfo.coupons) {
+      return saveUserInfo(partialInfo);
+    }
     const currentInfo = getUserInfo() || {};
+    if (partialInfo.coupons && Array.isArray(partialInfo.coupons)) {
+      if (currentInfo.coupons && Array.isArray(currentInfo.coupons)) {
+        const couponMap = {};
+        currentInfo.coupons.forEach((coupon) => {
+          couponMap[coupon.id] = coupon;
+        });
+        partialInfo.coupons.forEach((coupon) => {
+          if (couponMap[coupon.id] && couponMap[coupon.id].status === "used") {
+            coupon.status = "used";
+            coupon.usedTime = couponMap[coupon.id].usedTime;
+          }
+        });
+      }
+    }
     const newInfo = { ...currentInfo, ...partialInfo };
     return saveUserInfo(newInfo);
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userStorage.js:66", "更新用户信息失败", error);
+    common_vendor.index.__f__("error", "at utils/userStorage.js:96", "更新用户信息失败", error);
     return false;
   }
 };

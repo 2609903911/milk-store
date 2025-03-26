@@ -7,14 +7,19 @@ const initUserState = () => {
   try {
     const storedUserInfo = utils_userStorage.getUserInfo();
     if (storedUserInfo) {
-      Object.assign(userState, storedUserInfo);
-      common_vendor.index.__f__("log", "at utils/userState.js:22", "已从本地存储加载用户信息");
+      Object.keys(userState).forEach((key) => {
+        delete userState[key];
+      });
+      Object.entries(storedUserInfo).forEach(([key, value]) => {
+        userState[key] = value;
+      });
+      common_vendor.index.__f__("log", "at utils/userState.js:32", "已从本地存储加载用户信息");
     } else {
-      common_vendor.index.__f__("log", "at utils/userState.js:24", "未找到用户信息，使用默认值");
+      common_vendor.index.__f__("log", "at utils/userState.js:34", "未找到用户信息，使用默认值");
     }
     return true;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userState.js:28", "初始化用户状态失败", error);
+    common_vendor.index.__f__("error", "at utils/userState.js:38", "初始化用户状态失败", error);
     return false;
   }
 };
@@ -24,9 +29,9 @@ const updateUserState = (newInfo) => {
       return false;
     }
     Object.assign(userState, newInfo);
-    return utils_userStorage.updateUserInfo(newInfo);
+    return utils_userStorage.updateUserInfo(userState);
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userState.js:50", "更新用户状态失败", error);
+    common_vendor.index.__f__("error", "at utils/userState.js:61", "更新用户状态失败", error);
     return false;
   }
 };

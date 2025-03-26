@@ -9,15 +9,8 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/my-orders/my-orders",
-          "pathName": "pages/my-orders/my-orders",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/search/search",
-          "pathName": "pages/search/search",
+          "name": "pages/ai-chat/index",
+          "pathName": "pages/ai-chat/index",
           "query": "",
           "launchMode": "default",
           "scene": null

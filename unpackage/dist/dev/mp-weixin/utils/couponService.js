@@ -10,6 +10,9 @@ const getCouponsByStatus = (status) => {
   if (!status)
     return coupons;
   return coupons.filter((coupon) => {
+    if (coupon.status === utils_couponModel.COUPON_STATUS.USED) {
+      return status === utils_couponModel.COUPON_STATUS.USED;
+    }
     const currentStatus = utils_couponModel.calculateCouponStatus(coupon);
     return currentStatus === status;
   });

@@ -35,6 +35,11 @@ export const getCouponsByStatus = (status) => {
   
   // 更新每个优惠券的最新状态
   return coupons.filter(coupon => {
+    // 如果优惠券状态已经是USED，则保持使用过的状态
+    if (coupon.status === COUPON_STATUS.USED) {
+      return status === COUPON_STATUS.USED;
+    }
+    // 否则通过计算来判断优惠券状态
     const currentStatus = calculateCouponStatus(coupon);
     return currentStatus === status;
   });
@@ -96,6 +101,11 @@ export const getAvailableCoupons = (orderInfo) => {
  */
 export const calculateDiscount = (coupon, orderInfo) => {
   if (!coupon || !orderInfo) return 0;
+  
+  // 如果优惠券已被使用，直接返回0
+  if (coupon.status === COUPON_STATUS.USED) {
+    return 0;
+  }
   
   // 获取最新状态，检查是否可用
   const status = calculateCouponStatus(coupon);
@@ -226,6 +236,11 @@ export const useCoupon = (couponId, orderInfo) => {
     
     const coupon = userCoupons[couponIndex];
     
+    // 如果优惠券已经被使用，返回错误
+    if (coupon.status === COUPON_STATUS.USED) {
+      return { success: false, message: '优惠券已被使用', discount: 0 };
+    }
+    
     // 检查优惠券状态
     const status = calculateCouponStatus(coupon);
     if (status !== COUPON_STATUS.VALID) {
@@ -247,7 +262,7 @@ export const useCoupon = (couponId, orderInfo) => {
       usedTime: Date.now()
     };
     
-    // 更新用户状态
+    // 更新用户状态和本地存储
     const updated = updateUserState({ coupons: updatedCoupons });
     
     if (!updated) {

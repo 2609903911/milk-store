@@ -18,7 +18,17 @@ export const initUserState = () => {
     const storedUserInfo = getUserInfo();
     if (storedUserInfo) {
       // 将存储的用户信息同步到响应式状态
-      Object.assign(userState, storedUserInfo);
+      // 这里需要完全替换用户状态，而不是简单合并对象，以保证优惠券的状态等信息被完整保留
+      Object.keys(userState).forEach(key => {
+        // 删除所有现有的属性（保持响应式）
+        delete userState[key];
+      });
+      
+      // 添加存储的信息
+      Object.entries(storedUserInfo).forEach(([key, value]) => {
+        userState[key] = value;
+      });
+      
       console.log('已从本地存储加载用户信息');
     } else {
       console.log('未找到用户信息，使用默认值');
@@ -44,8 +54,9 @@ export const updateUserState = (newInfo) => {
     // 更新响应式状态
     Object.assign(userState, newInfo);
     
-    // 同步到本地存储
-    return updateUserInfo(newInfo);
+    // 同步到本地存储，确保完整更新用户信息
+    // 而不是仅更新部分字段
+    return updateUserInfo(userState);
   } catch (error) {
     console.error('更新用户状态失败', error);
     return false;
@@ -58,4 +69,7 @@ export const updateUserState = (newInfo) => {
 export const resetUserState = () => {
   const defaultInfo = createDefaultUserInfo();
   Object.assign(userState, defaultInfo);
+  
+  // 清除本地存储的用户信息
+  updateUserInfo(defaultInfo);
 }; 

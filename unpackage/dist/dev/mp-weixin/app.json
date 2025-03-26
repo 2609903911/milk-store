@@ -12,7 +12,8 @@
     "pages/coupons/coupons",
     "pages/panda-store/panda-store",
     "pages/personal-data/personal-data",
-    "pages/search/search"
+    "pages/search/search",
+    "pages/ai-chat/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",
