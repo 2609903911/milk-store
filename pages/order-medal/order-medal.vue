@@ -27,10 +27,22 @@
                     <text>{{ userNickname }}</text>
                     <view class="user-level">Lv{{ userLevel }}</view>
                 </view>
-                <view class="medal-count">已获得微章</view>
-                <view class="medal-num"
-                    >{{ totalActiveMedals }} <text class="unit">枚</text></view
-                >
+                <view class="medalAndStar-info">
+                    <view class="medal-info">
+                        <view class="medal-count">已获得微章</view>
+                        <view class="medal-num">
+                            {{ userState.medals ? userState.medals.length : 0 }}
+                            <text class="unit">枚</text>
+                        </view>
+                    </view>
+                    <view class="star-info">
+                        <view class="star-count">点亮星</view>
+                        <view class="star-num">
+                            {{ userState.lightningStars || 0 }}
+                            <text class="unit">颗</text>
+                        </view>
+                    </view>
+                </view>
             </view>
             <view class="recent-medal">
                 <image
@@ -83,8 +95,13 @@
                                 <view
                                     class="medal-wrapper"
                                     :class="{
-                                        'medal-wrapper-inactive': !item.isActive
+                                        'medal-wrapper-inactive':
+                                            !item.isActive,
+                                        'medal-wrapper-selected':
+                                            !item.isActive &&
+                                            selectedItemId === item.id
                                     }"
+                                    @click="selectMedal(item, 'seasonal')"
                                 >
                                     <image
                                         class="medal-pic"
@@ -99,6 +116,16 @@
                                     :class="{ 'inactive-text': !item.isActive }"
                                     >{{ item.name }}</text
                                 >
+                                <view
+                                    v-if="
+                                        !item.isActive &&
+                                        selectedItemId === item.id
+                                    "
+                                    class="activate-btn"
+                                    @click="handleMedalClick(item, 'seasonal')"
+                                >
+                                    点亮徽章
+                                </view>
                             </view>
                         </view>
                     </view>
@@ -123,8 +150,13 @@
                                 <view
                                     class="medal-wrapper"
                                     :class="{
-                                        'medal-wrapper-inactive': !item.isActive
+                                        'medal-wrapper-inactive':
+                                            !item.isActive,
+                                        'medal-wrapper-selected':
+                                            !item.isActive &&
+                                            selectedItemId === item.id
                                     }"
+                                    @click="selectMedal(item, 'nature')"
                                 >
                                     <image
                                         class="medal-pic"
@@ -139,6 +171,16 @@
                                     :class="{ 'inactive-text': !item.isActive }"
                                     >{{ item.name }}</text
                                 >
+                                <view
+                                    v-if="
+                                        !item.isActive &&
+                                        selectedItemId === item.id
+                                    "
+                                    class="activate-btn"
+                                    @click="handleMedalClick(item, 'nature')"
+                                >
+                                    点亮徽章
+                                </view>
                             </view>
                         </view>
                     </view>
@@ -163,8 +205,13 @@
                                 <view
                                     class="medal-wrapper"
                                     :class="{
-                                        'medal-wrapper-inactive': !item.isActive
+                                        'medal-wrapper-inactive':
+                                            !item.isActive,
+                                        'medal-wrapper-selected':
+                                            !item.isActive &&
+                                            selectedItemId === item.id
                                     }"
+                                    @click="selectMedal(item, 'starRail')"
                                 >
                                     <image
                                         class="medal-pic"
@@ -179,6 +226,16 @@
                                     :class="{ 'inactive-text': !item.isActive }"
                                     >{{ item.name }}</text
                                 >
+                                <view
+                                    v-if="
+                                        !item.isActive &&
+                                        selectedItemId === item.id
+                                    "
+                                    class="activate-btn"
+                                    @click="handleMedalClick(item, 'starRail')"
+                                >
+                                    点亮徽章
+                                </view>
                             </view>
                         </view>
                     </view>
@@ -225,12 +282,60 @@
                 </scroll-view>
             </swiper-item>
         </swiper>
+
+        <!-- 点亮徽章弹窗 -->
+        <view
+            v-if="showActivatePopup"
+            class="popup-mask"
+            @click="cancelActivate"
+        >
+            <view class="activate-popup" @click.stop>
+                <view class="popup-title">点亮徽章</view>
+                <view class="popup-content">
+                    <view class="popup-medal-img-container">
+                        <image
+                            class="popup-medal-img"
+                            :src="selectedMedal?.icon"
+                            mode="aspectFit"
+                        ></image>
+                    </view>
+                    <view class="popup-medal-name">{{
+                        selectedMedal?.name
+                    }}</view>
+                    <view class="popup-desc"
+                        >是否消耗1个点亮星点亮该徽章？</view
+                    >
+                    <view class="popup-star-info">
+                        <text>剩余点亮星：</text>
+                        <text class="star-count">{{
+                            userState.lightningStars || 0
+                        }}</text>
+                    </view>
+                </view>
+                <view class="popup-btns">
+                    <button class="btn cancel-btn" @click="cancelActivate">
+                        取消
+                    </button>
+                    <button
+                        class="btn confirm-btn"
+                        @click="confirmActivate"
+                        :disabled="(userState.lightningStars || 0) <= 0"
+                    >
+                        {{
+                            (userState.lightningStars || 0) <= 0
+                                ? '点亮星不足'
+                                : '确认点亮'
+                        }}
+                    </button>
+                </view>
+            </view>
+        </view>
     </view>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { userState } from '../../utils/userState'
+import { userState, updateUserState } from '../../utils/userState'
 import { getUserMedalsByType } from '../../utils/userModel'
 
 // 当前用户等级
@@ -451,13 +556,13 @@ const allBtMedals = reactive([
     },
     {
         id: 'star_medal_05',
-        name: '星河猎手-卡芙卡',
+        name: '星核猎手-卡芙卡',
         icon: '../../static/images/medal/bt-star-05.png',
         isActive: false
     },
     {
         id: 'star_medal_06',
-        name: '星河猎手-刃',
+        name: '星核猎手-刃',
         icon: '../../static/images/medal/bt-star-06.png',
         isActive: false
     },
@@ -539,27 +644,10 @@ const allLevelMedals = reactive([
 ])
 
 // 用户的勋章数据
-const seasonalMedals = ref([...allSeasonalMedals])
-const natureMedals = ref([...allNatureMedals])
-const levelMedals = ref([...allLevelMedals])
+const seasonalMedals = reactive([...allSeasonalMedals])
+const natureMedals = reactive([...allNatureMedals])
+const levelMedals = reactive([...allLevelMedals])
 const lastAcquiredMedal = ref(null)
-
-// 计算已获得的勋章总数
-const totalActiveMedals = computed(() => {
-    // 统计所有类型勋章中已激活的数量
-    const seasonalActive = seasonalMedals.value.filter(
-        (medal) => medal.isActive
-    ).length
-    const natureActive = natureMedals.value.filter(
-        (medal) => medal.isActive
-    ).length
-    const levelActive = levelMedals.value.filter(
-        (medal) => medal.isActive
-    ).length
-
-    // 返回总数
-    return seasonalActive + natureActive + levelActive
-})
 
 // 初始化用户勋章数据
 const initUserMedals = () => {
@@ -571,21 +659,31 @@ const initUserMedals = () => {
     const userSeasonalMedals = getUserMedalsByType(userState.medals, 'seasonal')
     const userNatureMedals = getUserMedalsByType(userState.medals, 'nature')
     const userLevelMedals = getUserMedalsByType(userState.medals, 'level')
+    const userStarRailMedals = getUserMedalsByType(userState.medals, 'starRail')
 
     // 更新季节勋章激活状态
-    seasonalMedals.value.forEach((medal) => {
+    seasonalMedals.forEach((medal) => {
         const userMedal = userSeasonalMedals.find((m) => m.id === medal.id)
-        medal.isActive = !!userMedal
+        // 如果找到用户勋章，并且勋章的isActive不是显式设为false，则认为是激活的
+        medal.isActive = userMedal ? userMedal.isActive !== false : false
     })
 
     // 更新自然勋章激活状态
-    natureMedals.value.forEach((medal) => {
+    natureMedals.forEach((medal) => {
         const userMedal = userNatureMedals.find((m) => m.id === medal.id)
-        medal.isActive = !!userMedal
+        // 如果找到用户勋章，并且勋章的isActive不是显式设为false，则认为是激活的
+        medal.isActive = userMedal ? userMedal.isActive !== false : false
+    })
+
+    // 更新崩铁联动勋章激活状态
+    allBtMedals.forEach((medal) => {
+        const userMedal = userStarRailMedals.find((m) => m.id === medal.id)
+        // 如果找到用户勋章，并且勋章的isActive不是显式设为false，则认为是激活的
+        medal.isActive = userMedal ? userMedal.isActive !== false : false
     })
 
     // 更新等级勋章激活状态
-    levelMedals.value.forEach((medal, index) => {
+    levelMedals.forEach((medal, index) => {
         medal.isActive = userLevel.value >= index + 1
     })
 
@@ -642,6 +740,147 @@ const handleAvatarError = () => {
     // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
     console.log('头像加载失败，使用默认头像')
 }
+
+// 新增的selectedItemId，用于记录当前选中的徽章ID
+const selectedItemId = ref(null)
+
+// 选择徽章，显示点亮按钮
+const selectMedal = (medal, type) => {
+    // 如果徽章已激活，不做任何处理
+    if (medal.isActive) {
+        return
+    }
+
+    // 如果点击的是当前选中的徽章，则取消选中（切换效果）
+    if (selectedItemId.value === medal.id) {
+        selectedItemId.value = null
+    } else {
+        // 否则，选中该徽章
+        selectedItemId.value = medal.id
+    }
+
+    console.log('当前选中徽章ID:', selectedItemId.value)
+}
+
+// 处理徽章点击事件 - 现在只在点击"点亮徽章"按钮时调用
+const handleMedalClick = (medal, type) => {
+    // 显示点亮徽章弹窗
+    selectedMedal.value = medal
+    selectedMedalType.value = type
+    showActivatePopup.value = true
+    // 隐藏点亮按钮
+    selectedItemId.value = null
+}
+
+// 点亮徽章相关状态
+const showActivatePopup = ref(false)
+const selectedMedal = ref(null)
+const selectedMedalType = ref('')
+
+// 取消点亮
+const cancelActivate = () => {
+    showActivatePopup.value = false
+    selectedMedal.value = null
+    selectedMedalType.value = ''
+}
+
+// 确认点亮
+const confirmActivate = () => {
+    // 检查点亮星是否足够
+    if (!userState.lightningStars || userState.lightningStars <= 0) {
+        uni.showToast({
+            title: '点亮星不足',
+            icon: 'none'
+        })
+        return
+    }
+
+    if (!selectedMedal.value || !selectedMedalType.value) {
+        return
+    }
+
+    // 获取徽章类型的中文描述
+    let typeDescription = '限定徽章'
+    switch (selectedMedalType.value) {
+        case 'seasonal':
+            typeDescription = '二十四节气限定徽章'
+            break
+        case 'nature':
+            typeDescription = '大自然限定徽章'
+            break
+        case 'starRail':
+            typeDescription = '星穹铁道限定徽章'
+            break
+    }
+
+    // 创建新的勋章对象
+    const newMedal = {
+        id: selectedMedal.value.id,
+        name: selectedMedal.value.name,
+        icon: selectedMedal.value.icon,
+        type: selectedMedalType.value,
+        description: `${typeDescription}：${selectedMedal.value.name}`,
+        acquireTime: Date.now(),
+        isActive: true
+    }
+
+    // 准备当前用户的勋章列表，确保不重复添加
+    const currentMedals = [...(userState.medals || [])]
+    const medalExists = currentMedals.some((medal) => medal.id === newMedal.id)
+
+    // 只有当勋章不存在时才添加到列表中
+    const updatedMedals = medalExists
+        ? currentMedals
+        : [...currentMedals, newMedal]
+
+    // 更新用户信息：减少点亮星，添加新勋章
+    const updatedUserInfo = {
+        lightningStars: userState.lightningStars - 1,
+        medals: updatedMedals
+    }
+
+    // 更新用户状态
+    const success = updateUserState(updatedUserInfo)
+
+    if (success) {
+        // 显示成功提示
+        uni.showToast({
+            title: '徽章点亮成功',
+            icon: 'success'
+        })
+
+        // 重新初始化勋章数据，确保UI更新
+        initUserMedals()
+
+        // 更新本地勋章状态，确保UI立即反映变化
+        if (selectedMedalType.value === 'seasonal') {
+            const medalToUpdate = seasonalMedals.find(
+                (m) => m.id === selectedMedal.value.id
+            )
+            if (medalToUpdate) medalToUpdate.isActive = true
+        } else if (selectedMedalType.value === 'nature') {
+            const medalToUpdate = natureMedals.find(
+                (m) => m.id === selectedMedal.value.id
+            )
+            if (medalToUpdate) medalToUpdate.isActive = true
+        } else if (selectedMedalType.value === 'starRail') {
+            const medalToUpdate = allBtMedals.find(
+                (m) => m.id === selectedMedal.value.id
+            )
+            if (medalToUpdate) medalToUpdate.isActive = true
+        }
+    } else {
+        uni.showToast({
+            title: '徽章点亮失败',
+            icon: 'none'
+        })
+    }
+
+    // 关闭弹窗
+    showActivatePopup.value = false
+    selectedMedal.value = null
+    selectedMedalType.value = ''
+}
 </script>
 
 <style lang="scss" scoped>
@@ -665,6 +904,7 @@ const handleAvatarError = () => {
     margin-bottom: 20rpx;
     height: 300rpx;
     overflow: hidden;
+    z-index: 0;
 }
 
 .bg-image {
@@ -708,31 +948,6 @@ const handleAvatarError = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.dot {
-    display: inline-block;
-    width: 16rpx;
-    height: 16rpx;
-    border-radius: 50%;
-    background-color: #6080e5;
-}
-
-.medal-count {
-    color: #666;
-    font-size: 28rpx;
-    margin-bottom: 10rpx;
-}
-
-.medal-num {
-    font-size: 60rpx;
-    font-weight: bold;
-    color: #333;
-}
-
-.unit {
-    font-size: 30rpx;
-    font-weight: normal;
 }
 
 .user-level {
@@ -795,7 +1010,6 @@ const handleAvatarError = () => {
     border-radius: 16rpx 16rpx 0 0;
     margin-top: -20rpx;
     position: relative;
-    z-index: 5;
 }
 
 .nav-item {
@@ -943,5 +1157,173 @@ const handleAvatarError = () => {
 .medal-scroll {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
+}
+
+// medalAndStar-info 样式
+.medalAndStar-info {
+    display: flex;
+    width: 380rpx;
+    margin-top: 10rpx;
+}
+
+.medal-info,
+.star-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.medal-info {
+    margin-right: 40rpx;
+}
+
+.medal-count,
+.star-count {
+    color: #666;
+    font-size: 26rpx;
+    margin-bottom: 6rpx;
+}
+
+.medal-num {
+    font-size: 48rpx;
+    font-weight: bold;
+    color: #0fa5f5;
+}
+
+.star-num {
+    font-size: 48rpx;
+    font-weight: bold;
+    color: #ff9500;
+}
+
+.unit {
+    font-size: 24rpx;
+    font-weight: normal;
+}
+
+// 点亮徽章弹窗
+.popup-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.activate-popup {
+    background-color: #fff;
+    padding: 40rpx;
+    border-radius: 20rpx;
+    width: 80%;
+    max-width: 600rpx;
+}
+
+.popup-title {
+    font-size: 30rpx;
+    font-weight: bold;
+    margin-bottom: 20rpx;
+}
+
+.popup-content {
+    margin-bottom: 20rpx;
+}
+
+.popup-medal-img-container {
+    width: 200rpx;
+    height: 200rpx;
+    margin: 0 auto 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+}
+
+.popup-medal-img {
+    width: 180rpx;
+    height: 180rpx;
+    object-fit: contain;
+}
+
+.popup-medal-name {
+    font-size: 28rpx;
+    font-weight: bold;
+    margin-bottom: 10rpx;
+}
+
+.popup-desc {
+    color: #666;
+    margin-bottom: 20rpx;
+}
+
+.popup-star-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20rpx;
+}
+
+.star-count {
+    font-size: 28rpx;
+    font-weight: bold;
+    margin-left: 10rpx;
+}
+
+.popup-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20rpx;
+}
+
+.btn {
+    padding: 10rpx 20rpx;
+    border: none;
+    width: 200rpx;
+    border-radius: 10rpx;
+    font-size: 28rpx;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #ddd;
+}
+
+.confirm-btn {
+    background-color: #008ef5;
+    color: #fff;
+}
+
+.confirm-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.activate-btn {
+    background-color: #ff9500;
+    color: #fff;
+    font-size: 24rpx;
+    padding: 6rpx 16rpx;
+    border-radius: 20rpx;
+    margin-top: 6rpx;
+}
+
+.medal-wrapper-selected {
+    border: 3rpx solid #ff9500;
+    box-shadow: 0 0 10rpx rgba(255, 149, 0, 0.5);
+}
+
+.medal-wrapper-selected .inactive-medal {
+    filter: grayscale(0%) opacity(70%);
+}
+
+.medal-wrapper,
+.medal-name,
+.activate-btn {
+    position: relative;
+    z-index: 5;
 }
 </style>

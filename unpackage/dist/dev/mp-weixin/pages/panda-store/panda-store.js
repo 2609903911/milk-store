@@ -237,7 +237,7 @@ const _sfc_main = {
           size: "24"
         }),
         b: common_vendor.o(goBack),
-        c: common_assets._imports_0$8,
+        c: common_assets._imports_0$7,
         d: common_vendor.o((...args) => _ctx.showEarnCoinsPopup && _ctx.showEarnCoinsPopup(...args)),
         e: common_assets._imports_1$3,
         f: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),

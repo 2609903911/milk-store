@@ -114,7 +114,7 @@ const _sfc_main = {
         }),
         b: loading.value
       }, loading.value ? {
-        c: common_assets._imports_0$11
+        c: common_assets._imports_0$10
       } : {}, {
         d: scrollToView.value,
         e: common_vendor.o(loadMoreHistory),

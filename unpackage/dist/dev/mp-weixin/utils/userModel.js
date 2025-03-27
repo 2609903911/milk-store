@@ -253,6 +253,8 @@ const createDefaultUserInfo = () => {
     // 收货地址列表
     pandaCoins: 856,
     // 熊猫币
+    lightningStars: 5,
+    // 点亮星，用于点亮勋章
     coupons: exampleCoupons,
     // 优惠券列表，默认赠送六种不同类型的优惠券
     medals: defaultMedals,

@@ -85,7 +85,7 @@ const _sfc_main = {
       }, searchText.value ? common_vendor.e({
         j: searchResults.value.length === 0
       }, searchResults.value.length === 0 ? {
-        k: common_assets._imports_0$10
+        k: common_assets._imports_0$9
       } : {
         l: common_vendor.f(searchResults.value, (item, index, i0) => {
           return {

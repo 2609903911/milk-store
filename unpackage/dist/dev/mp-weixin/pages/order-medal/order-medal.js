@@ -23,7 +23,7 @@ const _sfc_main = {
     const medalTypes = common_vendor.reactive([
       "二十四节气限定",
       "大自然限定微章",
-      "鲜果限定",
+      "崩铁联动限定",
       "等级徽章"
     ]);
     const allSeasonalMedals = common_vendor.reactive([
@@ -192,6 +192,80 @@ const _sfc_main = {
         isActive: false
       }
     ]);
+    const allBtMedals = common_vendor.reactive([
+      {
+        id: "star_medal_01",
+        name: "开拓者-穹",
+        icon: "../../static/images/medal/bt-star-01.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_02",
+        name: "开拓者-星",
+        icon: "../../static/images/medal/bt-star-02.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_03",
+        name: "垃圾桶",
+        icon: "../../static/images/medal/bt-star-03.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_04",
+        name: "景元",
+        icon: "../../static/images/medal/bt-star-04.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_05",
+        name: "星核猎手-卡芙卡",
+        icon: "../../static/images/medal/bt-star-05.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_06",
+        name: "星核猎手-刃",
+        icon: "../../static/images/medal/bt-star-06.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_07",
+        name: "开拓者-三月七",
+        icon: "../../static/images/medal/bt-star-07.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_08",
+        name: "开拓者-姬子",
+        icon: "../../static/images/medal/bt-star-08.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_09",
+        name: "开拓者-瓦尔特",
+        icon: "../../static/images/medal/bt-star-09.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_10",
+        name: "开拓者-丹恒",
+        icon: "../../static/images/medal/bt-star-10.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_11",
+        name: "假面愚者-花火",
+        icon: "../../static/images/medal/bt-star-11.png",
+        isActive: false
+      },
+      {
+        id: "star_medal_12",
+        name: "假面愚者-桑博",
+        icon: "../../static/images/medal/bt-star-12.png",
+        isActive: false
+      }
+    ]);
     const allLevelMedals = common_vendor.reactive([
       {
         id: "rank_01",
@@ -230,22 +304,10 @@ const _sfc_main = {
         isActive: false
       }
     ]);
-    const seasonalMedals = common_vendor.ref([...allSeasonalMedals]);
-    const natureMedals = common_vendor.ref([...allNatureMedals]);
-    const levelMedals = common_vendor.ref([...allLevelMedals]);
+    const seasonalMedals = common_vendor.reactive([...allSeasonalMedals]);
+    const natureMedals = common_vendor.reactive([...allNatureMedals]);
+    const levelMedals = common_vendor.reactive([...allLevelMedals]);
     const lastAcquiredMedal = common_vendor.ref(null);
-    const totalActiveMedals = common_vendor.computed(() => {
-      const seasonalActive = seasonalMedals.value.filter(
-        (medal) => medal.isActive
-      ).length;
-      const natureActive = natureMedals.value.filter(
-        (medal) => medal.isActive
-      ).length;
-      const levelActive = levelMedals.value.filter(
-        (medal) => medal.isActive
-      ).length;
-      return seasonalActive + natureActive + levelActive;
-    });
     const initUserMedals = () => {
       if (!utils_userState.userState || !utils_userState.userState.medals || !Array.isArray(utils_userState.userState.medals)) {
         return;
@@ -253,15 +315,20 @@ const _sfc_main = {
       const userSeasonalMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "seasonal");
       const userNatureMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "nature");
       utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "level");
-      seasonalMedals.value.forEach((medal) => {
+      const userStarRailMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "starRail");
+      seasonalMedals.forEach((medal) => {
         const userMedal = userSeasonalMedals.find((m) => m.id === medal.id);
-        medal.isActive = !!userMedal;
+        medal.isActive = userMedal ? userMedal.isActive !== false : false;
       });
-      natureMedals.value.forEach((medal) => {
+      natureMedals.forEach((medal) => {
         const userMedal = userNatureMedals.find((m) => m.id === medal.id);
-        medal.isActive = !!userMedal;
+        medal.isActive = userMedal ? userMedal.isActive !== false : false;
       });
-      levelMedals.value.forEach((medal, index) => {
+      allBtMedals.forEach((medal) => {
+        const userMedal = userStarRailMedals.find((m) => m.id === medal.id);
+        medal.isActive = userMedal ? userMedal.isActive !== false : false;
+      });
+      levelMedals.forEach((medal, index) => {
         medal.isActive = userLevel.value >= index + 1;
       });
       if (utils_userState.userState.medals.length > 0) {
@@ -296,11 +363,112 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:559", "头像加载失败，使用默认头像");
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:741", "头像加载失败，使用默认头像");
+    };
+    const selectedItemId = common_vendor.ref(null);
+    const selectMedal = (medal, type) => {
+      if (medal.isActive) {
+        return;
+      }
+      if (selectedItemId.value === medal.id) {
+        selectedItemId.value = null;
+      } else {
+        selectedItemId.value = medal.id;
+      }
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:762", "当前选中徽章ID:", selectedItemId.value);
+    };
+    const handleMedalClick = (medal, type) => {
+      selectedMedal.value = medal;
+      selectedMedalType.value = type;
+      showActivatePopup.value = true;
+      selectedItemId.value = null;
+    };
+    const showActivatePopup = common_vendor.ref(false);
+    const selectedMedal = common_vendor.ref(null);
+    const selectedMedalType = common_vendor.ref("");
+    const cancelActivate = () => {
+      showActivatePopup.value = false;
+      selectedMedal.value = null;
+      selectedMedalType.value = "";
+    };
+    const confirmActivate = () => {
+      if (!utils_userState.userState.lightningStars || utils_userState.userState.lightningStars <= 0) {
+        common_vendor.index.showToast({
+          title: "点亮星不足",
+          icon: "none"
+        });
+        return;
+      }
+      if (!selectedMedal.value || !selectedMedalType.value) {
+        return;
+      }
+      let typeDescription = "限定徽章";
+      switch (selectedMedalType.value) {
+        case "seasonal":
+          typeDescription = "二十四节气限定徽章";
+          break;
+        case "nature":
+          typeDescription = "大自然限定徽章";
+          break;
+        case "starRail":
+          typeDescription = "星穹铁道限定徽章";
+          break;
+      }
+      const newMedal = {
+        id: selectedMedal.value.id,
+        name: selectedMedal.value.name,
+        icon: selectedMedal.value.icon,
+        type: selectedMedalType.value,
+        description: `${typeDescription}：${selectedMedal.value.name}`,
+        acquireTime: Date.now(),
+        isActive: true
+      };
+      const currentMedals = [...utils_userState.userState.medals || []];
+      const medalExists = currentMedals.some((medal) => medal.id === newMedal.id);
+      const updatedMedals = medalExists ? currentMedals : [...currentMedals, newMedal];
+      const updatedUserInfo = {
+        lightningStars: utils_userState.userState.lightningStars - 1,
+        medals: updatedMedals
+      };
+      const success = utils_userState.updateUserState(updatedUserInfo);
+      if (success) {
+        common_vendor.index.showToast({
+          title: "徽章点亮成功",
+          icon: "success"
+        });
+        initUserMedals();
+        if (selectedMedalType.value === "seasonal") {
+          const medalToUpdate = seasonalMedals.find(
+            (m) => m.id === selectedMedal.value.id
+          );
+          if (medalToUpdate)
+            medalToUpdate.isActive = true;
+        } else if (selectedMedalType.value === "nature") {
+          const medalToUpdate = natureMedals.find(
+            (m) => m.id === selectedMedal.value.id
+          );
+          if (medalToUpdate)
+            medalToUpdate.isActive = true;
+        } else if (selectedMedalType.value === "starRail") {
+          const medalToUpdate = allBtMedals.find(
+            (m) => m.id === selectedMedal.value.id
+          );
+          if (medalToUpdate)
+            medalToUpdate.isActive = true;
+        }
+      } else {
+        common_vendor.index.showToast({
+          title: "徽章点亮失败",
+          icon: "none"
+        });
+      }
+      showActivatePopup.value = false;
+      selectedMedal.value = null;
+      selectedMedalType.value = "";
     };
     return (_ctx, _cache) => {
-      var _a2;
-      return {
+      var _a2, _b2, _c2;
+      return common_vendor.e({
         a: common_assets._imports_0$6,
         b: common_vendor.p({
           type: "left",
@@ -312,9 +480,10 @@ const _sfc_main = {
         e: common_vendor.o(handleAvatarError),
         f: common_vendor.t(userNickname.value),
         g: common_vendor.t(userLevel.value),
-        h: common_vendor.t(totalActiveMedals.value),
-        i: (_a2 = lastAcquiredMedal.value) == null ? void 0 : _a2.icon,
-        j: common_vendor.f(medalTypes, (item, index, i0) => {
+        h: common_vendor.t(common_vendor.unref(utils_userState.userState).medals ? common_vendor.unref(utils_userState.userState).medals.length : 0),
+        i: common_vendor.t(common_vendor.unref(utils_userState.userState).lightningStars || 0),
+        j: (_a2 = lastAcquiredMedal.value) == null ? void 0 : _a2.icon,
+        k: common_vendor.f(medalTypes, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index,
@@ -322,8 +491,56 @@ const _sfc_main = {
             d: common_vendor.o(($event) => switchType(index), index)
           };
         }),
-        k: navScrollLeft.value,
-        l: common_vendor.f(seasonalMedals.value, (item, index, i0) => {
+        l: navScrollLeft.value,
+        m: common_vendor.f(seasonalMedals, (item, index, i0) => {
+          return common_vendor.e({
+            a: item.icon,
+            b: !item.isActive ? 1 : "",
+            c: !item.isActive ? 1 : "",
+            d: !item.isActive && selectedItemId.value === item.id ? 1 : "",
+            e: common_vendor.o(($event) => selectMedal(item), index),
+            f: common_vendor.t(item.name),
+            g: !item.isActive ? 1 : "",
+            h: !item.isActive && selectedItemId.value === item.id
+          }, !item.isActive && selectedItemId.value === item.id ? {
+            i: common_vendor.o(($event) => handleMedalClick(item, "seasonal"), index)
+          } : {}, {
+            j: index
+          });
+        }),
+        n: common_vendor.f(natureMedals, (item, index, i0) => {
+          return common_vendor.e({
+            a: item.icon,
+            b: !item.isActive ? 1 : "",
+            c: !item.isActive ? 1 : "",
+            d: !item.isActive && selectedItemId.value === item.id ? 1 : "",
+            e: common_vendor.o(($event) => selectMedal(item), index),
+            f: common_vendor.t(item.name),
+            g: !item.isActive ? 1 : "",
+            h: !item.isActive && selectedItemId.value === item.id
+          }, !item.isActive && selectedItemId.value === item.id ? {
+            i: common_vendor.o(($event) => handleMedalClick(item, "nature"), index)
+          } : {}, {
+            j: index
+          });
+        }),
+        o: common_vendor.f(allBtMedals, (item, index, i0) => {
+          return common_vendor.e({
+            a: item.icon,
+            b: !item.isActive ? 1 : "",
+            c: !item.isActive ? 1 : "",
+            d: !item.isActive && selectedItemId.value === item.id ? 1 : "",
+            e: common_vendor.o(($event) => selectMedal(item), index),
+            f: common_vendor.t(item.name),
+            g: !item.isActive ? 1 : "",
+            h: !item.isActive && selectedItemId.value === item.id
+          }, !item.isActive && selectedItemId.value === item.id ? {
+            i: common_vendor.o(($event) => handleMedalClick(item, "starRail"), index)
+          } : {}, {
+            j: index
+          });
+        }),
+        p: common_vendor.f(levelMedals, (item, index, i0) => {
           return {
             a: item.icon,
             b: !item.isActive ? 1 : "",
@@ -333,36 +550,21 @@ const _sfc_main = {
             f: index
           };
         }),
-        m: common_vendor.f(natureMedals.value, (item, index, i0) => {
-          return {
-            a: item.icon,
-            b: !item.isActive ? 1 : "",
-            c: !item.isActive ? 1 : "",
-            d: common_vendor.t(item.name),
-            e: !item.isActive ? 1 : "",
-            f: index
-          };
+        q: currentType.value,
+        r: common_vendor.o(swiperChange),
+        s: showActivatePopup.value
+      }, showActivatePopup.value ? {
+        t: (_b2 = selectedMedal.value) == null ? void 0 : _b2.icon,
+        v: common_vendor.t((_c2 = selectedMedal.value) == null ? void 0 : _c2.name),
+        w: common_vendor.t(common_vendor.unref(utils_userState.userState).lightningStars || 0),
+        x: common_vendor.o(cancelActivate),
+        y: common_vendor.t((common_vendor.unref(utils_userState.userState).lightningStars || 0) <= 0 ? "点亮星不足" : "确认点亮"),
+        z: common_vendor.o(confirmActivate),
+        A: (common_vendor.unref(utils_userState.userState).lightningStars || 0) <= 0,
+        B: common_vendor.o(() => {
         }),
-        n: common_assets._imports_0$7,
-        o: common_vendor.f(levelMedals.value, (item, index, i0) => {
-          return {
-            a: item.icon,
-            b: !item.isActive ? 1 : "",
-            c: !item.isActive ? 1 : "",
-            d: common_vendor.t(item.name),
-            e: !item.isActive ? 1 : "",
-            f: index
-          };
-        }),
-        p: currentType.value,
-        q: common_vendor.o(swiperChange),
-        r: common_vendor.f(medalTypes, (item, index, i0) => {
-          return {
-            a: index,
-            b: currentType.value === index ? 1 : ""
-          };
-        })
-      };
+        C: common_vendor.o(cancelActivate)
+      } : {});
     };
   }
 };
