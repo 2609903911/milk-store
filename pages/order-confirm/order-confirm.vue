@@ -151,6 +151,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import CouponSelect from '../components/coupon-select.vue'
 import { userState } from '../../utils/userState'
+import { updateUserState } from '../../utils/userState'
 
 // 定义数据
 const orderItems = ref([])
@@ -300,9 +301,19 @@ const handlePayment = () => {
             (c) => c.id === selectedCoupon.value.id
         )
         if (index !== -1) {
+            console.log('优惠券已使用')
             userState.coupons[index].status = 'used'
+            // 记录优惠券使用时间
+            userState.coupons[index].usedTime = Date.now()
+            console.log('优惠券状态:', userState.coupons[index].status)
+            console.log(
+                '优惠券使用时间:',
+                new Date(userState.coupons[index].usedTime).toLocaleString()
+            )
             // 更新本地存储中的优惠券状态
-            uni.setStorageSync('userCoupons', userState.coupons)
+            // uni.setStorageSync('userCoupons', userState.coupons)
+            // 使用updateUserState保存完整的用户状态
+            updateUserState({ coupons: userState.coupons })
         }
     }
 

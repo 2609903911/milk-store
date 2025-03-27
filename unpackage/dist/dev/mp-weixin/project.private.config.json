@@ -9,8 +9,8 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/order-medal/order-medal",
-          "pathName": "pages/order-medal/order-medal",
+          "name": "pages/my-orders/my-orders",
+          "pathName": "pages/my-orders/my-orders",
           "query": "",
           "launchMode": "default",
           "scene": null
