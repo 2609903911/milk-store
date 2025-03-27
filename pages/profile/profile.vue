@@ -34,7 +34,7 @@
             <!-- 账户信息区域 -->
             <view class="account-section">
                 <view class="account-row">
-                    <view class="account-item">
+                    <view class="account-item" @click="navigateToPandaStore">
                         <view class="account-label">熊猫币</view>
                         <view class="account-value">{{
                             userState.pandaCoins
@@ -189,6 +189,13 @@ const goToMall = () => {
 const navigateToCoupons = () => {
     uni.navigateTo({
         url: '/pages/coupons/coupons'
+    })
+}
+
+// 在 script setup 部分添加跳转方法
+const navigateToPandaStore = () => {
+    uni.navigateTo({
+        url: '/pages/panda-store/panda-store'
     })
 }
 

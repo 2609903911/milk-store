@@ -145,21 +145,41 @@
                 </scroll-view>
             </swiper-item>
 
-            <!-- 鲜果限定 -->
+            <!-- 崩铁联动限定 -->
             <swiper-item>
                 <scroll-view
                     scroll-y="true"
                     class="medal-scroll"
                     :show-scrollbar="false"
                 >
-                    <view class="type-title">鲜果限定</view>
+                    <view class="type-title">崩铁联动限定</view>
                     <view class="medal-grid">
-                        <view class="empty-tip">
-                            <image
-                                class="empty-icon"
-                                src="../../static/images/medal/empty-icon.png"
-                            ></image>
-                            <text>暂无鲜果限定微章</text>
+                        <view class="medal-row">
+                            <view
+                                class="medal-item"
+                                v-for="(item, index) in allBtMedals"
+                                :key="index"
+                            >
+                                <view
+                                    class="medal-wrapper"
+                                    :class="{
+                                        'medal-wrapper-inactive': !item.isActive
+                                    }"
+                                >
+                                    <image
+                                        class="medal-pic"
+                                        :src="item.icon"
+                                        :class="{
+                                            'inactive-medal': !item.isActive
+                                        }"
+                                    ></image>
+                                </view>
+                                <text
+                                    class="medal-name"
+                                    :class="{ 'inactive-text': !item.isActive }"
+                                    >{{ item.name }}</text
+                                >
+                            </view>
                         </view>
                     </view>
                 </scroll-view>
@@ -205,17 +225,6 @@
                 </scroll-view>
             </swiper-item>
         </swiper>
-
-        <!-- 页面指示器 -->
-        <view class="indicator">
-            <view
-                v-for="(item, index) in medalTypes"
-                :key="index"
-                class="indicator-dot"
-                :class="{ active: currentType === index }"
-            >
-            </view>
-        </view>
     </view>
 </template>
 
@@ -240,7 +249,7 @@ const navScrollLeft = ref(0)
 const medalTypes = reactive([
     '二十四节气限定',
     '大自然限定微章',
-    '鲜果限定',
+    '崩铁联动限定',
     '等级徽章'
 ])
 
@@ -414,6 +423,81 @@ const allNatureMedals = reactive([
     }
 ])
 
+// 崩铁联动限定微章 - 所有可能的勋章
+const allBtMedals = reactive([
+    {
+        id: 'star_medal_01',
+        name: '开拓者-穹',
+        icon: '../../static/images/medal/bt-star-01.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_02',
+        name: '开拓者-星',
+        icon: '../../static/images/medal/bt-star-02.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_03',
+        name: '垃圾桶',
+        icon: '../../static/images/medal/bt-star-03.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_04',
+        name: '景元',
+        icon: '../../static/images/medal/bt-star-04.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_05',
+        name: '星河猎手-卡芙卡',
+        icon: '../../static/images/medal/bt-star-05.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_06',
+        name: '星河猎手-刃',
+        icon: '../../static/images/medal/bt-star-06.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_07',
+        name: '开拓者-三月七',
+        icon: '../../static/images/medal/bt-star-07.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_08',
+        name: '开拓者-姬子',
+        icon: '../../static/images/medal/bt-star-08.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_09',
+        name: '开拓者-瓦尔特',
+        icon: '../../static/images/medal/bt-star-09.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_10',
+        name: '开拓者-丹恒',
+        icon: '../../static/images/medal/bt-star-10.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_11',
+        name: '假面愚者-花火',
+        icon: '../../static/images/medal/bt-star-11.png',
+        isActive: false
+    },
+    {
+        id: 'star_medal_12',
+        name: '假面愚者-桑博',
+        icon: '../../static/images/medal/bt-star-12.png',
+        isActive: false
+    }
+])
 // 等级徽章 - 所有可能的勋章
 const allLevelMedals = reactive([
     {
@@ -564,7 +648,6 @@ const handleAvatarError = () => {
 .medal-container {
     background-color: #f2f6ff;
     min-height: 100vh;
-    padding-bottom: 30rpx;
 }
 
 // 头部导航
@@ -679,8 +762,8 @@ const handleAvatarError = () => {
 
 .medal-image {
     position: absolute;
-    width: 120rpx;
-    height: 120rpx;
+    width: 200rpx;
+    height: 200rpx;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
