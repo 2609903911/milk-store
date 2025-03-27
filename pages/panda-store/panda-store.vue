@@ -125,10 +125,10 @@
                                             COUPON_TYPES.SPECIAL_PRICE
                                         "
                                     >
-                                        <text class="symbol">¥</text>
                                         <text class="value">{{
                                             coupon.value
                                         }}</text>
+                                        <text class="unit">颗</text>
                                     </template>
                                     <template
                                         v-else-if="
@@ -214,10 +214,20 @@
             <view class="success-popup" @click.stop>
                 <view class="success-icon">🎉</view>
                 <view class="success-title">兑换成功</view>
-                <view class="success-desc">优惠券已添加到您的账户</view>
+                <view class="success-desc">
+                    {{
+                        exchangedCoupon?.category === 'lightStar'
+                            ? '点亮星已添加到您的账户'
+                            : '优惠券已添加到您的账户'
+                    }}
+                </view>
                 <view class="success-btns">
                     <button class="success-btn" @click="navigateToCoupons">
-                        查看我的优惠券
+                        {{
+                            exchangedCoupon?.category === 'lightStar'
+                                ? '查看我的徽章'
+                                : '查看我的优惠券'
+                        }}
                     </button>
                     <button class="cancel-btn" @click="closeSuccessPopup">
                         继续浏览
@@ -240,7 +250,7 @@ import {
 } from '../../utils/couponModel'
 
 // 标签页
-const tabs = ref(['人气兑换', '折扣券', '现金券', '免费券', '特价券'])
+const tabs = ref(['人气兑换', '折扣券', '现金券', '免费券', '点亮星'])
 const currentTab = ref(0)
 
 // 当前显示的优惠券列表
@@ -310,17 +320,39 @@ const allCoupons = reactive([
         coinsCost: 300,
         category: 'free'
     },
-    // 特价券
+    // 点亮星商品
     {
-        id: 'ex_special_1',
-        title: '杨梅吐气特价券',
+        id: 'ex_star_1',
+        title: '点亮星 x1',
         type: COUPON_TYPES.SPECIAL_PRICE,
-        value: 9.9,
+        value: 1,
         minOrderAmount: 0,
-        description: '杨梅吐气特价9.9元',
-        validity: '7天',
+        description: '点亮徽章的星星，永久有效',
+        validity: '永久',
         coinsCost: 180,
-        category: 'specialPrice'
+        category: 'lightStar'
+    },
+    {
+        id: 'ex_star_3',
+        title: '点亮星 x3',
+        type: COUPON_TYPES.SPECIAL_PRICE,
+        value: 3,
+        minOrderAmount: 0,
+        description: '点亮徽章的星星，永久有效',
+        validity: '永久',
+        coinsCost: 500,
+        category: 'lightStar'
+    },
+    {
+        id: 'ex_star_5',
+        title: '点亮星 x5',
+        type: COUPON_TYPES.SPECIAL_PRICE,
+        value: 5,
+        minOrderAmount: 0,
+        description: '点亮徽章的星星，永久有效',
+        validity: '永久',
+        coinsCost: 800,
+        category: 'lightStar'
     },
     // 免运费券
     {
@@ -348,7 +380,7 @@ const updateCouponList = () => {
         couponList.value = allCoupons
     } else {
         // 根据类型过滤
-        const categoryMap = ['', 'discount', 'cash', 'free', 'specialPrice']
+        const categoryMap = ['', 'discount', 'cash', 'free', 'lightStar']
         const selectedCategory = categoryMap[currentTab.value]
 
         couponList.value = allCoupons.filter(
@@ -373,7 +405,7 @@ const getCouponColorClass = (type) => {
         case COUPON_TYPES.FREE:
             return 'free-coupon'
         case COUPON_TYPES.SPECIAL_PRICE:
-            return 'special-coupon'
+            return 'lightstar-coupon'
         case COUPON_TYPES.SHIPPING:
             return 'shipping-coupon'
         default:
@@ -413,12 +445,42 @@ const exchangeCoupon = (coupon) => {
     // 减少熊猫币
     const newCoins = userState.pandaCoins - coupon.coinsCost
 
-    // 创建新的优惠券实例
+    // 创建新的优惠券实例或增加点亮星
     let newCoupon
     const now = Date.now()
     const endTime = now + 30 * 24 * 60 * 60 * 1000 // 默认30天后过期
 
-    // 根据不同类型创建对应优惠券
+    // 处理点亮星特殊情况
+    if (coupon.category === 'lightStar') {
+        // 更新用户的点亮星数量
+        const currentStars = userState.lightningStars || 0
+        const updatedUserInfo = {
+            pandaCoins: newCoins,
+            lightningStars: currentStars + coupon.value
+        }
+
+        const success = updateUserState(updatedUserInfo)
+
+        if (success) {
+            // 显示成功提示
+            uni.showToast({
+                title: `获得${coupon.value}个点亮星`,
+                icon: 'success'
+            })
+            // 显示成功弹窗
+            showSuccessPopup.value = true
+            // 创建虚拟兑换记录对象用于显示
+            exchangedCoupon.value = {
+                title: coupon.title,
+                description: coupon.description,
+                value: coupon.value,
+                category: 'lightStar'
+            }
+        }
+        return
+    }
+
+    // 其他类型优惠券的处理逻辑保持不变
     switch (coupon.type) {
         case COUPON_TYPES.DISCOUNT:
             newCoupon = createDiscountCoupon(
@@ -491,9 +553,15 @@ const closeSuccessPopup = () => {
 // 导航到我的优惠券页面
 const navigateToCoupons = () => {
     showSuccessPopup.value = false
-    uni.navigateTo({
-        url: '/pages/coupons/coupons'
-    })
+    if (exchangedCoupon.value?.category === 'lightStar') {
+        uni.navigateTo({
+            url: '/pages/order-medal/order-medal'
+        })
+    } else {
+        uni.navigateTo({
+            url: '/pages/coupons/coupons'
+        })
+    }
 }
 
 // 跳转到赚取熊猫币任务页面
@@ -993,8 +1061,8 @@ const goBack = () => {
     background-color: #5856d6;
 }
 
-.special-coupon .coupon-top {
-    background-color: #af52de;
+.lightstar-coupon .coupon-top {
+    background-color: #ff9500;
 }
 
 .shipping-coupon .coupon-top {

@@ -14,7 +14,7 @@ if (!Math) {
 const _sfc_main = {
   __name: "panda-store",
   setup(__props) {
-    const tabs = common_vendor.ref(["人气兑换", "折扣券", "现金券", "免费券", "特价券"]);
+    const tabs = common_vendor.ref(["人气兑换", "折扣券", "现金券", "免费券", "点亮星"]);
     const currentTab = common_vendor.ref(0);
     const couponList = common_vendor.ref([]);
     const showSuccessPopup = common_vendor.ref(false);
@@ -78,17 +78,39 @@ const _sfc_main = {
         coinsCost: 300,
         category: "free"
       },
-      // 特价券
+      // 点亮星商品
       {
-        id: "ex_special_1",
-        title: "杨梅吐气特价券",
+        id: "ex_star_1",
+        title: "点亮星 x1",
         type: utils_couponModel.COUPON_TYPES.SPECIAL_PRICE,
-        value: 9.9,
+        value: 1,
         minOrderAmount: 0,
-        description: "杨梅吐气特价9.9元",
-        validity: "7天",
+        description: "点亮徽章的星星，永久有效",
+        validity: "永久",
         coinsCost: 180,
-        category: "specialPrice"
+        category: "lightStar"
+      },
+      {
+        id: "ex_star_3",
+        title: "点亮星 x3",
+        type: utils_couponModel.COUPON_TYPES.SPECIAL_PRICE,
+        value: 3,
+        minOrderAmount: 0,
+        description: "点亮徽章的星星，永久有效",
+        validity: "永久",
+        coinsCost: 500,
+        category: "lightStar"
+      },
+      {
+        id: "ex_star_5",
+        title: "点亮星 x5",
+        type: utils_couponModel.COUPON_TYPES.SPECIAL_PRICE,
+        value: 5,
+        minOrderAmount: 0,
+        description: "点亮徽章的星星，永久有效",
+        validity: "永久",
+        coinsCost: 800,
+        category: "lightStar"
       },
       // 免运费券
       {
@@ -110,7 +132,7 @@ const _sfc_main = {
       if (currentTab.value === 0) {
         couponList.value = allCoupons;
       } else {
-        const categoryMap = ["", "discount", "cash", "free", "specialPrice"];
+        const categoryMap = ["", "discount", "cash", "free", "lightStar"];
         const selectedCategory = categoryMap[currentTab.value];
         couponList.value = allCoupons.filter(
           (coupon) => coupon.category === selectedCategory
@@ -130,7 +152,7 @@ const _sfc_main = {
         case utils_couponModel.COUPON_TYPES.FREE:
           return "free-coupon";
         case utils_couponModel.COUPON_TYPES.SPECIAL_PRICE:
-          return "special-coupon";
+          return "lightstar-coupon";
         case utils_couponModel.COUPON_TYPES.SHIPPING:
           return "shipping-coupon";
         default:
@@ -164,6 +186,28 @@ const _sfc_main = {
       const newCoins = utils_userState.userState.pandaCoins - coupon.coinsCost;
       let newCoupon;
       const now = Date.now();
+      if (coupon.category === "lightStar") {
+        const currentStars = utils_userState.userState.lightningStars || 0;
+        const updatedUserInfo2 = {
+          pandaCoins: newCoins,
+          lightningStars: currentStars + coupon.value
+        };
+        const success = utils_userState.updateUserState(updatedUserInfo2);
+        if (success) {
+          common_vendor.index.showToast({
+            title: `获得${coupon.value}个点亮星`,
+            icon: "success"
+          });
+          showSuccessPopup.value = true;
+          exchangedCoupon.value = {
+            title: coupon.title,
+            description: coupon.description,
+            value: coupon.value,
+            category: "lightStar"
+          };
+        }
+        return;
+      }
       switch (coupon.type) {
         case utils_couponModel.COUPON_TYPES.DISCOUNT:
           newCoupon = utils_couponModel.createDiscountCoupon(
@@ -222,15 +266,23 @@ const _sfc_main = {
       showSuccessPopup.value = false;
     };
     const navigateToCoupons = () => {
+      var _a;
       showSuccessPopup.value = false;
-      common_vendor.index.navigateTo({
-        url: "/pages/coupons/coupons"
-      });
+      if (((_a = exchangedCoupon.value) == null ? void 0 : _a.category) === "lightStar") {
+        common_vendor.index.navigateTo({
+          url: "/pages/order-medal/order-medal"
+        });
+      } else {
+        common_vendor.index.navigateTo({
+          url: "/pages/coupons/coupons"
+        });
+      }
     };
     const goBack = () => {
       common_vendor.index.navigateBack();
     };
     return (_ctx, _cache) => {
+      var _a, _b;
       return common_vendor.e({
         a: common_vendor.p({
           type: "left",
@@ -290,11 +342,13 @@ const _sfc_main = {
       } : {}, {
         m: showSuccessPopup.value
       }, showSuccessPopup.value ? {
-        n: common_vendor.o(navigateToCoupons),
-        o: common_vendor.o(closeSuccessPopup),
-        p: common_vendor.o(() => {
+        n: common_vendor.t(((_a = exchangedCoupon.value) == null ? void 0 : _a.category) === "lightStar" ? "点亮星已添加到您的账户" : "优惠券已添加到您的账户"),
+        o: common_vendor.t(((_b = exchangedCoupon.value) == null ? void 0 : _b.category) === "lightStar" ? "查看我的徽章" : "查看我的优惠券"),
+        p: common_vendor.o(navigateToCoupons),
+        q: common_vendor.o(closeSuccessPopup),
+        r: common_vendor.o(() => {
         }),
-        q: common_vendor.o(closeSuccessPopup)
+        s: common_vendor.o(closeSuccessPopup)
       } : {});
     };
   }

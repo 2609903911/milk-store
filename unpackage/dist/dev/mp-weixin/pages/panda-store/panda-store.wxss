@@ -421,8 +421,8 @@
 .free-coupon .coupon-top.data-v-21c67e85 {
   background-color: #5856d6;
 }
-.special-coupon .coupon-top.data-v-21c67e85 {
-  background-color: #af52de;
+.lightstar-coupon .coupon-top.data-v-21c67e85 {
+  background-color: #ff9500;
 }
 .shipping-coupon .coupon-top.data-v-21c67e85 {
   background-color: #007aff;

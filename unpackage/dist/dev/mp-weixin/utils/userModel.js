@@ -251,7 +251,7 @@ const createDefaultUserInfo = () => {
     // 生日，格式：YYYY-MM-DD
     addresses: [],
     // 收货地址列表
-    pandaCoins: 856,
+    pandaCoins: 5273,
     // 熊猫币
     lightningStars: 5,
     // 点亮星，用于点亮勋章
