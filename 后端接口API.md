@@ -238,5 +238,293 @@
 }
 ```
 
+## 产品接口
+
+### 获取所有产品
+
+获取所有激活状态的产品信息。
+
+- **URL**: `/api/milk-products`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 无
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "超级霸气水果茶",
+    "description": "采用新鲜水果，口感清爽，果香浓郁",
+    "price": 18.00,
+    "imageUrl": "/static/images/products/fruit-tea-1.jpg",
+    "category": {
+      "id": 1,
+      "name": "水果茶",
+      "description": "新鲜水果融合优质茶底"
+    },
+    "createdAt": "2023-04-01 12:00:00",
+    "updatedAt": "2023-04-01 12:00:00"
+  },
+  {
+    "id": 2,
+    "name": "芝芝芒芒",
+    "description": "优质茶底融合新鲜芒果果肉和芝士奶盖",
+    "price": 22.00,
+    "imageUrl": "/static/images/products/fruit-tea-2.jpg",
+    "category": {
+      "id": 1,
+      "name": "水果茶",
+      "description": "新鲜水果融合优质茶底"
+    },
+    "createdAt": "2023-04-01 12:00:00",
+    "updatedAt": "2023-04-01 12:00:00"
+  }
+  // 更多产品...
+]
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| id | Integer | 产品ID |
+| name | String | 产品名称 |
+| description | String | 产品描述 |
+| price | Decimal | 产品价格 |
+| imageUrl | String | 产品图片URL |
+| category | Object | 产品所属分类 |
+| category.id | Integer | 分类ID |
+| category.name | String | 分类名称 |
+| category.description | String | 分类描述 |
+| createdAt | String | 创建时间 |
+| updatedAt | String | 更新时间 |
+
+### 获取所有产品（包括非活跃产品）
+
+获取所有产品信息，包括非活跃状态的产品。
+
+- **URL**: `/api/milk-products/all`
+- **方法**: `GET`
+- **需要认证**: 是（管理员权限）
+- **参数**: 无
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**: 同上，但包含所有产品
+
+### 根据ID获取产品
+
+根据指定的ID获取产品详细信息。
+
+- **URL**: `/api/milk-products/{id}`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 
+  - `id`: 路径参数，产品ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "id": 1,
+  "name": "超级霸气水果茶",
+  "description": "采用新鲜水果，口感清爽，果香浓郁",
+  "price": 18.00,
+  "imageUrl": "/static/images/products/fruit-tea-1.jpg",
+  "category": {
+    "id": 1,
+    "name": "水果茶",
+    "description": "新鲜水果融合优质茶底"
+  },
+  "createdAt": "2023-04-01 12:00:00",
+  "updatedAt": "2023-04-01 12:00:00"
+}
+```
+
+#### 错误响应
+
+- **状态码**: 404 Not Found
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "timestamp": "2023-04-13T06:19:55.972+00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "产品不存在",
+  "path": "/api/milk-products/999"
+}
+```
+
+### 根据分类获取产品
+
+获取指定分类下的所有产品。
+
+- **URL**: `/api/milk-products/category/{categoryId}`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 
+  - `categoryId`: 路径参数，分类ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "超级霸气水果茶",
+    "description": "采用新鲜水果，口感清爽，果香浓郁",
+    "price": 18.00,
+    "imageUrl": "/static/images/products/fruit-tea-1.jpg",
+    "category": {
+      "id": 1,
+      "name": "水果茶",
+      "description": "新鲜水果融合优质茶底"
+    },
+    "createdAt": "2023-04-01 12:00:00",
+    "updatedAt": "2023-04-01 12:00:00"
+  },
+  {
+    "id": 2,
+    "name": "芝芝芒芒",
+    "description": "优质茶底融合新鲜芒果果肉和芝士奶盖",
+    "price": 22.00,
+    "imageUrl": "/static/images/products/fruit-tea-2.jpg",
+    "category": {
+      "id": 1,
+      "name": "水果茶",
+      "description": "新鲜水果融合优质茶底"
+    },
+    "createdAt": "2023-04-01 12:00:00",
+    "updatedAt": "2023-04-01 12:00:00"
+  }
+  // 更多产品...
+]
+```
+
+## 产品分类接口
+
+### 获取所有产品分类
+
+获取所有产品分类信息。
+
+- **URL**: `/api/categories`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 无
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "水果茶",
+    "description": "新鲜水果融合优质茶底"
+  },
+  {
+    "id": 2,
+    "name": "奶茶",
+    "description": "香浓奶茶，口感丝滑"
+  },
+  {
+    "id": 3,
+    "name": "咖啡",
+    "description": "精选咖啡豆，香气浓郁"
+  }
+  // 更多分类...
+]
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| id | Integer | 分类ID |
+| name | String | 分类名称 |
+| description | String | 分类描述 |
+
+### 根据ID获取产品分类
+
+根据指定的ID获取产品分类详细信息。
+
+- **URL**: `/api/categories/{id}`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 
+  - `id`: 路径参数，分类ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "id": 1,
+  "name": "水果茶",
+  "description": "新鲜水果融合优质茶底",
+  "products": [
+    {
+      "id": 1,
+      "name": "超级霸气水果茶",
+      "description": "采用新鲜水果，口感清爽，果香浓郁",
+      "price": 18.00,
+      "imageUrl": "/static/images/products/fruit-tea-1.jpg",
+      "createdAt": "2023-04-01 12:00:00",
+      "updatedAt": "2023-04-01 12:00:00"
+    },
+    {
+      "id": 2,
+      "name": "芝芝芒芒",
+      "description": "优质茶底融合新鲜芒果果肉和芝士奶盖",
+      "price": 22.00,
+      "imageUrl": "/static/images/products/fruit-tea-2.jpg",
+      "createdAt": "2023-04-01 12:00:00",
+      "updatedAt": "2023-04-01 12:00:00"
+    }
+    // 更多产品...
+  ]
+}
+```
+
+#### 错误响应
+
+- **状态码**: 404 Not Found
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "timestamp": "2023-04-13T06:19:55.972+00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "分类不存在",
+  "path": "/api/categories/999"
+}
+```
+
 ## 其他接口文档
 // 更多接口文档...
