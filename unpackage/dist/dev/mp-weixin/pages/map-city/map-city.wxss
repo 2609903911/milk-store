@@ -83,3 +83,25 @@
     padding: 4rpx;
     text-align: center;
 }
+
+/* 加载状态 */
+.loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.loading-text {
+    font-size: 32rpx;
+    color: #333;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20rpx 40rpx;
+    border-radius: 10rpx;
+    box-shadow: 0 0 10rpx rgba(0, 0, 0, 0.1);
+}
