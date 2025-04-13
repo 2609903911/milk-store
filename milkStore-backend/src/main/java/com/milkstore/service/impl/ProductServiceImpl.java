@@ -33,4 +33,9 @@ public class ProductServiceImpl implements ProductService {
     public List<MilkProduct> findByCategoryId(Integer categoryId) {
         return productMapper.findByCategoryId(categoryId);
     }
+    
+    @Override
+    public List<MilkProduct> findByName(String name) {
+        return productMapper.findByName(name);
+    }
 } 

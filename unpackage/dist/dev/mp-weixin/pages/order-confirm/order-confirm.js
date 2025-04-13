@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userState = require("../../utils/userState.js");
+const utils_api_orderApi = require("../../utils/api/orderApi.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -42,7 +43,7 @@ const _sfc_main = {
       try {
         const orderData = common_vendor.index.getStorageSync("orderConfirmData");
         if (orderData) {
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:199", "从本地存储获取订单数据:", orderData);
+          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:200", "从本地存储获取订单数据:", orderData);
           orderItems.value = orderData.items || [];
           totalPrice.value = orderData.totalPrice || "0.00";
           originalPrice.value = orderData.totalPrice || "0.00";
@@ -55,7 +56,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:219", "获取订单数据失败", error);
+        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:220", "获取订单数据失败", error);
         common_vendor.index.showToast({
           title: "获取订单数据失败",
           icon: "none"
@@ -73,7 +74,7 @@ const _sfc_main = {
         }
       });
     };
-    const handlePayment = () => {
+    const handlePayment = async () => {
       var _a, _b;
       const pages = getCurrentPages();
       pages.find((page) => page.route === "pages/index/index");
@@ -84,20 +85,12 @@ const _sfc_main = {
         (item) => item.id
       );
       common_vendor.index.setStorageSync("itemsToDeleteFromCart", selectedItemIds);
-      const now = /* @__PURE__ */ new Date();
-      const newOrder = {
-        id: "ORDER" + now.getTime(),
-        // 使用时间戳创建唯一ID
+      const orderData = {
         storeName: ((_a = orderConfirmData.store) == null ? void 0 : _a.name) || "默认店铺",
         storeAddress: ((_b = orderConfirmData.store) == null ? void 0 : _b.address) || "默认地址",
         deliveryType: orderConfirmData.deliveryType || "self",
-        status: "pending",
-        // 新订单状态为待取餐
-        time: now.getTime(),
         items: orderConfirmData.items || [],
-        // 使用打折后的价格
         totalPrice: totalPrice.value,
-        // 添加优惠信息
         discount: {
           amount: discountAmount.value,
           originalPrice: originalPrice.value,
@@ -109,40 +102,45 @@ const _sfc_main = {
           } : null
         }
       };
-      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:288", "创建新订单:", newOrder);
-      const savedOrders = common_vendor.index.getStorageSync("savedOrders") || [];
-      savedOrders.unshift(newOrder);
-      common_vendor.index.setStorageSync("savedOrders", savedOrders);
-      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:296", "订单已保存到本地存储");
-      if (selectedCoupon.value) {
-        const index = utils_userState.userState.coupons.findIndex(
-          (c) => c.id === selectedCoupon.value.id
-        );
-        if (index !== -1) {
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:304", "优惠券已使用");
-          utils_userState.userState.coupons[index].status = "used";
-          utils_userState.userState.coupons[index].usedTime = Date.now();
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:308", "优惠券状态:", utils_userState.userState.coupons[index].status);
-          common_vendor.index.__f__(
-            "log",
-            "at pages/order-confirm/order-confirm.vue:309",
-            "优惠券使用时间:",
-            new Date(utils_userState.userState.coupons[index].usedTime).toLocaleString()
+      try {
+        const newOrder = await utils_api_orderApi.createOrder(orderData);
+        common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:286", "订单创建成功:", newOrder);
+        if (selectedCoupon.value) {
+          const index = utils_userState.userState.coupons.findIndex(
+            (c) => c.id === selectedCoupon.value.id
           );
-          utils_userState.updateUserState({ coupons: utils_userState.userState.coupons });
+          if (index !== -1) {
+            common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:294", "优惠券已使用");
+            utils_userState.userState.coupons[index].status = "used";
+            utils_userState.userState.coupons[index].usedTime = Date.now();
+            common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:298", "优惠券状态:", utils_userState.userState.coupons[index].status);
+            common_vendor.index.__f__(
+              "log",
+              "at pages/order-confirm/order-confirm.vue:299",
+              "优惠券使用时间:",
+              new Date(utils_userState.userState.coupons[index].usedTime).toLocaleString()
+            );
+            utils_userState.updateUserState({ coupons: utils_userState.userState.coupons });
+          }
         }
+        common_vendor.index.showToast({
+          title: "模拟支付成功",
+          icon: "success",
+          success: () => {
+            setTimeout(() => {
+              common_vendor.index.switchTab({
+                url: "/pages/my-orders/my-orders"
+              });
+            }, 1500);
+          }
+        });
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:322", "创建订单失败:", error);
+        common_vendor.index.showToast({
+          title: "订单创建失败",
+          icon: "none"
+        });
       }
-      common_vendor.index.showToast({
-        title: "模拟支付成功",
-        icon: "success",
-        success: () => {
-          setTimeout(() => {
-            common_vendor.index.switchTab({
-              url: "/pages/my-orders/my-orders"
-            });
-          }, 1500);
-        }
-      });
     };
     const calculateTotalAmount = () => {
       totalAmount.value = orderItems.value.reduce((sum, item) => {
@@ -160,7 +158,7 @@ const _sfc_main = {
       showCouponSelect.value = true;
     };
     const handleCouponSelect = (coupon) => {
-      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:359", "优惠券选择:", coupon);
+      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:353", "优惠券选择:", coupon);
       totalPrice.value = originalPrice.value;
       let finalPrice = parseFloat(totalPrice.value);
       let discount = 0;
@@ -168,7 +166,7 @@ const _sfc_main = {
         selectedCoupon.value = coupon;
         if (coupon.type === "cash") {
           discount = coupon.value;
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:371", "减去的价格：", discount);
+          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:365", "减去的价格：", discount);
           finalPrice = Math.max(0, finalPrice - discount);
         } else if (coupon.type === "discount") {
           const originalAmount = parseFloat(originalPrice.value);
@@ -192,7 +190,7 @@ const _sfc_main = {
         }
         discountAmount.value = discount.toFixed(2);
         totalPrice.value = finalPrice.toFixed(2);
-        common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:407", "应用优惠券后:", {
+        common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:401", "应用优惠券后:", {
           优惠券: coupon.title,
           原价: originalPrice.value,
           折扣: discountAmount.value,

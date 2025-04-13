@@ -3,57 +3,106 @@
  * 提供产品相关的功能
  */
 
+// 产品数据服务
+import { productApi, categoryApi } from './api';
+
 /**
- * 获取产品列表
- * @returns {Promise<Array>} 产品列表
+ * 获取产品数据（包含分类和对应产品）
+ * @returns {Promise<Array>} 包含分类和产品的数组
  */
-export const getProductList = async () => {
-  // 模拟产品数据，实际应用中应该从API获取
+export const getProductData = async () => {
+  try {
+    // 1. 获取所有分类
+    const categories = await categoryApi.fetchCategories();
+    
+    // 2. 对每个分类获取对应的产品
+    const result = await Promise.all(
+      categories.map(async (category) => {
+        // 获取该分类下的产品
+        const products = await productApi.fetchProductsByCategory(category.id);
+        
+        // 转换为前端需要的格式
+        return {
+          name: category.name,
+          products: products.map(product => ({
+            id: product.id,
+            image: product.imageUrl || `/static/images/default-product.png`,
+            name: product.name,
+            desc: product.description,
+            price: product.price
+          }))
+        };
+      })
+    );
+    
+    return result;
+  } catch (error) {
+    console.error('获取产品数据失败:', error);
+    throw error;
+  }
+};
+
+/**
+ * 获取单个分类下的产品
+ * @param {Number} categoryId 分类ID
+ * @returns {Promise<Object>} 包含分类和产品的对象
+ */
+export const getCategoryProducts = async (categoryId) => {
+  try {
+    // 1. 获取分类信息
+    const category = await categoryApi.fetchCategoryById(categoryId);
+    if (!category) {
+      throw new Error('分类不存在');
+    }
+    
+    // 2. 获取该分类下的产品
+    const products = await productApi.fetchProductsByCategory(categoryId);
+    
+    // 3. 转换为前端需要的格式
+    return {
+      name: category.name,
+      products: products.map(product => ({
+        id: product.id,
+        image: product.imageUrl || `/static/images/default-product.png`,
+        name: product.name,
+        desc: product.description,
+        price: product.price
+      }))
+    };
+  } catch (error) {
+    console.error(`获取分类${categoryId}的产品失败:`, error);
+    throw error;
+  }
+};
+
+/**
+ * 获取默认的本地产品数据（当API请求失败时使用）
+ * @returns {Array} 默认产品数据（最小化版本）
+ */
+export const getDefaultProductData = () => {
+  // 返回一个最小的默认数据，仅用于在网络故障时显示基本界面
   return [
     {
-      id: 'p001',
-      name: '熊猫珍珠奶茶',
-      price: 18,
-      description: '招牌奶茶，口感香浓，珍珠Q弹',
-      category: '奶茶',
-      image: '/static/images/products/milktea1.png',
-      isPopular: true
+      name: "奶茶",
+      products: [
+        {
+          image: "/static/images/default-product.png",
+          name: "默认奶茶产品",
+          desc: "暂无产品数据，请检查网络连接",
+          price: 0
+        }
+      ]
     },
     {
-      id: 'p002',
-      name: '杨梅吐气',
-      price: 19,
-      description: '杨梅汁与气泡水结合，酸甜清爽',
-      category: '果茶',
-      image: '/static/images/products/fruittea1.png',
-      isPopular: true
-    },
-    {
-      id: 'p003',
-      name: '芋泥啵啵奶茶',
-      price: 22,
-      description: '香浓奶茶搭配芋泥和芋圆，层次丰富',
-      category: '奶茶',
-      image: '/static/images/products/milktea2.png',
-      isPopular: true
-    },
-    {
-      id: 'p004',
-      name: '芝士草莓茉莉',
-      price: 23,
-      description: '茉莉花茶底搭配草莓果酱和芝士奶盖',
-      category: '果茶',
-      image: '/static/images/products/fruittea2.png',
-      isPopular: false
-    },
-    {
-      id: 'p005',
-      name: '椰云拿铁',
-      price: 20,
-      description: '意式浓缩咖啡搭配椰乳奶盖',
-      category: '咖啡',
-      image: '/static/images/products/coffee1.png',
-      isPopular: false
+      name: "果茶",
+      products: [
+        {
+          image: "/static/images/default-product.png",
+          name: "默认果茶产品",
+          desc: "暂无产品数据，请检查网络连接",
+          price: 0
+        }
+      ]
     }
   ];
 }; 

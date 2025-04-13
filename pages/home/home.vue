@@ -257,6 +257,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { userState } from '../../utils/userState'
+import { bannerApi } from '../../utils/api'
 
 console.log(userState)
 
@@ -268,29 +269,9 @@ const bannerList = ref([])
 // 从后端获取轮播图数据
 const fetchBannerData = async () => {
     try {
-        const response = await uni.request({
-            url: 'http://localhost:8082/api/banners',
-            method: 'GET'
-        })
-
-        if (response.statusCode === 200 && response.data.code === 200) {
-            // 转换后端数据格式为前端所需格式
-            const banners = response.data.data.map((item) => {
-                return {
-                    tag: item.tag,
-                    title: [item.title1, item.title2],
-                    desc: [item.desc1, item.desc2],
-                    image: item.imageUrl,
-                    bgColor: item.bgColor
-                }
-            })
-            bannerList.value = banners
-            console.log('轮播图数据获取成功:', bannerList.value)
-        } else {
-            console.error('获取轮播图数据失败:', response.data.message)
-            // 加载本地备用数据
-            loadLocalBannerData()
-        }
+        const banners = await bannerApi.fetchBanners()
+        bannerList.value = banners
+        console.log('轮播图数据获取成功:', bannerList.value)
     } catch (error) {
         console.error('轮播图数据请求异常:', error)
         // 请求失败时加载本地备用数据

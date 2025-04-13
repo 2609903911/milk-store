@@ -329,16 +329,23 @@ watch(deliveryType, (newValue) => {
 
 // 页面加载时初始化数据
 onMounted(() => {
+    // 初始化数据
+    initData()
+
+    // 获取存储的门店信息
+    updateStoreInfo()
+
+    // 监听门店选择事件
+    uni.$on('store-selected', handleStoreSelected)
+
+    // 监听页面刷新事件
+    uni.$on('refresh-order-page', refreshPage)
+
     // 尝试从本地存储中获取配送方式
     const savedDeliveryType = uni.getStorageSync('deliveryType')
     if (savedDeliveryType) {
         deliveryType.value = savedDeliveryType
     }
-
-    // 初始化产品数据
-    initProductData()
-    // 加载产品数据
-    loadProductData()
 })
 
 // 轮播播报数据
@@ -397,10 +404,28 @@ const currentCategoryId = ref('product-0')
 // 分类数据
 const categories = ref([])
 
+// 是否正在加载产品数据
+const isLoading = ref(false)
+
 // 加载产品数据
-const loadProductData = () => {
-    const productData = getProductData()
-    categories.value = productData
+const loadProductData = async () => {
+    isLoading.value = true
+    try {
+        const productData = await getProductData()
+        categories.value = productData
+        console.log('产品数据加载成功')
+
+        // 计算分类高度
+        calculateHeights()
+    } catch (error) {
+        console.error('加载产品数据失败:', error)
+        uni.showToast({
+            title: '加载产品失败，请重试',
+            icon: 'none'
+        })
+    } finally {
+        isLoading.value = false
+    }
 }
 
 // 为每个分类及其产品计算高度，便于后续滚动计算
@@ -419,18 +444,13 @@ const calculateHeights = () => {
     categoryHeights.value = heights
 }
 
-onMounted(() => {
-    calculateHeights()
-
-    // 获取存储的门店信息
-    updateStoreInfo()
-
-    // 监听门店选择事件
-    uni.$on('store-selected', handleStoreSelected)
-
-    // 监听页面刷新事件
-    uni.$on('refresh-order-page', refreshPage)
-})
+// 初始化数据
+const initData = async () => {
+    // 初始化产品数据
+    await initProductData()
+    // 加载产品数据
+    await loadProductData()
+}
 
 // 添加onShow生命周期钩子，确保页面每次显示时都更新数据
 onShow(() => {

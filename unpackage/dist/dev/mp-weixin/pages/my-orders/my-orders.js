@@ -2,17 +2,18 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userState = require("../../utils/userState.js");
+const utils_api_orderApi = require("../../utils/api/orderApi.js");
 const _sfc_main = {
   __name: "my-orders",
   setup(__props, { expose: __expose }) {
-    common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:116", utils_userState.userState);
+    common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:117", utils_userState.userState);
     const hasOrders = common_vendor.ref(false);
     const orders = common_vendor.ref([]);
-    const refreshOrders = () => {
-      const savedOrders = common_vendor.index.getStorageSync("savedOrders");
-      if (savedOrders && savedOrders.length) {
+    const refreshOrders = async () => {
+      try {
+        const userOrders = await utils_api_orderApi.fetchUserOrders();
         let totalCoinsToAdd = 0;
-        savedOrders.forEach((order) => {
+        userOrders.forEach((order) => {
           var _a;
           if (order.status !== "cancelled" && !order.pandaCoins) {
             const coinsForOrder = getPandaCoins(
@@ -26,16 +27,21 @@ const _sfc_main = {
         if (totalCoinsToAdd > 0) {
           utils_userState.userState.pandaCoins += totalCoinsToAdd;
           utils_userState.updateUserState({ pandaCoins: utils_userState.userState.pandaCoins });
-          common_vendor.index.setStorageSync("savedOrders", savedOrders);
+          common_vendor.index.setStorageSync("savedOrders", userOrders);
           common_vendor.index.__f__(
             "log",
-            "at pages/my-orders/my-orders.vue:158",
+            "at pages/my-orders/my-orders.vue:160",
             `已添加${totalCoinsToAdd}熊猫币，当前总数：${utils_userState.userState.pandaCoins}`
           );
         }
-        orders.value = savedOrders;
-        hasOrders.value = true;
-      } else {
+        orders.value = userOrders;
+        hasOrders.value = userOrders.length > 0;
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:168", "获取订单列表失败:", error);
+        common_vendor.index.showToast({
+          title: "获取订单失败",
+          icon: "none"
+        });
         orders.value = [];
         hasOrders.value = false;
       }
@@ -96,7 +102,7 @@ const _sfc_main = {
     };
     const viewOrderDetail = (order) => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:250", "查看订单详情:", order.id);
+      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:257", "查看订单详情:", order.id);
       if (!order.pandaCoins && order.status !== "cancelled") {
         const coinsToAdd = getPandaCoins(
           order.totalPrice,
@@ -108,7 +114,7 @@ const _sfc_main = {
         utils_userState.updateUserState({ pandaCoins: utils_userState.userState.pandaCoins });
         common_vendor.index.__f__(
           "log",
-          "at pages/my-orders/my-orders.vue:272",
+          "at pages/my-orders/my-orders.vue:279",
           `已添加${coinsToAdd}熊猫币，当前总数：${utils_userState.userState.pandaCoins}`
         );
       }
@@ -117,21 +123,31 @@ const _sfc_main = {
         url: `/pages/order-detail/order-detail?orderId=${order.id}`
       });
     };
-    const cancelOrder = (index) => {
+    const cancelOrder = async (index) => {
       common_vendor.index.showModal({
         title: "提示",
         content: "确定要取消订单吗？",
-        success: function(res) {
+        success: async function(res) {
           if (res.confirm) {
-            orders.value[index].status = "cancelled";
-            if (orders.value[index].pandaCoins) {
-              utils_userState.userState.pandaCoins -= orders.value[index].pandaCoins;
+            try {
+              const orderId = orders.value[index].id;
+              const updatedOrder = await utils_api_orderApi.cancelOrder(orderId);
+              orders.value[index] = updatedOrder;
+              if (updatedOrder.pandaCoins) {
+                utils_userState.userState.pandaCoins -= updatedOrder.pandaCoins;
+                utils_userState.updateUserState({ pandaCoins: utils_userState.userState.pandaCoins });
+              }
+              common_vendor.index.showToast({
+                title: "订单已取消",
+                icon: "success"
+              });
+            } catch (error) {
+              common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:323", "取消订单失败:", error);
+              common_vendor.index.showToast({
+                title: "取消订单失败",
+                icon: "none"
+              });
             }
-            common_vendor.index.setStorageSync("savedOrders", orders.value);
-            common_vendor.index.showToast({
-              title: "订单已取消",
-              icon: "success"
-            });
           }
         }
       });
@@ -139,14 +155,15 @@ const _sfc_main = {
     const deleteOrder = (index) => {
       common_vendor.index.showModal({
         title: "提示",
-        content: "确定要删除这条订单记录吗？",
+        content: "确定要删除此订单吗？",
         success: function(res) {
           if (res.confirm) {
+            orders.value[index];
             orders.value.splice(index, 1);
+            common_vendor.index.setStorageSync("savedOrders", orders.value);
             if (orders.value.length === 0) {
               hasOrders.value = false;
             }
-            common_vendor.index.setStorageSync("savedOrders", orders.value);
             common_vendor.index.showToast({
               title: "订单已删除",
               icon: "success"

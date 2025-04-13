@@ -2,36 +2,20 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userState = require("../../utils/userState.js");
+const utils_api_bannerApi = require("../../utils/api/bannerApi.js");
 const _sfc_main = {
   __name: "home",
   setup(__props) {
-    common_vendor.index.__f__("log", "at pages/home/home.vue:261", utils_userState.userState);
+    common_vendor.index.__f__("log", "at pages/home/home.vue:262", utils_userState.userState);
     const currentSwiper = common_vendor.ref(0);
     const bannerList = common_vendor.ref([]);
     const fetchBannerData = async () => {
       try {
-        const response = await common_vendor.index.request({
-          url: "http://localhost:8082/api/banners",
-          method: "GET"
-        });
-        if (response.statusCode === 200 && response.data.code === 200) {
-          const banners = response.data.data.map((item) => {
-            return {
-              tag: item.tag,
-              title: [item.title1, item.title2],
-              desc: [item.desc1, item.desc2],
-              image: item.imageUrl,
-              bgColor: item.bgColor
-            };
-          });
-          bannerList.value = banners;
-          common_vendor.index.__f__("log", "at pages/home/home.vue:288", "轮播图数据获取成功:", bannerList.value);
-        } else {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:290", "获取轮播图数据失败:", response.data.message);
-          loadLocalBannerData();
-        }
+        const banners = await utils_api_bannerApi.fetchBanners();
+        bannerList.value = banners;
+        common_vendor.index.__f__("log", "at pages/home/home.vue:274", "轮播图数据获取成功:", bannerList.value);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:295", "轮播图数据请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:276", "轮播图数据请求异常:", error);
         loadLocalBannerData();
       }
     };
@@ -57,7 +41,7 @@ const _sfc_main = {
       });
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:370", "头像加载失败，使用默认头像");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:351", "头像加载失败，使用默认头像");
     };
     return (_ctx, _cache) => {
       return {

@@ -31,12 +31,14 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       common_vendor.index.__f__("log", "at pages/order/order.vue:327", "配送方式已更新:", newValue);
     });
     common_vendor.onMounted(() => {
+      initData();
+      updateStoreInfo();
+      common_vendor.index.$on("store-selected", handleStoreSelected);
+      common_vendor.index.$on("refresh-order-page", refreshPage);
       const savedDeliveryType = common_vendor.index.getStorageSync("deliveryType");
       if (savedDeliveryType) {
         deliveryType.value = savedDeliveryType;
       }
-      utils_productData.initProductData();
-      loadProductData();
     });
     const noticeList = common_vendor.ref([
       "周一现场下单立减5元，仅限堂食",
@@ -78,9 +80,23 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     });
     const currentCategoryId = common_vendor.ref("product-0");
     const categories = common_vendor.ref([]);
-    const loadProductData = () => {
-      const productData = utils_productData.getProductData();
-      categories.value = productData;
+    const isLoading = common_vendor.ref(false);
+    const loadProductData = async () => {
+      isLoading.value = true;
+      try {
+        const productData = await utils_productData.getProductData();
+        categories.value = productData;
+        common_vendor.index.__f__("log", "at pages/order/order.vue:416", "产品数据加载成功");
+        calculateHeights();
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order/order.vue:421", "加载产品数据失败:", error);
+        common_vendor.index.showToast({
+          title: "加载产品失败，请重试",
+          icon: "none"
+        });
+      } finally {
+        isLoading.value = false;
+      }
     };
     const categoryHeights = common_vendor.ref([]);
     const calculateHeights = () => {
@@ -93,12 +109,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
       categoryHeights.value = heights;
     };
-    common_vendor.onMounted(() => {
-      calculateHeights();
-      updateStoreInfo();
-      common_vendor.index.$on("store-selected", handleStoreSelected);
-      common_vendor.index.$on("refresh-order-page", refreshPage);
-    });
+    const initData = async () => {
+      await utils_productData.initProductData();
+      await loadProductData();
+    };
     common_vendor.onShow(() => {
       updateStoreInfo();
       loadUserCoupons();
@@ -108,8 +122,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       common_vendor.index.$off("refresh-order-page", refreshPage);
     });
     const handleStoreSelected = (data) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:452", "收到门店选择事件:", data);
-      common_vendor.index.__f__("log", "at pages/order/order.vue:453", data);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:472", "收到门店选择事件:", data);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:473", data);
       if (data) {
         if (data.name) {
           shopName.value = data.name;
@@ -130,10 +144,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       }
     };
     const updateStoreInfo = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:479", "更新门店信息");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:499", "更新门店信息");
       const selectedStore = common_vendor.index.getStorageSync("selectedStore");
       if (selectedStore) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:482", "从存储中获取到的门店信息:", selectedStore);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:502", "从存储中获取到的门店信息:", selectedStore);
         let updated = false;
         if (selectedStore.name && selectedStore.name !== shopName.value) {
           shopName.value = selectedStore.name;
@@ -149,7 +163,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
         }
         if (updated) {
           common_vendor.nextTick$1(() => {
-            common_vendor.index.__f__("log", "at pages/order/order.vue:508", "强制刷新UI");
+            common_vendor.index.__f__("log", "at pages/order/order.vue:528", "强制刷新UI");
           });
         }
       }
@@ -231,9 +245,9 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             // 保存原始优惠券数据，便于后续使用
           };
         });
-        common_vendor.index.__f__("log", "at pages/order/order.vue:627", "已加载优惠券：", coupons.value.length, "张");
+        common_vendor.index.__f__("log", "at pages/order/order.vue:647", "已加载优惠券：", coupons.value.length, "张");
       } else {
-        common_vendor.index.__f__("warn", "at pages/order/order.vue:629", "未找到用户优惠券数据");
+        common_vendor.index.__f__("warn", "at pages/order/order.vue:649", "未找到用户优惠券数据");
       }
     };
     const useCoupon = (coupon) => {
@@ -248,7 +262,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:680", "打开商品详情", category.name, product.name);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:700", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
       setTimeout(() => {
         productDetailVisible.value = true;
@@ -265,26 +279,26 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:707", "添加到购物车", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:727", "添加到购物车", item);
       if (!item) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:710", "添加到购物车的商品数据为空");
+        common_vendor.index.__f__("error", "at pages/order/order.vue:730", "添加到购物车的商品数据为空");
         return;
       }
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.addToCart(item);
         } else {
-          common_vendor.index.__f__("warn", "at pages/order/order.vue:720", "orderCartRef不存在，尝试其他方式获取组件");
+          common_vendor.index.__f__("warn", "at pages/order/order.vue:740", "orderCartRef不存在，尝试其他方式获取组件");
           const pages = getCurrentPages();
           if (pages && pages.length > 0) {
             const currentPage = pages[pages.length - 1];
             if (currentPage.$refs && currentPage.$refs.orderCartRef) {
               currentPage.$refs.orderCartRef.addToCart(item);
             } else {
-              common_vendor.index.__f__("error", "at pages/order/order.vue:728", "无法获取购物车组件引用");
+              common_vendor.index.__f__("error", "at pages/order/order.vue:748", "无法获取购物车组件引用");
             }
           } else {
-            common_vendor.index.__f__("error", "at pages/order/order.vue:731", "无法获取当前页面实例");
+            common_vendor.index.__f__("error", "at pages/order/order.vue:751", "无法获取当前页面实例");
           }
         }
       });
@@ -292,7 +306,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:745", "打开促销商品详情", item.title);
+        common_vendor.index.__f__("log", "at pages/order/order.vue:765", "打开促销商品详情", item.title);
         selectedProduct.value = { ...product };
         setTimeout(() => {
           productDetailVisible.value = true;
@@ -313,7 +327,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
     };
     const refreshPage = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:773", "执行页面刷新");
+      common_vendor.index.__f__("log", "at pages/order/order.vue:793", "执行页面刷新");
       updateStoreInfo();
     };
     const goToSearch = () => {

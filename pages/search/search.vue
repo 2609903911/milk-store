@@ -11,13 +11,13 @@
                     @confirm="handleSearch"
                 />
             </view>
-            <text class="cancel-btn" @tap="goBack">取消</text>
+            <text class="search-btn" @tap="handleSearch">搜索</text>
         </view>
 
         <!-- 搜索历史 -->
         <view
             class="search-history"
-            v-if="!searchText && searchHistory.length > 0"
+            v-if="!hasSearched && searchHistory.length > 0"
         >
             <view class="history-header">
                 <text class="title">搜索历史</text>
@@ -35,8 +35,11 @@
         </view>
 
         <!-- 搜索结果 -->
-        <view class="search-result" v-if="searchText">
-            <view v-if="searchResults.length === 0" class="empty-result">
+        <view class="search-result" v-if="hasSearched">
+            <view
+                v-if="searchResults.length === 0 && !isLoading"
+                class="empty-result"
+            >
                 <image
                     src="/static/images/empty-search.png"
                     mode="aspectFit"
@@ -44,7 +47,10 @@
                 ></image>
                 <text>没有找到相关商品</text>
             </view>
-            <view class="result-list" v-else>
+            <view v-if="isLoading" class="loading">
+                <text class="loading-text">正在搜索...</text>
+            </view>
+            <view class="result-list" v-if="searchResults.length > 0">
                 <view
                     class="result-item"
                     v-for="(item, index) in searchResults"
@@ -52,27 +58,43 @@
                     @tap="viewProductDetail(item)"
                 >
                     <image
-                        :src="item.image"
+                        :src="
+                            item.imageUrl ||
+                            '/static/images/default-product.png'
+                        "
                         mode="aspectFill"
                         class="product-image"
                     ></image>
                     <view class="product-info">
                         <text class="product-name">{{ item.name }}</text>
-                        <text class="product-category">{{
-                            item.category
-                        }}</text>
-                        <text class="product-desc">{{ item.desc }}</text>
+                        <text
+                            class="product-category"
+                            v-if="item.category && item.category.name"
+                        >
+                            {{ item.category.name }}
+                        </text>
+                        <text class="product-desc">{{ item.description }}</text>
                         <text class="product-price">¥{{ item.price }}</text>
                     </view>
                 </view>
             </view>
         </view>
+
+        <!-- 商品详情弹窗 -->
+        <shop-detail
+            v-if="productDetailVisible"
+            :visible="productDetailVisible"
+            :product="selectedProduct"
+            @update:visible="updateDetailVisible"
+            @add-to-cart="handleAddToCart"
+        />
     </view>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { searchProducts } from '../../utils/productData'
+import { searchProductsByName } from '../../utils/api/productApi'
+import ShopDetail from '../components/shop-detail.vue'
 
 // 搜索文本
 const searchText = ref('')
@@ -83,13 +105,23 @@ const searchHistory = ref([])
 // 搜索结果
 const searchResults = ref([])
 
+// 加载状态
+const isLoading = ref(false)
+
+// 是否已搜索
+const hasSearched = ref(false)
+
+// 商品详情弹窗
+const productDetailVisible = ref(false)
+const selectedProduct = ref({})
+
 // 返回上一页
 const goBack = () => {
     uni.navigateBack()
 }
 
 // 处理搜索
-const handleSearch = () => {
+const handleSearch = async () => {
     if (!searchText.value.trim()) return
 
     // 添加到搜索历史
@@ -103,8 +135,24 @@ const handleSearch = () => {
         uni.setStorageSync('searchHistory', searchHistory.value)
     }
 
-    // 使用工具函数从本地存储搜索产品
-    searchResults.value = searchProducts(searchText.value)
+    try {
+        // 设置加载状态和搜索状态
+        isLoading.value = true
+        hasSearched.value = true
+        searchResults.value = []
+
+        // 使用API搜索产品
+        const results = await searchProductsByName(searchText.value)
+        searchResults.value = results
+    } catch (error) {
+        console.error('搜索产品失败:', error)
+        uni.showToast({
+            title: '搜索失败，请重试',
+            icon: 'none'
+        })
+    } finally {
+        isLoading.value = false
+    }
 }
 
 // 清空搜索历史
@@ -129,16 +177,38 @@ const handleHistoryClick = (keyword) => {
 
 // 查看产品详情
 const viewProductDetail = (product) => {
-    // 可以跳转到产品详情页或打开商品详情弹窗
-    uni.showToast({
-        title: `您选择了${product.name}`,
-        icon: 'none'
-    })
+    // 转换产品数据格式以匹配shop-detail组件的需求
+    selectedProduct.value = {
+        id: product.id,
+        name: product.name,
+        desc: product.description || '',
+        price: product.price,
+        image: product.imageUrl || '/static/images/default-product.png'
+    }
+    // 显示弹窗
+    productDetailVisible.value = true
+}
 
-    // 这里可以添加跳转逻辑
-    // uni.navigateTo({
-    //     url: `/pages/product-detail/product-detail?id=${product.id}`
-    // })
+// 更新弹窗可见性
+const updateDetailVisible = (visible) => {
+    productDetailVisible.value = visible
+}
+
+// 处理添加到购物车
+const handleAddToCart = (orderItem) => {
+    console.log('添加到购物车:', orderItem)
+    // 获取当前购物车
+    const cartItems = uni.getStorageSync('cartItems') || []
+    // 添加新商品
+    cartItems.push(orderItem)
+    // 保存回本地存储
+    uni.setStorageSync('cartItems', cartItems)
+
+    // 提示用户
+    uni.showToast({
+        title: '已加入购物车',
+        icon: 'success'
+    })
 }
 
 // 页面加载时获取搜索历史
@@ -184,9 +254,10 @@ onMounted(() => {
     font-size: 28rpx;
 }
 
-.cancel-btn {
+.search-btn {
     font-size: 28rpx;
-    color: #666;
+    color: #3a86ff;
+    font-weight: 500;
 }
 
 .search-history {
@@ -283,6 +354,16 @@ onMounted(() => {
     height: 200rpx;
     margin-bottom: 20rpx;
     opacity: 0.5;
+}
+
+.loading {
+    padding: 40rpx 0;
+    text-align: center;
+}
+
+.loading-text {
+    font-size: 28rpx;
+    color: #666;
 }
 
 .product-category {

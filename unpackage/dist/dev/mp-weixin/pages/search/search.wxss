@@ -53,9 +53,10 @@
   margin-left: 20rpx;
   font-size: 28rpx;
 }
-.cancel-btn.data-v-c10c040c {
+.search-btn.data-v-c10c040c {
   font-size: 28rpx;
-  color: #666;
+  color: #3a86ff;
+  font-weight: 500;
 }
 .search-history.data-v-c10c040c {
   margin-top: 20rpx;
@@ -137,6 +138,14 @@
   height: 200rpx;
   margin-bottom: 20rpx;
   opacity: 0.5;
+}
+.loading.data-v-c10c040c {
+  padding: 40rpx 0;
+  text-align: center;
+}
+.loading-text.data-v-c10c040c {
+  font-size: 28rpx;
+  color: #666;
 }
 .product-category.data-v-c10c040c {
   font-size: 24rpx;

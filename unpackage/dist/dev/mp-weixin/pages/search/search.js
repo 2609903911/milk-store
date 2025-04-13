@@ -1,25 +1,27 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
-const utils_productData = require("../../utils/productData.js");
+const utils_api_productApi = require("../../utils/api/productApi.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + ShopDetail)();
 }
+const ShopDetail = () => "../components/shop-detail.js";
 const _sfc_main = {
   __name: "search",
   setup(__props) {
     const searchText = common_vendor.ref("");
     const searchHistory = common_vendor.ref([]);
     const searchResults = common_vendor.ref([]);
-    const goBack = () => {
-      common_vendor.index.navigateBack();
-    };
-    const handleSearch = () => {
+    const isLoading = common_vendor.ref(false);
+    const hasSearched = common_vendor.ref(false);
+    const productDetailVisible = common_vendor.ref(false);
+    const selectedProduct = common_vendor.ref({});
+    const handleSearch = async () => {
       if (!searchText.value.trim())
         return;
       if (!searchHistory.value.includes(searchText.value)) {
@@ -29,7 +31,21 @@ const _sfc_main = {
         }
         common_vendor.index.setStorageSync("searchHistory", searchHistory.value);
       }
-      searchResults.value = utils_productData.searchProducts(searchText.value);
+      try {
+        isLoading.value = true;
+        hasSearched.value = true;
+        searchResults.value = [];
+        const results = await utils_api_productApi.searchProductsByName(searchText.value);
+        searchResults.value = results;
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/search/search.vue:148", "搜索产品失败:", error);
+        common_vendor.index.showToast({
+          title: "搜索失败，请重试",
+          icon: "none"
+        });
+      } finally {
+        isLoading.value = false;
+      }
     };
     const clearHistory = () => {
       common_vendor.index.showModal({
@@ -48,9 +64,26 @@ const _sfc_main = {
       handleSearch();
     };
     const viewProductDetail = (product) => {
+      selectedProduct.value = {
+        id: product.id,
+        name: product.name,
+        desc: product.description || "",
+        price: product.price,
+        image: product.imageUrl || "/static/images/default-product.png"
+      };
+      productDetailVisible.value = true;
+    };
+    const updateDetailVisible = (visible) => {
+      productDetailVisible.value = visible;
+    };
+    const handleAddToCart = (orderItem) => {
+      common_vendor.index.__f__("log", "at pages/search/search.vue:199", "添加到购物车:", orderItem);
+      const cartItems = common_vendor.index.getStorageSync("cartItems") || [];
+      cartItems.push(orderItem);
+      common_vendor.index.setStorageSync("cartItems", cartItems);
       common_vendor.index.showToast({
-        title: `您选择了${product.name}`,
-        icon: "none"
+        title: "已加入购物车",
+        icon: "success"
       });
     };
     common_vendor.onMounted(() => {
@@ -69,9 +102,9 @@ const _sfc_main = {
         b: common_vendor.o(handleSearch),
         c: searchText.value,
         d: common_vendor.o(($event) => searchText.value = $event.detail.value),
-        e: common_vendor.o(goBack),
-        f: !searchText.value && searchHistory.value.length > 0
-      }, !searchText.value && searchHistory.value.length > 0 ? {
+        e: common_vendor.o(handleSearch),
+        f: !hasSearched.value && searchHistory.value.length > 0
+      }, !hasSearched.value && searchHistory.value.length > 0 ? {
         g: common_vendor.o(clearHistory),
         h: common_vendor.f(searchHistory.value, (item, index, i0) => {
           return {
@@ -81,24 +114,40 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        i: searchText.value
-      }, searchText.value ? common_vendor.e({
-        j: searchResults.value.length === 0
-      }, searchResults.value.length === 0 ? {
+        i: hasSearched.value
+      }, hasSearched.value ? common_vendor.e({
+        j: searchResults.value.length === 0 && !isLoading.value
+      }, searchResults.value.length === 0 && !isLoading.value ? {
         k: common_assets._imports_0$9
-      } : {
-        l: common_vendor.f(searchResults.value, (item, index, i0) => {
-          return {
-            a: item.image,
+      } : {}, {
+        l: isLoading.value
+      }, isLoading.value ? {} : {}, {
+        m: searchResults.value.length > 0
+      }, searchResults.value.length > 0 ? {
+        n: common_vendor.f(searchResults.value, (item, index, i0) => {
+          return common_vendor.e({
+            a: item.imageUrl || "/static/images/default-product.png",
             b: common_vendor.t(item.name),
-            c: common_vendor.t(item.category),
-            d: common_vendor.t(item.desc),
-            e: common_vendor.t(item.price),
-            f: index,
-            g: common_vendor.o(($event) => viewProductDetail(item), index)
-          };
+            c: item.category && item.category.name
+          }, item.category && item.category.name ? {
+            d: common_vendor.t(item.category.name)
+          } : {}, {
+            e: common_vendor.t(item.description),
+            f: common_vendor.t(item.price),
+            g: index,
+            h: common_vendor.o(($event) => viewProductDetail(item), index)
+          });
         })
-      }) : {});
+      } : {}) : {}, {
+        o: productDetailVisible.value
+      }, productDetailVisible.value ? {
+        p: common_vendor.o(updateDetailVisible),
+        q: common_vendor.o(handleAddToCart),
+        r: common_vendor.p({
+          visible: productDetailVisible.value,
+          product: selectedProduct.value
+        })
+      } : {});
     };
   }
 };

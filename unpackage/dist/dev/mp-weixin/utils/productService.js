@@ -1,52 +1,57 @@
 "use strict";
-const getProductList = async () => {
+const common_vendor = require("../common/vendor.js");
+const utils_api_productApi = require("./api/productApi.js");
+const utils_api_categoryApi = require("./api/categoryApi.js");
+const getProductData = async () => {
+  try {
+    const categories = await utils_api_categoryApi.fetchCategories();
+    const result = await Promise.all(
+      categories.map(async (category) => {
+        const products = await utils_api_productApi.fetchProductsByCategory(category.id);
+        return {
+          name: category.name,
+          products: products.map((product) => ({
+            id: product.id,
+            image: product.imageUrl || `/static/images/default-product.png`,
+            name: product.name,
+            desc: product.description,
+            price: product.price
+          }))
+        };
+      })
+    );
+    return result;
+  } catch (error) {
+    common_vendor.index.__f__("error", "at utils/productService.js:40", "获取产品数据失败:", error);
+    throw error;
+  }
+};
+const getDefaultProductData = () => {
   return [
     {
-      id: "p001",
-      name: "熊猫珍珠奶茶",
-      price: 18,
-      description: "招牌奶茶，口感香浓，珍珠Q弹",
-      category: "奶茶",
-      image: "/static/images/products/milktea1.png",
-      isPopular: true
+      name: "奶茶",
+      products: [
+        {
+          image: "/static/images/default-product.png",
+          name: "默认奶茶产品",
+          desc: "暂无产品数据，请检查网络连接",
+          price: 0
+        }
+      ]
     },
     {
-      id: "p002",
-      name: "杨梅吐气",
-      price: 19,
-      description: "杨梅汁与气泡水结合，酸甜清爽",
-      category: "果茶",
-      image: "/static/images/products/fruittea1.png",
-      isPopular: true
-    },
-    {
-      id: "p003",
-      name: "芋泥啵啵奶茶",
-      price: 22,
-      description: "香浓奶茶搭配芋泥和芋圆，层次丰富",
-      category: "奶茶",
-      image: "/static/images/products/milktea2.png",
-      isPopular: true
-    },
-    {
-      id: "p004",
-      name: "芝士草莓茉莉",
-      price: 23,
-      description: "茉莉花茶底搭配草莓果酱和芝士奶盖",
-      category: "果茶",
-      image: "/static/images/products/fruittea2.png",
-      isPopular: false
-    },
-    {
-      id: "p005",
-      name: "椰云拿铁",
-      price: 20,
-      description: "意式浓缩咖啡搭配椰乳奶盖",
-      category: "咖啡",
-      image: "/static/images/products/coffee1.png",
-      isPopular: false
+      name: "果茶",
+      products: [
+        {
+          image: "/static/images/default-product.png",
+          name: "默认果茶产品",
+          desc: "暂无产品数据，请检查网络连接",
+          price: 0
+        }
+      ]
     }
   ];
 };
-exports.getProductList = getProductList;
+exports.getDefaultProductData = getDefaultProductData;
+exports.getProductData = getProductData;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/productService.js.map

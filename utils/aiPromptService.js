@@ -4,7 +4,7 @@
  */
 
 import { userState } from './userState';
-import { getProductList } from './productService';
+import { getProductData } from './productService';
 
 /**
  * 生成系统提示信息
@@ -12,7 +12,30 @@ import { getProductList } from './productService';
  */
 export const generateSystemPrompt = async () => {
   // 获取产品信息
-  const products = await getProductList();
+  let productsInfo = [];
+  try {
+    // 获取分类和产品数据
+    const categoriesWithProducts = await getProductData();
+    
+    // 将产品平铺到一个数组
+    if (categoriesWithProducts && categoriesWithProducts.length > 0) {
+      categoriesWithProducts.forEach(category => {
+        if (category.products && category.products.length > 0) {
+          category.products.forEach(product => {
+            productsInfo.push({
+              name: product.name,
+              price: product.price,
+              description: product.desc,
+              category: category.name
+            });
+          });
+        }
+      });
+    }
+  } catch (error) {
+    console.error('获取产品数据失败:', error);
+    productsInfo = [];
+  }
   
   // 基础提示信息
   let prompt = `你是熊猫奶茶店的AI助手，负责回答用户关于奶茶产品、优惠活动、门店信息等问题。
@@ -26,10 +49,10 @@ export const generateSystemPrompt = async () => {
 - 配送范围: 门店3公里内免费配送`;
 
   // 添加产品信息
-  if (products && products.length > 0) {
+  if (productsInfo && productsInfo.length > 0) {
     prompt += `\n\n主要产品列表:`;
-    products.slice(0, 10).forEach(product => {
-      prompt += `\n- ${product.name}: ${product.price}元 (${product.description})`;
+    productsInfo.slice(0, 10).forEach(product => {
+      prompt += `\n- ${product.name}: ${product.price}元 (${product.description}) - 分类: ${product.category}`;
     });
   }
   

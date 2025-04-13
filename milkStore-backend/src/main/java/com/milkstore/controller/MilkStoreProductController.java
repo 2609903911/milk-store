@@ -41,4 +41,9 @@ public class MilkStoreProductController {
     public ResponseEntity<List<MilkProduct>> getProductsByCategory(@PathVariable Integer categoryId) {
         return ResponseEntity.ok(productService.findByCategoryId(categoryId));
     }
+    
+    @GetMapping("/search")
+    public ResponseEntity<List<MilkProduct>> searchProductsByName(@RequestParam String name) {
+        return ResponseEntity.ok(productService.findByName(name));
+    }
 } 

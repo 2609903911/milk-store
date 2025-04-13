@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_api_cityApi = require("../../utils/api/cityApi.js");
 const _sfc_main = {
   __name: "map-city",
   setup(__props) {
@@ -33,41 +34,32 @@ const _sfc_main = {
     const fetchCityData = async () => {
       isLoading.value = true;
       try {
-        common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:95", "开始获取城市数据...");
-        const response = await common_vendor.index.request({
-          url: "http://localhost:8082/api/cities",
-          method: "GET"
+        common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:96", "开始获取城市数据...");
+        const cityData = await utils_api_cityApi.fetchAllCities();
+        hotCities.value = cityData.hotCities || [];
+        const citiesByLetter = cityData.cityMap || {};
+        Object.keys(cityMap).forEach((key) => {
+          delete cityMap[key];
         });
-        if (response.statusCode === 200 && response.data.code === 200) {
-          common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:102", "城市数据获取成功");
-          hotCities.value = response.data.data.hotCities || [];
-          const citiesByLetter = response.data.data.cityMap || {};
-          Object.keys(cityMap).forEach((key) => {
-            delete cityMap[key];
-          });
-          Object.keys(citiesByLetter).forEach((letter) => {
-            cityMap[letter] = citiesByLetter[letter];
-          });
-          common_vendor.index.__f__(
-            "log",
-            "at pages/map-city/map-city.vue:120",
-            "城市数据处理完成，共有热门城市：",
-            hotCities.value.length,
-            "个"
-          );
-        } else {
-          common_vendor.index.__f__("error", "at pages/map-city/map-city.vue:126", "获取城市数据失败:", response.data.message);
-          loadLocalCityData();
-        }
+        Object.keys(citiesByLetter).forEach((letter) => {
+          cityMap[letter] = citiesByLetter[letter];
+        });
+        common_vendor.index.__f__(
+          "log",
+          "at pages/map-city/map-city.vue:115",
+          "城市数据处理完成，共有热门城市：",
+          hotCities.value.length,
+          "个"
+        );
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/map-city/map-city.vue:131", "城市数据请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/map-city/map-city.vue:121", "城市数据请求异常:", error);
         loadLocalCityData();
       } finally {
         isLoading.value = false;
       }
     };
     const loadLocalCityData = () => {
-      common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:141", "加载本地备用城市数据");
+      common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:131", "加载本地备用城市数据");
       hotCities.value = [
         {
           name: "北京",

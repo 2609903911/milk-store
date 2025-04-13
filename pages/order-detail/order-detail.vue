@@ -141,6 +141,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { orderApi } from '../../utils/api'
 
 // 订单信息
 const orderId = ref('')
@@ -182,7 +183,7 @@ const getPandaCoins = (price, discount = 0) => {
 }
 
 // 在页面加载时获取订单数据
-onMounted(() => {
+onMounted(async () => {
     try {
         console.log('订单详情页面已加载')
 
@@ -209,9 +210,24 @@ onMounted(() => {
         console.log('其他环境，获取订单ID:', urlOrderId)
         // #endif
 
-        // 从本地存储获取完整订单信息
-        const orderDetail = uni.getStorageSync('currentOrderDetail')
-        console.log('本地存储订单信息:', orderDetail)
+        let orderDetail = null
+
+        // 如果有订单ID，使用API获取订单详情
+        if (urlOrderId) {
+            try {
+                orderDetail = await orderApi.fetchOrderById(urlOrderId)
+                console.log('通过API获取到订单信息:', orderDetail)
+            } catch (error) {
+                console.error('通过API获取订单失败:', error)
+                // 尝试从本地存储获取
+                orderDetail = uni.getStorageSync('currentOrderDetail')
+                console.log('从本地存储获取订单信息:', orderDetail)
+            }
+        } else {
+            // 从本地存储获取订单信息
+            orderDetail = uni.getStorageSync('currentOrderDetail')
+            console.log('从本地存储获取订单信息:', orderDetail)
+        }
 
         // 验证参数 - 允许没有urlOrderId也可以显示，只要有orderDetail
         if (
@@ -225,8 +241,8 @@ onMounted(() => {
             storeAddress.value = orderDetail.storeAddress || ''
             orderItems.value = orderDetail.items || []
             totalPrice.value = orderDetail.totalPrice || '0.00'
-            discount.value = orderDetail.discount.amount || '0.00'
-            originalPrice.value = orderDetail.discount.originalPrice || '0.00'
+            discount.value = orderDetail.discount?.amount || '0.00'
+            originalPrice.value = orderDetail.discount?.originalPrice || '0.00'
 
             // 获取熊猫币，如果没有则计算
             if (orderDetail.pandaCoins) {
@@ -253,10 +269,9 @@ onMounted(() => {
                     '0'
                 )} ${String(date.getHours()).padStart(2, '0')}:${String(
                     date.getMinutes()
-                ).padStart(2, '0')}:${String(date.getSeconds()).padStart(
-                    2,
-                    '0'
-                )}`
+                ).padStart(2, '0')}`
+            } else {
+                orderTime.value = '无信息'
             }
         } else {
             console.error('订单ID不匹配或未找到订单信息')

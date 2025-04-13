@@ -152,6 +152,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import CouponSelect from '../components/coupon-select.vue'
 import { userState } from '../../utils/userState'
 import { updateUserState } from '../../utils/userState'
+import { orderApi } from '../../utils/api'
 
 // 定义数据
 const orderItems = ref([])
@@ -238,7 +239,7 @@ const copyPhoneNumber = () => {
 }
 
 // 处理支付
-const handlePayment = () => {
+const handlePayment = async () => {
     // 创建一个获取购物车组件的引用
     const pages = getCurrentPages()
     const homePage = pages.find((page) => page.route === 'pages/index/index')
@@ -258,19 +259,13 @@ const handlePayment = () => {
     // 保存需要删除的商品ID
     uni.setStorageSync('itemsToDeleteFromCart', selectedItemIds)
 
-    // 创建新订单记录并添加到savedOrders中
-    const now = new Date()
-    const newOrder = {
-        id: 'ORDER' + now.getTime(), // 使用时间戳创建唯一ID
+    // 构建订单数据
+    const orderData = {
         storeName: orderConfirmData.store?.name || '默认店铺',
         storeAddress: orderConfirmData.store?.address || '默认地址',
         deliveryType: orderConfirmData.deliveryType || 'self',
-        status: 'pending', // 新订单状态为待取餐
-        time: now.getTime(),
         items: orderConfirmData.items || [],
-        // 使用打折后的价格
         totalPrice: totalPrice.value,
-        // 添加优惠信息
         discount: {
             amount: discountAmount.value,
             originalPrice: originalPrice.value,
@@ -285,52 +280,51 @@ const handlePayment = () => {
         }
     }
 
-    console.log('创建新订单:', newOrder)
+    try {
+        // 使用订单API创建订单
+        const newOrder = await orderApi.createOrder(orderData)
+        console.log('订单创建成功:', newOrder)
 
-    // 获取现有订单列表并添加新订单
-    const savedOrders = uni.getStorageSync('savedOrders') || []
-    savedOrders.unshift(newOrder) // 添加到订单列表开头
-
-    // 保存更新后的订单列表
-    uni.setStorageSync('savedOrders', savedOrders)
-    console.log('订单已保存到本地存储')
-
-    // 如果使用了优惠券，将其标记为已使用
-    if (selectedCoupon.value) {
-        const index = userState.coupons.findIndex(
-            (c) => c.id === selectedCoupon.value.id
-        )
-        if (index !== -1) {
-            console.log('优惠券已使用')
-            userState.coupons[index].status = 'used'
-            // 记录优惠券使用时间
-            userState.coupons[index].usedTime = Date.now()
-            console.log('优惠券状态:', userState.coupons[index].status)
-            console.log(
-                '优惠券使用时间:',
-                new Date(userState.coupons[index].usedTime).toLocaleString()
+        // 如果使用了优惠券，将其标记为已使用
+        if (selectedCoupon.value) {
+            const index = userState.coupons.findIndex(
+                (c) => c.id === selectedCoupon.value.id
             )
-            // 更新本地存储中的优惠券状态
-            // uni.setStorageSync('userCoupons', userState.coupons)
-            // 使用updateUserState保存完整的用户状态
-            updateUserState({ coupons: userState.coupons })
+            if (index !== -1) {
+                console.log('优惠券已使用')
+                userState.coupons[index].status = 'used'
+                // 记录优惠券使用时间
+                userState.coupons[index].usedTime = Date.now()
+                console.log('优惠券状态:', userState.coupons[index].status)
+                console.log(
+                    '优惠券使用时间:',
+                    new Date(userState.coupons[index].usedTime).toLocaleString()
+                )
+                // 使用updateUserState保存完整的用户状态
+                updateUserState({ coupons: userState.coupons })
+            }
         }
-    }
 
-    // 显示支付成功提示
-    uni.showToast({
-        title: '模拟支付成功',
-        icon: 'success',
-        success: () => {
-            setTimeout(() => {
-                // 支付成功后跳转到订单列表
-                // 跳转至tabBar
-                uni.switchTab({
-                    url: '/pages/my-orders/my-orders'
-                })
-            }, 1500)
-        }
-    })
+        // 显示支付成功提示
+        uni.showToast({
+            title: '模拟支付成功',
+            icon: 'success',
+            success: () => {
+                setTimeout(() => {
+                    // 支付成功后跳转到订单列表
+                    uni.switchTab({
+                        url: '/pages/my-orders/my-orders'
+                    })
+                }, 1500)
+            }
+        })
+    } catch (error) {
+        console.error('创建订单失败:', error)
+        uni.showToast({
+            title: '订单创建失败',
+            icon: 'none'
+        })
+    }
 }
 
 // 计算总金额

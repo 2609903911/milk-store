@@ -58,6 +58,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { cityApi } from '../../utils/api'
 
 // 城市数据
 const hotCities = ref([])
@@ -93,40 +94,29 @@ const fetchCityData = async () => {
     isLoading.value = true
     try {
         console.log('开始获取城市数据...')
-        const response = await uni.request({
-            url: 'http://localhost:8082/api/cities',
-            method: 'GET'
+        const cityData = await cityApi.fetchAllCities()
+
+        // 获取热门城市
+        hotCities.value = cityData.hotCities || []
+
+        // 获取按字母分组的城市映射
+        const citiesByLetter = cityData.cityMap || {}
+
+        // 清空旧数据
+        Object.keys(cityMap).forEach((key) => {
+            delete cityMap[key]
         })
 
-        if (response.statusCode === 200 && response.data.code === 200) {
-            console.log('城市数据获取成功')
+        // 添加新数据
+        Object.keys(citiesByLetter).forEach((letter) => {
+            cityMap[letter] = citiesByLetter[letter]
+        })
 
-            // 获取热门城市
-            hotCities.value = response.data.data.hotCities || []
-
-            // 获取按字母分组的城市映射
-            const citiesByLetter = response.data.data.cityMap || {}
-
-            // 清空旧数据
-            Object.keys(cityMap).forEach((key) => {
-                delete cityMap[key]
-            })
-
-            // 添加新数据
-            Object.keys(citiesByLetter).forEach((letter) => {
-                cityMap[letter] = citiesByLetter[letter]
-            })
-
-            console.log(
-                '城市数据处理完成，共有热门城市：',
-                hotCities.value.length,
-                '个'
-            )
-        } else {
-            console.error('获取城市数据失败:', response.data.message)
-            // 加载本地备用数据
-            loadLocalCityData()
-        }
+        console.log(
+            '城市数据处理完成，共有热门城市：',
+            hotCities.value.length,
+            '个'
+        )
     } catch (error) {
         console.error('城市数据请求异常:', error)
         // 请求失败时加载本地备用数据

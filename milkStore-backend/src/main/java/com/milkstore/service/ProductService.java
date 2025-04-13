@@ -13,4 +13,6 @@ public interface ProductService {
     MilkProduct findById(Integer id);
     
     List<MilkProduct> findByCategoryId(Integer categoryId);
+    
+    List<MilkProduct> findByName(String name);
 } 

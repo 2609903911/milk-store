@@ -113,6 +113,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { userState, updateUserState } from '../../utils/userState'
+import { orderApi } from '../../utils/api'
 console.log(userState)
 
 // 页面数据
@@ -120,14 +121,15 @@ const hasOrders = ref(false)
 const orders = ref([])
 
 // 刷新订单数据
-const refreshOrders = () => {
-    // 从本地存储获取订单数据
-    const savedOrders = uni.getStorageSync('savedOrders')
-    if (savedOrders && savedOrders.length) {
+const refreshOrders = async () => {
+    try {
+        // 使用订单API获取订单数据
+        const userOrders = await orderApi.fetchUserOrders()
+
         // 遍历所有订单，检查是否有未添加熊猫币的订单
         let totalCoinsToAdd = 0
 
-        savedOrders.forEach((order) => {
+        userOrders.forEach((order) => {
             // 只处理未取消且没有添加过熊猫币的订单
             if (order.status !== 'cancelled' && !order.pandaCoins) {
                 // 计算熊猫币
@@ -153,16 +155,21 @@ const refreshOrders = () => {
             updateUserState({ pandaCoins: userState.pandaCoins })
 
             // 更新本地存储中的订单信息
-            uni.setStorageSync('savedOrders', savedOrders)
+            uni.setStorageSync('savedOrders', userOrders)
 
             console.log(
                 `已添加${totalCoinsToAdd}熊猫币，当前总数：${userState.pandaCoins}`
             )
         }
 
-        orders.value = savedOrders
-        hasOrders.value = true
-    } else {
+        orders.value = userOrders
+        hasOrders.value = userOrders.length > 0
+    } catch (error) {
+        console.error('获取订单列表失败:', error)
+        uni.showToast({
+            title: '获取订单失败',
+            icon: 'none'
+        })
         orders.value = []
         hasOrders.value = false
     }
@@ -284,28 +291,41 @@ const viewOrderDetail = (order) => {
 }
 
 // 更新订单取消函数
-const cancelOrder = (index) => {
+const cancelOrder = async (index) => {
     uni.showModal({
         title: '提示',
         content: '确定要取消订单吗？',
-        success: function (res) {
+        success: async function (res) {
             if (res.confirm) {
-                // 更新订单状态
-                orders.value[index].status = 'cancelled'
+                try {
+                    // 获取要取消的订单ID
+                    const orderId = orders.value[index].id
 
-                // 更新熊猫币（取消订单时减去相应熊猫币）
-                if (orders.value[index].pandaCoins) {
-                    userState.pandaCoins -= orders.value[index].pandaCoins
+                    // 使用API取消订单
+                    const updatedOrder = await orderApi.cancelOrder(orderId)
+
+                    // 更新本地订单列表
+                    orders.value[index] = updatedOrder
+
+                    // 如果有熊猫币，需要减去
+                    if (updatedOrder.pandaCoins) {
+                        userState.pandaCoins -= updatedOrder.pandaCoins
+                        // 更新用户状态
+                        updateUserState({ pandaCoins: userState.pandaCoins })
+                    }
+
+                    // 提示用户
+                    uni.showToast({
+                        title: '订单已取消',
+                        icon: 'success'
+                    })
+                } catch (error) {
+                    console.error('取消订单失败:', error)
+                    uni.showToast({
+                        title: '取消订单失败',
+                        icon: 'none'
+                    })
                 }
-
-                // 更新本地存储
-                uni.setStorageSync('savedOrders', orders.value)
-
-                // 提示用户
-                uni.showToast({
-                    title: '订单已取消',
-                    icon: 'success'
-                })
             }
         }
     })
@@ -315,19 +335,20 @@ const cancelOrder = (index) => {
 const deleteOrder = (index) => {
     uni.showModal({
         title: '提示',
-        content: '确定要删除这条订单记录吗？',
+        content: '确定要删除此订单吗？',
         success: function (res) {
             if (res.confirm) {
-                // 从数组中删除订单
+                // 从列表中删除订单
+                const orderToDelete = orders.value[index]
                 orders.value.splice(index, 1)
-
-                // 如果删除后没有订单了，更新状态
-                if (orders.value.length === 0) {
-                    hasOrders.value = false
-                }
 
                 // 更新本地存储
                 uni.setStorageSync('savedOrders', orders.value)
+
+                // 如果删除后没有订单，显示空状态
+                if (orders.value.length === 0) {
+                    hasOrders.value = false
+                }
 
                 // 提示用户
                 uni.showToast({

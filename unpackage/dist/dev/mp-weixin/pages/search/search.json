@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "搜索",
   "usingComponents": {
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "shop-detail": "../components/shop-detail"
   }
 }
