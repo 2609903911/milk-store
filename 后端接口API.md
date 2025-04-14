@@ -872,3 +872,223 @@
 
 ## 其他接口文档
 // 更多接口文档...
+
+## 用户优惠券接口
+
+### 获取用户优惠券
+
+根据用户ID获取该用户拥有的所有优惠券。
+
+- **URL**: `/api/user-coupons/user/{userId}`
+- **方法**: `GET`
+- **需要认证**: 是
+- **参数**: 
+  - `userId`: 路径参数，用户ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": [
+    {
+      "id": 1,
+      "couponTemplateId": 101,
+      "couponCode": "ABC123456",
+      "status": "valid",
+      "claimTime": "2023-05-01 10:00:00",
+      "usedTime": null,
+      "orderId": null,
+      "createTime": "2023-05-01 10:00:00",
+      "updateTime": "2023-05-01 10:00:00",
+      "userId": "user123",
+      "couponTemplate": {
+        "id": 101,
+        "name": "新用户立减券",
+        "type": "cash",
+        "discount": null,
+        "amount": 10.00,
+        "minOrderAmount": 20.00,
+        "description": "新用户首单满20减10",
+        "startTime": "2023-05-01 00:00:00",
+        "endTime": "2023-06-01 23:59:59"
+      }
+    },
+    {
+      "id": 2,
+      "couponTemplateId": 102,
+      "couponCode": "DEF789012",
+      "status": "valid",
+      "claimTime": "2023-05-02 15:30:00",
+      "usedTime": null,
+      "orderId": null,
+      "createTime": "2023-05-02 15:30:00",
+      "updateTime": "2023-05-02 15:30:00",
+      "userId": "user123",
+      "couponTemplate": {
+        "id": 102,
+        "name": "季节限定8折券",
+        "type": "discount",
+        "discount": 0.8,
+        "amount": null,
+        "minOrderAmount": 30.00,
+        "description": "季节限定产品8折优惠",
+        "startTime": "2023-05-01 00:00:00",
+        "endTime": "2023-05-31 23:59:59"
+      }
+    }
+    // 更多优惠券...
+  ]
+}
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| code | Integer | 状态码，200表示成功 |
+| message | String | 响应消息 |
+| data | Array | 用户优惠券数组 |
+| data[].id | Long | 用户优惠券ID |
+| data[].couponTemplateId | Long | 优惠券模板ID |
+| data[].couponCode | String | 优惠券唯一码 |
+| data[].status | String | 优惠券状态(valid-有效,used-已使用,expired-已过期) |
+| data[].claimTime | String | 优惠券领取时间 |
+| data[].usedTime | String | 优惠券使用时间 |
+| data[].orderId | String | 使用的订单ID |
+| data[].createTime | String | 创建时间 |
+| data[].updateTime | String | 更新时间 |
+| data[].userId | String | 用户ID |
+| data[].couponTemplate | Object | 优惠券模板信息 |
+| data[].couponTemplate.id | Long | 模板ID |
+| data[].couponTemplate.name | String | 优惠券名称 |
+| data[].couponTemplate.type | String | 优惠券类型(cash-现金券,discount-折扣券,free-免单券) |
+| data[].couponTemplate.discount | Double | 折扣率(折扣券专用) |
+| data[].couponTemplate.amount | Double | 优惠金额(现金券专用) |
+| data[].couponTemplate.minOrderAmount | Double | 最低使用金额 |
+| data[].couponTemplate.description | String | 优惠券描述 |
+| data[].couponTemplate.startTime | String | 有效期开始时间 |
+| data[].couponTemplate.endTime | String | 有效期结束时间 |
+
+#### 错误响应
+
+- **状态码**: 404 Not Found
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 404,
+  "message": "用户不存在",
+  "data": null
+}
+```
+
+- **状态码**: 401 Unauthorized
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 401,
+  "message": "未授权访问",
+  "data": null
+}
+```
+
+### 获取指定状态的用户优惠券
+
+根据用户ID和优惠券状态获取该用户拥有的特定状态的优惠券。
+
+- **URL**: `/api/user-coupons/user/{userId}/status/{status}`
+- **方法**: `GET`
+- **需要认证**: 是
+- **参数**: 
+  - `userId`: 路径参数，用户ID
+  - `status`: 路径参数，优惠券状态(valid-有效,used-已使用,expired-已过期)
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": [
+    {
+      "id": 1,
+      "couponTemplateId": 101,
+      "couponCode": "ABC123456",
+      "status": "valid",
+      "claimTime": "2023-05-01 10:00:00",
+      "usedTime": null,
+      "orderId": null,
+      "createTime": "2023-05-01 10:00:00",
+      "updateTime": "2023-05-01 10:00:00",
+      "userId": "user123",
+      "couponTemplate": {
+        "id": 101,
+        "name": "新用户立减券",
+        "type": "cash",
+        "discount": null,
+        "amount": 10.00,
+        "minOrderAmount": 20.00,
+        "description": "新用户首单满20减10",
+        "startTime": "2023-05-01 00:00:00",
+        "endTime": "2023-06-01 23:59:59"
+      }
+    },
+    // 更多相同状态的优惠券...
+  ]
+}
+```
+
+#### 响应字段说明
+
+与获取用户优惠券接口相同。
+
+#### 错误响应
+
+- **状态码**: 404 Not Found
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 404,
+  "message": "用户不存在或没有指定状态的优惠券",
+  "data": null
+}
+```
+
+- **状态码**: 400 Bad Request
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 400,
+  "message": "无效的优惠券状态",
+  "data": null
+}
+```
+
+- **状态码**: 401 Unauthorized
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 401,
+  "message": "未授权访问",
+  "data": null
+}
+```

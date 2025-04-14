@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.milkstore.mapper.UserCouponMapper">
+
+    <resultMap id="UserCouponMap" type="com.milkstore.entity.UserCoupon">
+        <id property="id" column="id"/>
+        <result property="couponTemplateId" column="coupon_template_id"/>
+        <result property="couponCode" column="coupon_code"/>
+        <result property="status" column="status"/>
+        <result property="claimTime" column="claim_time"/>
+        <result property="usedTime" column="used_time"/>
+        <result property="orderId" column="order_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="userId" column="user_id"/>
+    </resultMap>
+    
+    <!-- 根据用户ID查询用户优惠券 -->
+    <select id="findByUserId" resultMap="UserCouponMap">
+        SELECT 
+            id, coupon_template_id, coupon_code, status, 
+            claim_time, used_time, order_id, create_time, 
+            update_time, user_id
+        FROM 
+            user_coupon
+        WHERE 
+            user_id = #{userId}
+        ORDER BY 
+            create_time DESC
+    </select>
+    
+    <!-- 根据用户ID和状态查询用户优惠券 -->
+    <select id="findByUserIdAndStatus" resultMap="UserCouponMap">
+        SELECT 
+            id, coupon_template_id, coupon_code, status, 
+            claim_time, used_time, order_id, create_time, 
+            update_time, user_id
+        FROM 
+            user_coupon
+        WHERE 
+            user_id = #{userId}
+        AND 
+            status = #{status}
+        ORDER BY 
+            create_time DESC
+    </select>
+</mapper> 
