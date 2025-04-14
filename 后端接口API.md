@@ -562,5 +562,313 @@
 }
 ```
 
+## 勋章接口
+
+### 获取所有勋章类型
+
+获取系统中所有可用的勋章类型。
+
+- **URL**: `/api/medals/types`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 无
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "获取勋章类型成功",
+  "data": [
+    {
+      "typeId": "seasonal",
+      "typeName": "二十四节气限定",
+      "description": "与二十四节气相关的限定勋章，每个节气期间可获得",
+      "displayOrder": 1,
+      "createTime": "2023-05-01 12:00:00",
+      "updateTime": "2023-05-01 12:00:00"
+    },
+    {
+      "typeId": "nature",
+      "typeName": "大自然限定微章",
+      "description": "以大自然元素为主题的限定勋章",
+      "displayOrder": 2,
+      "createTime": "2023-05-01 12:00:00",
+      "updateTime": "2023-05-01 12:00:00"
+    },
+    {
+      "typeId": "starrail",
+      "typeName": "崩铁联动限定",
+      "description": "与《崩坏：星穹铁道》游戏联动的限定勋章",
+      "displayOrder": 3,
+      "createTime": "2023-05-01 12:00:00",
+      "updateTime": "2023-05-01 12:00:00"
+    },
+    {
+      "typeId": "rank",
+      "typeName": "等级徽章",
+      "description": "用户达到特定等级后获得的勋章",
+      "displayOrder": 4,
+      "createTime": "2023-05-01 12:00:00",
+      "updateTime": "2023-05-01 12:00:00"
+    }
+  ]
+}
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| code | Integer | 状态码，200表示成功 |
+| message | String | 响应消息 |
+| data | Array | 勋章类型数组 |
+| data[].typeId | String | 类型ID |
+| data[].typeName | String | 类型名称 |
+| data[].description | String | 类型描述 |
+| data[].displayOrder | Integer | 显示顺序 |
+| data[].createTime | String | 创建时间 |
+| data[].updateTime | String | 更新时间 |
+
+### 获取所有勋章
+
+获取系统中所有可用的勋章信息。
+
+- **URL**: `/api/medals`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 无
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "获取所有勋章成功",
+  "data": [
+    {
+      "medalId": "season_01",
+      "type": {
+        "typeId": "seasonal",
+        "typeName": "二十四节气限定"
+      },
+      "medalName": "节气 · 立春",
+      "iconPath": "/static/images/medal/season01.png",
+      "description": "立春节气勋章",
+      "obtainCondition": "在立春期间购买特定饮品",
+      "sortOrder": 1,
+      "createTime": "2023-05-01 12:00:00"
+    },
+    {
+      "medalId": "season_02",
+      "type": {
+        "typeId": "seasonal",
+        "typeName": "二十四节气限定"
+      },
+      "medalName": "节气 · 雨水",
+      "iconPath": "/static/images/medal/season02.png",
+      "description": "雨水节气勋章",
+      "obtainCondition": "在雨水期间购买特定饮品",
+      "sortOrder": 2,
+      "createTime": "2023-05-01 12:00:00"
+    },
+    // 更多勋章...
+  ]
+}
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| code | Integer | 状态码，200表示成功 |
+| message | String | 响应消息 |
+| data | Array | 勋章数组 |
+| data[].medalId | String | 勋章ID |
+| data[].type | Object | 勋章所属类型 |
+| data[].type.typeId | String | 类型ID |
+| data[].type.typeName | String | 类型名称 |
+| data[].medalName | String | 勋章名称 |
+| data[].iconPath | String | 勋章图标路径 |
+| data[].description | String | 勋章描述 |
+| data[].obtainCondition | String | 获取条件 |
+| data[].sortOrder | Integer | 排序顺序 |
+| data[].createTime | String | 创建时间 |
+
+### 根据类型获取勋章
+
+获取特定类型的所有勋章。
+
+- **URL**: `/api/medals/type/{typeId}`
+- **方法**: `GET`
+- **需要认证**: 否
+- **参数**: 
+  - `typeId`: 路径参数，勋章类型ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "获取类型勋章成功",
+  "data": [
+    {
+      "medalId": "season_01",
+      "type": {
+        "typeId": "seasonal",
+        "typeName": "二十四节气限定"
+      },
+      "medalName": "节气 · 立春",
+      "iconPath": "/static/images/medal/season01.png",
+      "description": "立春节气勋章",
+      "obtainCondition": "在立春期间购买特定饮品",
+      "sortOrder": 1,
+      "createTime": "2023-05-01 12:00:00"
+    },
+    // 更多该类型的勋章...
+  ]
+}
+```
+
+#### 错误响应
+
+- **状态码**: 404 Not Found
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 404,
+  "message": "找不到指定的勋章类型",
+  "data": null
+}
+```
+
+### 获取用户拥有的勋章
+
+获取特定用户拥有的所有勋章。
+
+- **URL**: `/api/medals/user/{userId}`
+- **方法**: `GET`
+- **需要认证**: 是
+- **参数**: 
+  - `userId`: 路径参数，用户ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "获取用户勋章成功",
+  "data": {
+    "totalCount": 5,
+    "activeCount": 3,
+    "medals": [
+      {
+        "id": 1,
+        "medal": {
+          "medalId": "season_01",
+          "medalName": "节气 · 立春",
+          "iconPath": "/static/images/medal/season01.png",
+          "type": {
+            "typeId": "seasonal",
+            "typeName": "二十四节气限定"
+          }
+        },
+        "isActive": true,
+        "obtainTime": "2023-05-10 14:23:45"
+      },
+      {
+        "id": 2,
+        "medal": {
+          "medalId": "nature_bee",
+          "medalName": "大自然 · 蜜蜂",
+          "iconPath": "/static/images/medal/nature-bee.png",
+          "type": {
+            "typeId": "nature",
+            "typeName": "大自然限定微章"
+          }
+        },
+        "isActive": true,
+        "obtainTime": "2023-05-15 09:12:30"
+      },
+      // 更多用户拥有的勋章...
+    ],
+    "byType": {
+      "seasonal": [
+        // 季节勋章...
+      ],
+      "nature": [
+        // 大自然勋章...
+      ],
+      "starrail": [
+        // 崩铁联动勋章...
+      ],
+      "rank": [
+        // 等级勋章...
+      ]
+    }
+  }
+}
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| code | Integer | 状态码，200表示成功 |
+| message | String | 响应消息 |
+| data | Object | 用户勋章数据 |
+| data.totalCount | Integer | 用户拥有的勋章总数 |
+| data.activeCount | Integer | 用户已激活的勋章数量 |
+| data.medals | Array | 用户拥有的勋章列表 |
+| data.medals[].id | Integer | 用户勋章关联ID |
+| data.medals[].medal | Object | 勋章详细信息 |
+| data.medals[].isActive | Boolean | 勋章是否激活 |
+| data.medals[].obtainTime | String | 获得勋章的时间 |
+| data.byType | Object | 按类型分组的用户勋章 |
+
+#### 错误响应
+
+- **状态码**: 404 Not Found
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 404,
+  "message": "用户不存在",
+  "data": null
+}
+```
+
+- **状态码**: 401 Unauthorized
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 401,
+  "message": "未授权访问",
+  "data": null
+}
+```
+
 ## 其他接口文档
 // 更多接口文档...
