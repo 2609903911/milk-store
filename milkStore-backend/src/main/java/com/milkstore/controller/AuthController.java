@@ -62,7 +62,7 @@ public class AuthController {
         boolean isValid = verificationCodeService.verifyCode(phone, code, "login");
         
         if (!isValid) {
-            return Result.error(400, "验证码无效或已过期");
+            return Result.error(400, "验证码错误");
         }
         
         // 2. 查询用户是否存在

@@ -11,4 +11,5 @@ export * as bannerApi from './bannerApi';
 export * as cityApi from './cityApi';
 export * as productApi from './productApi';
 export * as categoryApi from './categoryApi';
-export * as orderApi from './orderApi'; 
+export * as orderApi from './orderApi';
+export * as authApi from './authApi'; 

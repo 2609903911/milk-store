@@ -1,16 +1,5 @@
 <template>
     <view class="login-container">
-        <!-- 标题栏 -->
-        <view class="header">
-            <view class="back-btn" @click="navBack">
-                <text class="iconfont icon-left"></text>
-            </view>
-            <view class="title">授权登录</view>
-            <view class="right-icons">
-                <text class="iconfont icon-more-dot"></text>
-            </view>
-        </view>
-
         <!-- 登录图片 -->
         <view class="login-image">
             <image
@@ -24,27 +13,38 @@
 
         <!-- 手机号验证码登录表单 -->
         <view class="login-form">
-            <view class="input-group">
-                <input
-                    type="number"
-                    maxlength="11"
-                    v-model="phone"
-                    placeholder="请输入手机号"
-                />
-            </view>
-            <view class="input-group code-group">
-                <input
-                    type="number"
-                    maxlength="6"
-                    v-model="code"
-                    placeholder="请输入验证码"
-                />
-                <view
-                    class="code-btn"
-                    :class="{ disabled: counting }"
-                    @click="getVerificationCode"
-                >
-                    {{ counting ? `重新获取(${counter}s)` : '获取验证码' }}
+            <view class="form-container">
+                <view class="form-item">
+                    <text class="label">手机号码</text>
+                    <view class="input-box">
+                        <input
+                            class="input"
+                            type="number"
+                            v-model="phone"
+                            placeholder="请输入手机号码"
+                            maxlength="11"
+                        />
+                    </view>
+                </view>
+
+                <view class="form-item">
+                    <text class="label">验证码</text>
+                    <view class="input-box code-box">
+                        <input
+                            class="input"
+                            type="number"
+                            v-model="code"
+                            placeholder="请输入验证码"
+                            maxlength="6"
+                        />
+                        <button
+                            class="code-btn"
+                            :disabled="isCounting"
+                            @click="getVerificationCode"
+                        >
+                            {{ isCounting ? `${countdown}s` : '获取验证码' }}
+                        </button>
+                    </view>
                 </view>
             </view>
             <button class="login-btn" @click="handleLogin">登录</button>
@@ -55,25 +55,39 @@
 
         <!-- 用户协议 -->
         <view class="agreement">
-            <checkbox :checked="isAgree" @click="toggleAgreement"></checkbox>
-            <text class="agreement-text">
-                我已阅读并同意 <text class="agreement-link">《用户协议》</text>
-                <text class="agreement-link">《用户隐私协议》</text>
-            </text>
+            <view class="checkbox-wrapper" @click="toggleAgree">
+                <checkbox
+                    class="checkbox"
+                    :checked="isAgree"
+                    :style="{ transform: 'scale(0.7)' }"
+                />
+                <text class="agreement-text">
+                    登录即代表您同意
+                    <text class="agreement-link" @click.stop="goToUserAgreement"
+                        >《用户协议》</text
+                    >
+                    和
+                    <text class="agreement-link" @click.stop="goToPrivacyPolicy"
+                        >《隐私政策》</text
+                    >
+                </text>
+            </view>
         </view>
     </view>
 </template>
 
 <script>
+import { authApi } from '@/utils/api'
+
 export default {
     data() {
         return {
-            phone: '', // 手机号
-            code: '', // 验证码
-            isAgree: true, // 是否同意协议
-            counting: false, // 是否在倒计时
-            counter: 60, // 倒计时秒数
-            timer: null // 定时器
+            phone: '',
+            code: '',
+            isAgree: false,
+            isCounting: false,
+            countdown: 60,
+            timer: null // 添加timer变量保存定时器引用
         }
     },
     methods: {
@@ -82,56 +96,316 @@ export default {
             uni.navigateBack()
         },
 
-        // 获取验证码
-        getVerificationCode() {
-            // 仅UI展示，不需要实现功能
-            if (this.counting) return
-
-            this.counting = true
-            this.counter = 60
-
-            this.timer = setInterval(() => {
-                this.counter--
-                if (this.counter <= 0) {
-                    clearInterval(this.timer)
-                    this.counting = false
-                }
-            }, 1000)
-        },
-
-        // 处理登录
-        handleLogin() {
-            // 仅UI展示，不需要实现功能
-            uni.showToast({
-                title: '登录成功',
-                icon: 'success'
-            })
-
-            // 登录成功后跳转到首页
-            setTimeout(() => {
-                uni.switchTab({
-                    url: '/pages/home/home'
+        validatePhone() {
+            if (!this.phone) {
+                uni.showToast({
+                    title: '请输入手机号码',
+                    icon: 'none'
                 })
-            }, 1500)
+                return false
+            }
+
+            const phoneRegex = /^1[3-9]\d{9}$/
+            if (!phoneRegex.test(this.phone)) {
+                uni.showToast({
+                    title: '请输入正确的手机号码',
+                    icon: 'none'
+                })
+                return false
+            }
+
+            return true
         },
 
-        // 切换协议同意状态
-        toggleAgreement() {
+        validateCode() {
+            if (!this.code) {
+                uni.showToast({
+                    title: '请输入验证码',
+                    icon: 'none'
+                })
+                return false
+            }
+
+            const codeRegex = /^\d{6}$/
+            if (!codeRegex.test(this.code)) {
+                uni.showToast({
+                    title: '请输入6位数字验证码',
+                    icon: 'none'
+                })
+                return false
+            }
+
+            return true
+        },
+
+        validateAgreement() {
+            if (!this.isAgree) {
+                uni.showToast({
+                    title: '请先同意用户协议和隐私政策',
+                    icon: 'none'
+                })
+                return false
+            }
+            return true
+        },
+
+        async getVerificationCode() {
+            console.log('点击获取验证码按钮')
+            console.log('当前手机号:', this.phone)
+            console.log('当前isCounting状态:', this.isCounting)
+            console.log('当前countdown值:', this.countdown)
+
+            // 验证手机号
+            if (!this.validatePhone()) {
+                return
+            }
+
+            try {
+                uni.showLoading({
+                    title: '发送中...'
+                })
+
+                // 由于可能是网络问题，先测试直接调用倒计时
+                console.log('直接测试倒计时功能')
+                setTimeout(() => {
+                    this.startCountdown()
+                }, 500)
+
+                // 使用URL查询参数格式直接构建URL
+                const url = `http://localhost:8082/api/auth/code/send?phone=${encodeURIComponent(
+                    this.phone
+                )}&type=login`
+
+                console.log('发送验证码请求:', url)
+
+                // 发送POST请求，参数在URL中
+                uni.request({
+                    url: url,
+                    method: 'POST',
+                    success: (res) => {
+                        console.log('验证码响应:', JSON.stringify(res.data))
+                        uni.hideLoading()
+
+                        if (res.statusCode >= 200 && res.statusCode < 300) {
+                            if (res.data.code === 200) {
+                                uni.showToast({
+                                    title: '验证码已发送',
+                                    icon: 'success'
+                                })
+
+                                // 调试信息：输出验证码
+                                if (res.data.data && res.data.data.code) {
+                                    console.log(
+                                        '测试验证码:',
+                                        res.data.data.code
+                                    )
+                                }
+
+                                // 开始倒计时
+                                console.log('即将调用倒计时方法...')
+                                this.startCountdown()
+                                console.log('倒计时方法调用完成')
+                            } else {
+                                uni.showToast({
+                                    title: res.data.message || '验证码发送失败',
+                                    icon: 'none'
+                                })
+                            }
+                        } else {
+                            uni.showToast({
+                                title: res.data?.message || '验证码发送失败',
+                                icon: 'none'
+                            })
+                        }
+                    },
+                    fail: (err) => {
+                        console.error('请求失败:', err)
+                        uni.hideLoading()
+                        uni.showToast({
+                            title: '网络错误，请稍后重试',
+                            icon: 'none'
+                        })
+                    }
+                })
+            } catch (error) {
+                uni.hideLoading()
+                uni.showToast({
+                    title: error.message || '验证码发送失败，请稍后重试',
+                    icon: 'none'
+                })
+            }
+        },
+
+        startCountdown() {
+            // 确保组件已经挂载
+            this.$nextTick(() => {
+                console.log('开始倒计时...')
+                // 先清除可能存在的旧定时器
+                if (this.timer) {
+                    clearInterval(this.timer)
+                    this.timer = null
+                }
+
+                this.isCounting = true
+                this.countdown = 60
+
+                console.log('设置状态完成:', this.isCounting, this.countdown)
+
+                // 创建新的定时器
+                this.timer = setInterval(() => {
+                    if (this.countdown > 0) {
+                        this.countdown -= 1
+                    } else {
+                        if (this.timer) {
+                            clearInterval(this.timer)
+                            this.timer = null
+                            this.isCounting = false
+                            console.log('倒计时结束，状态重置')
+                        }
+                    }
+                }, 1000)
+            })
+        },
+
+        async handleLogin() {
+            // 验证手机号、验证码和协议同意
+            if (
+                !this.validatePhone() ||
+                !this.validateCode() ||
+                !this.validateAgreement()
+            ) {
+                return
+            }
+
+            try {
+                uni.showLoading({
+                    title: '登录中...'
+                })
+
+                // 使用URL查询参数格式直接构建URL
+                const url = `http://localhost:8082/api/auth/login/code?phone=${encodeURIComponent(
+                    this.phone
+                )}&code=${encodeURIComponent(this.code)}`
+
+                console.log('发送登录请求:', url)
+
+                // 发送POST请求，参数在URL中
+                uni.request({
+                    url: url,
+                    method: 'POST',
+                    success: (res) => {
+                        console.log('登录响应:', JSON.stringify(res.data))
+                        uni.hideLoading()
+
+                        // 检查响应中的code字段 - 服务器成功码为200
+                        if (res.statusCode >= 200 && res.statusCode < 300) {
+                            if (res.data.code === 200) {
+                                // 保存用户信息和token到本地存储
+                                if (res.data.data) {
+                                    uni.setStorageSync(
+                                        'token',
+                                        res.data.data.token
+                                    )
+                                    uni.setStorageSync(
+                                        'userInfo',
+                                        res.data.data.user
+                                    )
+                                }
+
+                                uni.showToast({
+                                    title: '登录成功',
+                                    icon: 'success'
+                                })
+
+                                // 延迟1.5秒后跳转到首页
+                                console.log('1.5秒后跳转到首页...')
+                                setTimeout(() => {
+                                    uni.switchTab({
+                                        url: '/pages/home/home',
+                                        success: function () {
+                                            console.log('跳转成功')
+                                        },
+                                        fail: function (err) {
+                                            console.error('跳转失败:', err)
+                                            // 如果switchTab失败，尝试使用reLaunch
+                                            uni.reLaunch({
+                                                url: '/pages/home/home'
+                                            })
+                                        }
+                                    })
+                                }, 1500)
+                            } else {
+                                // 业务逻辑错误
+                                uni.showToast({
+                                    title: res.data.message || '验证码错误',
+                                    icon: 'none'
+                                })
+                            }
+                        } else {
+                            uni.showToast({
+                                title: res.data?.message || '登录失败',
+                                icon: 'none'
+                            })
+                        }
+                    },
+                    fail: (err) => {
+                        console.error('请求失败:', err)
+                        uni.hideLoading()
+                        uni.showToast({
+                            title: '网络错误，请稍后重试',
+                            icon: 'none'
+                        })
+                    }
+                })
+            } catch (error) {
+                uni.hideLoading()
+                uni.showToast({
+                    title: error.message || '登录失败，请稍后重试',
+                    icon: 'none'
+                })
+            }
+        },
+
+        toggleAgree() {
             this.isAgree = !this.isAgree
+        },
+
+        goToUserAgreement() {
+            uni.navigateTo({
+                url: '/pages/agreement/user-agreement'
+            })
+        },
+
+        goToPrivacyPolicy() {
+            uni.navigateTo({
+                url: '/pages/agreement/privacy-policy'
+            })
         },
 
         // 暂不登录
         skipLogin() {
             // 跳转到首页
             uni.switchTab({
-                url: '/pages/home/home'
+                url: '/pages/home/home',
+                success: function () {
+                    console.log('跳转成功')
+                },
+                fail: function (err) {
+                    console.error('跳转失败:', err)
+                    // 如果switchTab失败，尝试使用reLaunch
+                    uni.reLaunch({
+                        url: '/pages/home/home'
+                    })
+                }
             })
-        }
-    },
-    // 组件销毁时清除定时器
-    beforeDestroy() {
-        if (this.timer) {
-            clearInterval(this.timer)
+        },
+
+        // 组件销毁时清除定时器
+        beforeDestroy() {
+            if (this.timer) {
+                clearInterval(this.timer)
+                this.timer = null
+            }
         }
     }
 }
@@ -142,54 +416,24 @@ export default {
     padding: 0 30rpx;
     height: 100vh;
     background-color: #ffffff;
-
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 88rpx;
-        position: relative;
-
-        .back-btn {
-            width: 88rpx;
-            height: 88rpx;
-            display: flex;
-            align-items: center;
-
-            .iconfont {
-                font-size: 40rpx;
-            }
-        }
-
-        .title {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 36rpx;
-            font-weight: 500;
-        }
-
-        .right-icons {
-            width: 88rpx;
-            height: 88rpx;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-
-            .iconfont {
-                font-size: 40rpx;
-            }
-        }
-    }
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .login-image {
         display: flex;
         justify-content: center;
-        margin: 60rpx 0;
+        margin-top: 200rpx;
+        margin-bottom: 40rpx;
 
         image {
-            width: 400rpx;
-            height: 300rpx;
+            width: 300rpx;
+            height: 220rpx;
         }
     }
 
@@ -197,56 +441,70 @@ export default {
         font-size: 36rpx;
         font-weight: 500;
         text-align: center;
-        margin-bottom: 60rpx;
+        margin-bottom: 50rpx;
     }
 
     .login-form {
-        .input-group {
-            height: 100rpx;
-            border: 1px solid #e5e5e5;
-            border-radius: 50rpx;
-            padding: 0 30rpx;
+        .form-container {
+            width: 100%;
             margin-bottom: 30rpx;
-            display: flex;
-            align-items: center;
 
-            input {
-                flex: 1;
-                height: 100%;
-                font-size: 30rpx;
+            .form-item {
+                margin-bottom: 20rpx;
+
+                .label {
+                    font-size: 28rpx;
+                    color: #333;
+                    margin-bottom: 10rpx;
+                    display: block;
+                }
+
+                .input-box {
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8rpx;
+                    padding: 10rpx 20rpx;
+                    display: flex;
+                    align-items: center;
+
+                    .input {
+                        flex: 1;
+                        height: 80rpx;
+                        font-size: 28rpx;
+                    }
+                }
             }
-        }
 
-        .code-group {
-            display: flex;
-            align-items: center;
-            padding-right: 10rpx;
+            .code-box {
+                display: flex;
+                justify-content: space-between;
+            }
 
             .code-btn {
                 width: 200rpx;
                 height: 80rpx;
                 line-height: 80rpx;
-                text-align: center;
-                background-color: #7facfa;
-                color: #fff;
                 font-size: 26rpx;
-                border-radius: 40rpx;
+                color: #fff;
+                background-color: #007aff;
+                text-align: center;
+                border-radius: 8rpx;
+                padding: 0;
+                margin: 0;
+            }
 
-                &.disabled {
-                    background-color: #f5f5f5;
-                    color: #999;
-                }
+            .code-btn[disabled] {
+                background-color: #ccc;
             }
         }
 
         .login-btn {
-            height: 100rpx;
-            background-color: #7facfa;
-            border-radius: 50rpx;
+            height: 90rpx;
+            background-color: #007aff;
+            border-radius: 45rpx;
             color: #fff;
             font-size: 32rpx;
             font-weight: 500;
-            margin-top: 60rpx;
+            margin-top: 40rpx;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -257,11 +515,11 @@ export default {
         font-size: 28rpx;
         color: #999;
         text-align: center;
-        margin-top: 40rpx;
+        margin-top: 30rpx;
     }
 
     .agreement {
-        position: fixed;
+        position: absolute;
         bottom: 50rpx;
         left: 0;
         right: 0;
@@ -271,14 +529,36 @@ export default {
         font-size: 24rpx;
         color: #999;
 
-        checkbox {
-            transform: scale(0.7);
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
             margin-right: 5rpx;
+
+            .checkbox {
+                transform: scale(0.7);
+                margin-right: 5rpx;
+            }
+        }
+
+        .agreement-text {
+            font-size: 24rpx;
+            color: #666;
         }
 
         .agreement-link {
-            color: #7facfa;
+            color: #007aff;
+            margin-right: 5rpx;
         }
+    }
+
+    .debug-info {
+        margin-top: 20rpx;
+        padding: 10rpx;
+        border: 1px dashed #ccc;
+        font-size: 24rpx;
+        color: #666;
+        display: flex;
+        flex-direction: column;
     }
 }
 </style>

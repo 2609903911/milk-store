@@ -31,7 +31,13 @@ export const API_PATHS = {
   ORDERS: '/api/orders',
   ORDERS_BY_USER: '/api/orders/user', // 需要拼接用户ID
   ORDER_BY_ID: '/api/orders', // 需要拼接订单ID
-  ORDER_STATUS: '/api/orders/status' // 需要拼接订单ID
+  ORDER_STATUS: '/api/orders/status', // 需要拼接订单ID
+
+  // 认证相关
+  AUTH_SEND_CODE: '/api/auth/code/send',
+  AUTH_LOGIN_CODE: '/api/auth/login/code',
+  AUTH_LOGOUT: '/api/auth/logout',
+  AUTH_STATUS: '/api/auth/status'
 };
 
 // 请求方法
