@@ -21,7 +21,7 @@ public class UserCouponController {
     private JdbcTemplate jdbcTemplate;
     
     /**
-     * 根据用户ID查询用户优惠券
+     * 根据用户ID查询用户优惠券（不包含模板信息）
      * @param userId 用户ID
      * @return 用户优惠券列表
      */
@@ -32,7 +32,18 @@ public class UserCouponController {
     }
     
     /**
-     * 根据用户ID和状态查询用户优惠券
+     * 根据用户ID查询用户优惠券（包含模板信息）
+     * @param userId 用户ID
+     * @return 用户优惠券列表（包含模板信息）
+     */
+    @GetMapping("/user/{userId}/with-template")
+    public Result<List<UserCoupon>> findByUserIdWithTemplate(@PathVariable("userId") String userId) {
+        List<UserCoupon> userCoupons = userCouponService.findByUserIdWithTemplate(userId);
+        return Result.success("查询成功", userCoupons);
+    }
+    
+    /**
+     * 根据用户ID和状态查询用户优惠券（不包含模板信息）
      * @param userId 用户ID
      * @param status 优惠券状态
      * @return 用户优惠券列表
@@ -42,6 +53,20 @@ public class UserCouponController {
             @PathVariable("userId") String userId,
             @PathVariable("status") String status) {
         List<UserCoupon> userCoupons = userCouponService.findByUserIdAndStatus(userId, status);
+        return Result.success("查询成功", userCoupons);
+    }
+    
+    /**
+     * 根据用户ID和状态查询用户优惠券（包含模板信息）
+     * @param userId 用户ID
+     * @param status 优惠券状态
+     * @return 用户优惠券列表（包含模板信息）
+     */
+    @GetMapping("/user/{userId}/status/{status}/with-template")
+    public Result<List<UserCoupon>> findByUserIdAndStatusWithTemplate(
+            @PathVariable("userId") String userId,
+            @PathVariable("status") String status) {
+        List<UserCoupon> userCoupons = userCouponService.findByUserIdAndStatusWithTemplate(userId, status);
         return Result.success("查询成功", userCoupons);
     }
     

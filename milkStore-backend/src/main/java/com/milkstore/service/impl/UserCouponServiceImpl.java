@@ -20,7 +20,17 @@ public class UserCouponServiceImpl implements UserCouponService {
     }
     
     @Override
+    public List<UserCoupon> findByUserIdWithTemplate(String userId) {
+        return userCouponMapper.findByUserIdWithTemplate(userId);
+    }
+    
+    @Override
     public List<UserCoupon> findByUserIdAndStatus(String userId, String status) {
         return userCouponMapper.findByUserIdAndStatus(userId, status);
+    }
+    
+    @Override
+    public List<UserCoupon> findByUserIdAndStatusWithTemplate(String userId, String status) {
+        return userCouponMapper.findByUserIdAndStatusWithTemplate(userId, status);
     }
 } 

@@ -13,35 +13,96 @@
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="userId" column="user_id"/>
+        <association property="couponTemplate" javaType="com.milkstore.entity.CouponTemplate">
+            <id property="id" column="template_id"/>
+            <result property="code" column="template_code"/>
+            <result property="title" column="template_title"/>
+            <result property="type" column="template_type"/>
+            <result property="value" column="template_value"/>
+            <result property="minOrderAmount" column="template_min_order_amount"/>
+            <result property="scope" column="template_scope"/>
+            <result property="description" column="template_description"/>
+            <result property="imageUrl" column="template_image_url"/>
+            <result property="status" column="template_status"/>
+            <result property="startTime" column="template_start_time"/>
+            <result property="endTime" column="template_end_time"/>
+            <result property="createTime" column="template_create_time"/>
+            <result property="updateTime" column="template_update_time"/>
+            <result property="isDeleted" column="template_is_deleted"/>
+        </association>
     </resultMap>
+
+    <sql id="userCouponColumns">
+        uc.id, uc.coupon_template_id, uc.coupon_code, uc.status, 
+        uc.claim_time, uc.used_time, uc.order_id, uc.create_time, 
+        uc.update_time, uc.user_id
+    </sql>
     
-    <!-- 根据用户ID查询用户优惠券 -->
+    <sql id="templateColumns">
+        ct.id as template_id, ct.code as template_code, ct.title as template_title,
+        ct.type as template_type, ct.value as template_value, 
+        ct.min_order_amount as template_min_order_amount, ct.scope as template_scope,
+        ct.description as template_description, ct.image_url as template_image_url,
+        ct.status as template_status, ct.start_time as template_start_time, 
+        ct.end_time as template_end_time, ct.create_time as template_create_time,
+        ct.update_time as template_update_time, ct.is_deleted as template_is_deleted
+    </sql>
+    
+    <!-- 根据用户ID查询用户优惠券（不包含模板信息） -->
     <select id="findByUserId" resultMap="UserCouponMap">
         SELECT 
-            id, coupon_template_id, coupon_code, status, 
-            claim_time, used_time, order_id, create_time, 
-            update_time, user_id
+            <include refid="userCouponColumns" />
         FROM 
-            user_coupon
+            user_coupon uc
         WHERE 
-            user_id = #{userId}
+            uc.user_id = #{userId}
         ORDER BY 
-            create_time DESC
+            uc.create_time DESC
     </select>
     
-    <!-- 根据用户ID和状态查询用户优惠券 -->
+    <!-- 根据用户ID查询用户优惠券（包含模板信息） -->
+    <select id="findByUserIdWithTemplate" resultMap="UserCouponMap">
+        SELECT 
+            <include refid="userCouponColumns" />,
+            <include refid="templateColumns" />
+        FROM 
+            user_coupon uc
+        LEFT JOIN 
+            coupon_template ct ON uc.coupon_template_id = ct.id
+        WHERE 
+            uc.user_id = #{userId}
+        ORDER BY 
+            uc.create_time DESC
+    </select>
+    
+    <!-- 根据用户ID和状态查询用户优惠券（不包含模板信息） -->
     <select id="findByUserIdAndStatus" resultMap="UserCouponMap">
         SELECT 
-            id, coupon_template_id, coupon_code, status, 
-            claim_time, used_time, order_id, create_time, 
-            update_time, user_id
+            <include refid="userCouponColumns" />
         FROM 
-            user_coupon
+            user_coupon uc
         WHERE 
-            user_id = #{userId}
+            uc.user_id = #{userId}
         AND 
-            status = #{status}
+            uc.status = #{status}
         ORDER BY 
-            create_time DESC
+            uc.create_time DESC
+    </select>
+    
+    <!-- 根据用户ID和状态查询用户优惠券（包含模板信息） -->
+    <select id="findByUserIdAndStatusWithTemplate" resultMap="UserCouponMap">
+        SELECT 
+            <include refid="userCouponColumns" />,
+            <include refid="templateColumns" />
+        FROM 
+            user_coupon uc
+        LEFT JOIN 
+            coupon_template ct ON uc.coupon_template_id = ct.id
+        WHERE 
+            uc.user_id = #{userId}
+        AND 
+            uc.status = #{status}
+        ORDER BY 
+            uc.create_time DESC
     </select>
 </mapper> 

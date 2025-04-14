@@ -877,7 +877,7 @@
 
 ### 获取用户优惠券
 
-根据用户ID获取该用户拥有的所有优惠券。
+根据用户ID获取该用户拥有的所有优惠券（不包含优惠券模板详情）。
 
 - **URL**: `/api/user-coupons/user/{userId}`
 - **方法**: `GET`
@@ -1001,6 +1001,82 @@
 }
 ```
 
+### 获取用户优惠券（包含模板信息）
+
+根据用户ID获取该用户拥有的所有优惠券，包含优惠券模板的详细信息。
+
+- **URL**: `/api/user-coupons/user/{userId}/with-template`
+- **方法**: `GET`
+- **需要认证**: 是
+- **参数**: 
+  - `userId`: 路径参数，用户ID
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": [
+    {
+      "id": 1,
+      "couponTemplateId": 101,
+      "couponCode": "ABC123456",
+      "status": "valid",
+      "claimTime": "2023-05-01 10:00:00",
+      "usedTime": null,
+      "orderId": null,
+      "createTime": "2023-05-01 10:00:00",
+      "updateTime": "2023-05-01 10:00:00",
+      "userId": "user123",
+      "couponTemplate": {
+        "id": 101,
+        "code": "NEW_USER_10",
+        "title": "新用户立减券",
+        "type": "cash",
+        "value": 10.00,
+        "minOrderAmount": 20.00,
+        "scope": "all",
+        "description": "新用户首单满20减10",
+        "imageUrl": "/static/images/coupon/new_user.png",
+        "status": "active",
+        "startTime": "2023-05-01 00:00:00",
+        "endTime": "2023-06-01 23:59:59",
+        "createTime": "2023-04-01 12:00:00",
+        "updateTime": "2023-04-01 12:00:00",
+        "isDeleted": false
+      }
+    },
+    // 更多优惠券...
+  ]
+}
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| data[].couponTemplate | Object | 优惠券模板信息 |
+| data[].couponTemplate.id | Long | 模板ID |
+| data[].couponTemplate.code | String | 优惠券编码 |
+| data[].couponTemplate.title | String | 优惠券标题 |
+| data[].couponTemplate.type | String | 优惠券类型(cash-现金券,discount-折扣券,free-免单券) |
+| data[].couponTemplate.value | Decimal | 优惠券面值(现金券金额或折扣券折扣率) |
+| data[].couponTemplate.minOrderAmount | Decimal | 最低使用金额 |
+| data[].couponTemplate.scope | String | 使用范围(all-全部商品,category-分类,product-单品) |
+| data[].couponTemplate.description | String | 优惠券描述 |
+| data[].couponTemplate.imageUrl | String | 优惠券图片 |
+| data[].couponTemplate.status | String | 优惠券状态 |
+| data[].couponTemplate.startTime | String | 有效期开始时间 |
+| data[].couponTemplate.endTime | String | 有效期结束时间 |
+| data[].couponTemplate.createTime | String | 创建时间 |
+| data[].couponTemplate.updateTime | String | 更新时间 |
+| data[].couponTemplate.isDeleted | Boolean | 是否已删除 |
+
 ### 获取指定状态的用户优惠券
 
 根据用户ID和优惠券状态获取该用户拥有的特定状态的优惠券。
@@ -1092,3 +1168,67 @@
   "data": null
 }
 ```
+
+### 获取指定状态的用户优惠券（包含模板信息）
+
+根据用户ID和优惠券状态获取该用户拥有的特定状态的优惠券，包含优惠券模板的详细信息。
+
+- **URL**: `/api/user-coupons/user/{userId}/status/{status}/with-template`
+- **方法**: `GET`
+- **需要认证**: 是
+- **参数**: 
+  - `userId`: 路径参数，用户ID
+  - `status`: 路径参数，优惠券状态(valid-有效,used-已使用,expired-已过期)
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "查询成功",
+  "data": [
+    {
+      "id": 1,
+      "couponTemplateId": 101,
+      "couponCode": "ABC123456",
+      "status": "valid",
+      "claimTime": "2023-05-01 10:00:00",
+      "usedTime": null,
+      "orderId": null,
+      "createTime": "2023-05-01 10:00:00",
+      "updateTime": "2023-05-01 10:00:00",
+      "userId": "user123",
+      "couponTemplate": {
+        "id": 101,
+        "code": "NEW_USER_10",
+        "title": "新用户立减券",
+        "type": "cash",
+        "value": 10.00,
+        "minOrderAmount": 20.00,
+        "scope": "all",
+        "description": "新用户首单满20减10",
+        "imageUrl": "/static/images/coupon/new_user.png",
+        "status": "active",
+        "startTime": "2023-05-01 00:00:00",
+        "endTime": "2023-06-01 23:59:59",
+        "createTime": "2023-04-01 12:00:00",
+        "updateTime": "2023-04-01 12:00:00",
+        "isDeleted": false
+      }
+    },
+    // 更多相同状态的优惠券...
+  ]
+}
+```
+
+#### 响应字段说明
+
+与获取用户优惠券（包含模板信息）接口相同。
+
+#### 错误响应
+
+与获取指定状态的用户优惠券接口相同。

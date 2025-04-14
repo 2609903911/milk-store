@@ -10,17 +10,32 @@ import java.util.List;
 public interface UserCouponMapper {
     
     /**
-     * 根据用户ID查询用户优惠券
+     * 根据用户ID查询用户优惠券（不包含模板信息）
      * @param userId 用户ID
      * @return 用户优惠券列表
      */
     List<UserCoupon> findByUserId(@Param("userId") String userId);
     
     /**
-     * 根据用户ID和状态查询用户优惠券
+     * 根据用户ID查询用户优惠券（包含模板信息）
+     * @param userId 用户ID
+     * @return 用户优惠券列表（包含模板信息）
+     */
+    List<UserCoupon> findByUserIdWithTemplate(@Param("userId") String userId);
+    
+    /**
+     * 根据用户ID和状态查询用户优惠券（不包含模板信息）
      * @param userId 用户ID
      * @param status 优惠券状态
      * @return 用户优惠券列表
      */
     List<UserCoupon> findByUserIdAndStatus(@Param("userId") String userId, @Param("status") String status);
+    
+    /**
+     * 根据用户ID和状态查询用户优惠券（包含模板信息）
+     * @param userId 用户ID
+     * @param status 优惠券状态
+     * @return 用户优惠券列表（包含模板信息）
+     */
+    List<UserCoupon> findByUserIdAndStatusWithTemplate(@Param("userId") String userId, @Param("status") String status);
 } 

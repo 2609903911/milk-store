@@ -16,6 +16,6 @@ public class UserCoupon {
     private Date updateTime;
     private String userId;
     
-    // 暂时注释掉关联查询
-    // private CouponTemplate couponTemplate;
+    // 非数据库字段，用于关联查询
+    private CouponTemplate couponTemplate;
 } 

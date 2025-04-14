@@ -1,23 +1,24 @@
 package com.milkstore.entity;
 
 import lombok.Data;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
 public class CouponTemplate {
     private Long id;
-    private String name;
+    private String code;
+    private String title;
     private String type;
-    private Double discount;
-    private Double amount;
-    private Double minOrderAmount;
+    private BigDecimal value;
+    private BigDecimal minOrderAmount;
+    private String scope;
     private String description;
+    private String imageUrl;
+    private String status;
     private Date startTime;
     private Date endTime;
-    private Integer quantity;
-    private Integer usedCount;
-    private Integer validDays;
-    private Boolean isDeleted;
     private Date createTime;
     private Date updateTime;
+    private Boolean isDeleted;
 } 
