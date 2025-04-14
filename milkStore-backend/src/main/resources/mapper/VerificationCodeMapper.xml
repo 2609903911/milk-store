@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.milkstore.mapper.VerificationCodeMapper">
+
+    <resultMap id="VerificationCodeMap" type="com.milkstore.entity.VerificationCode">
+        <id property="id" column="id"/>
+        <result property="phone" column="phone"/>
+        <result property="code" column="code"/>
+        <result property="type" column="type"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="isUsed" column="is_used"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 插入新的验证码 -->
+    <insert id="insert" parameterType="com.milkstore.entity.VerificationCode" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO verification_code (
+            phone, code, type, expire_time, is_used
+        ) VALUES (
+            #{phone}, #{code}, #{type}, #{expireTime}, #{isUsed}
+        )
+    </insert>
+    
+    <!-- 根据手机号和类型查询最新的未过期且未使用的验证码 -->
+    <select id="findLatestValidCode" resultMap="VerificationCodeMap">
+        SELECT 
+            * 
+        FROM 
+            verification_code 
+        WHERE 
+            phone = #{phone} 
+        AND 
+            type = #{type}
+        AND 
+            is_used = 0
+        AND 
+            expire_time > #{currentTime}
+        ORDER BY 
+            create_time DESC 
+        LIMIT 1
+    </select>
+    
+    <!-- 将验证码标记为已使用 -->
+    <update id="markAsUsed">
+        UPDATE 
+            verification_code 
+        SET 
+            is_used = 1 
+        WHERE 
+            id = #{id}
+    </update>
+    
+    <!-- 检查是否在指定时间内已经发送过验证码 -->
+    <select id="findLatestByTime" resultMap="VerificationCodeMap">
+        SELECT 
+            * 
+        FROM 
+            verification_code 
+        WHERE 
+            phone = #{phone} 
+        AND 
+            type = #{type}
+        AND 
+            create_time > #{startTime}
+        ORDER BY 
+            create_time DESC 
+        LIMIT 1
+    </select>
+</mapper> 

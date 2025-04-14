@@ -1232,3 +1232,128 @@
 #### 错误响应
 
 与获取指定状态的用户优惠券接口相同。
+
+## 验证码登录接口
+
+### 发送验证码
+
+发送短信验证码到指定手机号码。
+
+- **URL**: `/api/auth/code/send`
+- **方法**: `POST`
+- **需要认证**: 否
+- **参数**: 
+  - `phone`: 必填，手机号码
+  - `type`: 可选，验证码类型，默认为"login"。可选值：login(登录)、register(注册)、resetPassword(重置密码)
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "验证码发送成功",
+  "data": null
+}
+```
+
+#### 错误响应
+
+- **状态码**: 400 Bad Request
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 400,
+  "message": "无效的手机号",
+  "data": null
+}
+```
+
+- **状态码**: 429 Too Many Requests
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 429,
+  "message": "发送验证码过于频繁，请稍后再试",
+  "data": null
+}
+```
+
+### 验证码登录
+
+使用手机号和验证码进行登录。
+
+- **URL**: `/api/auth/login/code`
+- **方法**: `POST`
+- **需要认证**: 否
+- **参数**: 
+  - `phone`: 必填，手机号码
+  - `code`: 必填，验证码
+
+#### 成功响应
+
+- **状态码**: 200 OK
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 200,
+  "message": "登录成功",
+  "data": {
+    "user": {
+      "userId": "user_1650123456789",
+      "nickname": "用户1234",
+      "avatar": null,
+      "phone": "13812341234",
+      "gender": "unknown",
+      "birthday": null,
+      "pandaCoins": 0,
+      "lightningStars": 0,
+      "memberLevel": 1,
+      "createTime": "2025-04-14T15:54:00.417+08:00",
+      "lastLoginTime": null
+    },
+    "token": "a1b2c3d4e5f6g7h8i9j0"
+  }
+}
+```
+
+#### 响应字段说明
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| data.user | Object | 用户信息 |
+| data.user.userId | String | 用户ID |
+| data.user.nickname | String | 用户昵称 |
+| data.user.avatar | String | 用户头像URL |
+| data.user.phone | String | 手机号 |
+| data.user.gender | String | 性别(male-男, female-女, unknown-未知) |
+| data.user.birthday | String | 生日 |
+| data.user.pandaCoins | Integer | 熊猫币数量 |
+| data.user.lightningStars | Integer | 闪电星数量 |
+| data.user.memberLevel | Integer | 会员等级 |
+| data.user.createTime | String | 创建时间 |
+| data.user.lastLoginTime | String | 最后登录时间 |
+| data.token | String | 登录令牌 |
+
+#### 错误响应
+
+- **状态码**: 400 Bad Request
+- **内容类型**: application/json
+- **响应体**:
+
+```json
+{
+  "code": 400,
+  "message": "验证码无效或已过期",
+  "data": null
+}
+```
