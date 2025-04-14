@@ -93,4 +93,8 @@ page {
 .icon-right:before {
     content: '\e6a3';
 }
+
+.icon-left:before {
+    content: '\e6b7';
+}
 </style>

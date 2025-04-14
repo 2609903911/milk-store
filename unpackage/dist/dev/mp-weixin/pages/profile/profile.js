@@ -70,7 +70,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$3,
+        a: common_assets._imports_0$4,
         b: common_vendor.unref(utils_userState.userState).avatar || "/static/images/avatar",
         c: common_vendor.o(handleAvatarError),
         d: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),

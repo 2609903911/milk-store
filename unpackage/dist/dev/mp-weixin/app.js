@@ -4,6 +4,7 @@ const common_vendor = require("./common/vendor.js");
 const utils_userState = require("./utils/userState.js");
 const utils_userService = require("./utils/userService.js");
 if (!Math) {
+  "./pages/login/login.js";
   "./pages/home/home.js";
   "./pages/order/order.js";
   "./pages/my-orders/my-orders.js";

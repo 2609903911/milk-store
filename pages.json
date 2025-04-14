@@ -1,6 +1,13 @@
 {
     "pages" : [
         {
+            "path" : "pages/login/login",
+            "style" : {
+                "navigationBarTitleText" : "授权登录",
+                "navigationStyle" : "custom"
+            }
+        },
+        {
             "path" : "pages/home/home",
             "style" : {
                 "navigationBarTitleText" : "首页",

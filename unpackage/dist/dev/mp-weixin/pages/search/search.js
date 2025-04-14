@@ -118,7 +118,7 @@ const _sfc_main = {
       }, hasSearched.value ? common_vendor.e({
         j: searchResults.value.length === 0 && !isLoading.value
       }, searchResults.value.length === 0 && !isLoading.value ? {
-        k: common_assets._imports_0$9
+        k: common_assets._imports_0$10
       } : {}, {
         l: isLoading.value
       }, isLoading.value ? {} : {}, {

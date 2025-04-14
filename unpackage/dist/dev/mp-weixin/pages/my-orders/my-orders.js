@@ -176,7 +176,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: !hasOrders.value
       }, !hasOrders.value ? {
-        b: common_assets._imports_0$2,
+        b: common_assets._imports_0$3,
         c: common_vendor.o(goToOrder)
       } : {}, {
         d: hasOrders.value

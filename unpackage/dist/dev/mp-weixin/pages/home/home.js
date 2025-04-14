@@ -85,7 +85,7 @@ const _sfc_main = {
         h: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
         i: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
         j: common_vendor.o(navigateToCoupons),
-        k: common_assets._imports_0$1,
+        k: common_assets._imports_0$2,
         l: common_vendor.o(navigateToOrder),
         m: common_assets._imports_1,
         n: common_assets._imports_2,

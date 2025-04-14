@@ -187,7 +187,7 @@ const _sfc_main = {
         a: userInfo.value.avatar || "/static/images/avatar",
         b: common_vendor.o(handleAvatarError),
         c: common_vendor.o(chooseAvatar),
-        d: common_assets._imports_0$8,
+        d: common_assets._imports_0$9,
         e: userInfo.value.nickname,
         f: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
         g: common_vendor.t(formatPhone(userInfo.value.phone)),
