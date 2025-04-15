@@ -3,6 +3,7 @@ package com.milkstore.mapper;
 import com.milkstore.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface UserMapper {
@@ -27,4 +28,10 @@ public interface UserMapper {
      * @return 影响行数
      */
     int insert(User user);
+
+    @Update("UPDATE users SET panda_coins = #{pandaCoins} WHERE user_id = #{userId}")
+    int updateCoins(@Param("userId") String userId, @Param("pandaCoins") int pandaCoins);
+    
+    @Update("UPDATE users SET panda_coins = #{pandaCoins}, lightning_stars = #{lightningStars} WHERE user_id = #{userId}")
+    int updateCoinsAndStars(@Param("userId") String userId, @Param("pandaCoins") int pandaCoins, @Param("lightningStars") int lightningStars);
 } 

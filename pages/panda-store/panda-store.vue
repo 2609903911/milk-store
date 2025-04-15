@@ -39,7 +39,7 @@
                         src="/static/images/coin.png"
                         mode="aspectFit"
                     ></image>
-                    {{ userInfo.pandaCoins }}
+                    {{ userData.pandaCoins }}
                 </view>
 
                 <view class="user-info-tabs">
@@ -181,11 +181,11 @@
                                 class="exchange-btn"
                                 @click="exchangeCoupon(coupon)"
                                 :disabled="
-                                    userInfo.pandaCoins < coupon.coinsCost
+                                    userData.pandaCoins < coupon.coinsCost
                                 "
                             >
                                 {{
-                                    userInfo.pandaCoins < coupon.coinsCost
+                                    userData.pandaCoins < coupon.coinsCost
                                         ? '熊猫币不足'
                                         : '立即兑换'
                                 }}
@@ -241,6 +241,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { updateUserState } from '../../utils/userState'
+import { userData, initUserData } from '../../utils/userData'
 import {
     COUPON_TYPES,
     COUPON_STATUS,
@@ -248,6 +249,7 @@ import {
     createCashCoupon,
     createFreeCoupon
 } from '../../utils/couponModel'
+import { get, post } from '../../utils/request'
 
 // 标签页
 const tabs = ref(['人气兑换', '折扣券', '现金券', '免费券', '点亮星'])
@@ -260,123 +262,49 @@ const couponList = ref([])
 const showSuccessPopup = ref(false)
 const exchangedCoupon = ref(null)
 
-// 本地用户信息
-const userInfo = reactive({
-    userId: '',
-    nickname: '',
-    avatar: '',
-    pandaCoins: 0,
-    lightningStars: 0,
-    coupons: [],
-    medals: []
-})
-
 // 所有可兑换的优惠券
 const allCoupons = reactive([])
 
 // 初始化数据
 onMounted(() => {
-    // 获取用户信息
-    fetchUserInfo()
+    // 初始化用户数据
+    initUserData()
     // 从后端获取商城商品数据
     fetchStoreProducts()
 })
 
-// 获取用户信息
-const fetchUserInfo = () => {
-    uni.showLoading({
-        title: '加载中'
-    })
-
-    // 模拟从本地存储或API获取用户信息
-    uni.request({
-        url: '/api/user/info',
-        method: 'GET',
-        success: (res) => {
-            if (res.statusCode === 200 && res.data.code === 200) {
-                // 更新用户信息
-                const userData = res.data.data
-                Object.assign(userInfo, userData)
-            } else {
-                // 如果API获取失败，尝试使用本地存储的用户信息
-                const localUserInfo = uni.getStorageSync('userInfo')
-                if (localUserInfo) {
-                    Object.assign(userInfo, JSON.parse(localUserInfo))
-                } else {
-                    uni.showToast({
-                        title: '获取用户信息失败',
-                        icon: 'none'
-                    })
-                }
-            }
-        },
-        fail: () => {
-            // 测试模式：使用硬编码的用户信息
-            Object.assign(userInfo, {
-                userId: 'guest_1719396000000',
-                nickname: '奶茶爱好者',
-                avatar: '/static/images/avatar.png',
-                pandaCoins: 1739,
-                lightningStars: 6,
-                memberLevel: 2,
-                coupons: [],
-                medals: []
-            })
-        },
-        complete: () => {
-            uni.hideLoading()
-        }
-    })
-}
-
 // 从后端获取商城商品数据
 const fetchStoreProducts = () => {
     return new Promise((resolve) => {
-        uni.showLoading({
-            title: '加载中'
-        })
-
-        uni.request({
-            url: '/api/store/home',
-            method: 'GET',
-            success: (res) => {
-                if (res.statusCode === 200 && res.data.code === 200) {
-                    // 更新商品列表
-                    const data = res.data.data
-                    if (data.allProducts && data.allProducts.length > 0) {
-                        // 清空原数组并添加新数据
-                        allCoupons.splice(
-                            0,
-                            allCoupons.length,
-                            ...data.allProducts
-                        )
-                        // 根据当前tab更新显示的优惠券
-                        updateCouponList()
-                    } else {
-                        uni.showToast({
-                            title: '暂无商品数据',
-                            icon: 'none'
-                        })
-                    }
+        // 使用统一请求工具
+        get(
+            '/api/store/home',
+            {},
+            {
+                loading: true,
+                loadingText: '加载中'
+            }
+        )
+            .then((res) => {
+                const data = res.data
+                if (data.allProducts && data.allProducts.length > 0) {
+                    // 清空原数组并添加新数据
+                    allCoupons.splice(0, allCoupons.length, ...data.allProducts)
+                    // 根据当前tab更新显示的优惠券
+                    updateCouponList()
                 } else {
                     uni.showToast({
-                        title: '获取商品失败',
+                        title: '暂无商品数据',
                         icon: 'none'
                     })
                 }
-            },
-            fail: (err) => {
+            })
+            .catch((err) => {
                 console.error('获取商城商品失败:', err)
-                uni.showToast({
-                    title: '网络错误，请稍后再试',
-                    icon: 'none'
-                })
-            },
-            complete: () => {
-                uni.hideLoading()
+            })
+            .finally(() => {
                 resolve()
-            }
-        })
+            })
     })
 }
 
@@ -448,7 +376,7 @@ const getCouponTypeImage = (type) => {
 // 兑换优惠券
 const exchangeCoupon = (coupon) => {
     // 检查熊猫币是否足够
-    if (userInfo.pandaCoins < coupon.coinsCost) {
+    if (userData.pandaCoins < coupon.coinsCost) {
         uni.showToast({
             title: '熊猫币不足',
             icon: 'none'
@@ -457,7 +385,7 @@ const exchangeCoupon = (coupon) => {
     }
 
     // 减少熊猫币
-    const newCoins = userInfo.pandaCoins - coupon.coinsCost
+    const newCoins = userData.pandaCoins - coupon.coinsCost
 
     // 创建新的优惠券实例或增加点亮星
     let newCoupon
@@ -467,20 +395,23 @@ const exchangeCoupon = (coupon) => {
     // 处理点亮星特殊情况
     if (coupon.category === 'lightStar') {
         // 更新用户的点亮星数量
-        const currentStars = userInfo.lightningStars || 0
+        const currentStars = userData.lightningStars || 0
         const updatedUserInfo = {
             pandaCoins: newCoins,
             lightningStars: currentStars + coupon.value
         }
 
         // 更新本地用户信息
-        userInfo.pandaCoins = newCoins
-        userInfo.lightningStars = currentStars + coupon.value
+        userData.pandaCoins = newCoins
+        userData.lightningStars = currentStars + coupon.value
 
         // 同步更新到全局状态
         const success = updateUserState(updatedUserInfo)
 
         if (success) {
+            // 创建交易记录
+            createTransaction(coupon, null, 'lightstar', coupon.value)
+
             // 显示成功提示
             uni.showToast({
                 title: `获得${coupon.value}个点亮星`,
@@ -550,24 +481,49 @@ const exchangeCoupon = (coupon) => {
     }
 
     // 更新本地用户信息
-    userInfo.pandaCoins = newCoins
-    if (!userInfo.coupons) {
-        userInfo.coupons = []
+    userData.pandaCoins = newCoins
+    if (!userData.coupons) {
+        userData.coupons = []
     }
-    userInfo.coupons.push(newCoupon)
+    userData.coupons.push(newCoupon)
 
     // 同步更新到全局状态
     const updatedUserInfo = {
         pandaCoins: newCoins,
-        coupons: [...(userInfo.coupons || []), newCoupon]
+        coupons: [...(userData.coupons || []), newCoupon]
     }
     updateUserState(updatedUserInfo)
+
+    // 创建交易记录
+    createTransaction(coupon, newCoupon, 'coupon', 1)
 
     // 记录兑换的优惠券
     exchangedCoupon.value = newCoupon
 
     // 显示成功弹窗
     showSuccessPopup.value = true
+}
+
+// 创建交易记录
+const createTransaction = (coupon, newCoupon, transactionType, amount) => {
+    // 交易数据
+    const transactionData = {
+        userId: userData.userId,
+        productId: coupon.id,
+        transactionType: transactionType,
+        coinsSpent: coupon.coinsCost,
+        quantity: 1,
+        couponId: newCoupon ? newCoupon.id : null,
+        lightstarAmount: transactionType === 'lightstar' ? amount : null
+    }
+
+    // 调用后端API创建交易记录
+    post('/api/transactions', transactionData, {
+        showError: false
+    }).catch((err) => {
+        console.error('创建交易记录失败:', err)
+        // 交易记录失败不影响前端兑换流程，只记录日志
+    })
 }
 
 // 关闭成功弹窗

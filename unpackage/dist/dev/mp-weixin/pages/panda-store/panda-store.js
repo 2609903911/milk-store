@@ -2,7 +2,9 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userState = require("../../utils/userState.js");
+const utils_userData = require("../../utils/userData.js");
 const utils_couponModel = require("../../utils/couponModel.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -19,102 +21,35 @@ const _sfc_main = {
     const couponList = common_vendor.ref([]);
     const showSuccessPopup = common_vendor.ref(false);
     const exchangedCoupon = common_vendor.ref(null);
-    const userInfo = common_vendor.reactive({
-      userId: "",
-      nickname: "",
-      avatar: "",
-      pandaCoins: 0,
-      lightningStars: 0,
-      coupons: [],
-      medals: []
-    });
     const allCoupons = common_vendor.reactive([]);
     common_vendor.onMounted(() => {
-      fetchUserInfo();
+      utils_userData.initUserData();
       fetchStoreProducts();
     });
-    const fetchUserInfo = () => {
-      common_vendor.index.showLoading({
-        title: "加载中"
-      });
-      common_vendor.index.request({
-        url: "/api/user/info",
-        method: "GET",
-        success: (res) => {
-          if (res.statusCode === 200 && res.data.code === 200) {
-            const userData = res.data.data;
-            Object.assign(userInfo, userData);
-          } else {
-            const localUserInfo = common_vendor.index.getStorageSync("userInfo");
-            if (localUserInfo) {
-              Object.assign(userInfo, JSON.parse(localUserInfo));
-            } else {
-              common_vendor.index.showToast({
-                title: "获取用户信息失败",
-                icon: "none"
-              });
-            }
-          }
-        },
-        fail: () => {
-          Object.assign(userInfo, {
-            userId: "guest_1719396000000",
-            nickname: "奶茶爱好者",
-            avatar: "/static/images/avatar.png",
-            pandaCoins: 1739,
-            lightningStars: 6,
-            memberLevel: 2,
-            coupons: [],
-            medals: []
-          });
-        },
-        complete: () => {
-          common_vendor.index.hideLoading();
-        }
-      });
-    };
     const fetchStoreProducts = () => {
       return new Promise((resolve) => {
-        common_vendor.index.showLoading({
-          title: "加载中"
-        });
-        common_vendor.index.request({
-          url: "/api/store/home",
-          method: "GET",
-          success: (res) => {
-            if (res.statusCode === 200 && res.data.code === 200) {
-              const data = res.data.data;
-              if (data.allProducts && data.allProducts.length > 0) {
-                allCoupons.splice(
-                  0,
-                  allCoupons.length,
-                  ...data.allProducts
-                );
-                updateCouponList();
-              } else {
-                common_vendor.index.showToast({
-                  title: "暂无商品数据",
-                  icon: "none"
-                });
-              }
-            } else {
-              common_vendor.index.showToast({
-                title: "获取商品失败",
-                icon: "none"
-              });
-            }
-          },
-          fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:369", "获取商城商品失败:", err);
+        utils_request.get(
+          "/api/store/home",
+          {},
+          {
+            loading: true,
+            loadingText: "加载中"
+          }
+        ).then((res) => {
+          const data = res.data;
+          if (data.allProducts && data.allProducts.length > 0) {
+            allCoupons.splice(0, allCoupons.length, ...data.allProducts);
+            updateCouponList();
+          } else {
             common_vendor.index.showToast({
-              title: "网络错误，请稍后再试",
+              title: "暂无商品数据",
               icon: "none"
             });
-          },
-          complete: () => {
-            common_vendor.index.hideLoading();
-            resolve();
           }
+        }).catch((err) => {
+          common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:303", "获取商城商品失败:", err);
+        }).finally(() => {
+          resolve();
         });
       });
     };
@@ -166,26 +101,27 @@ const _sfc_main = {
       }
     };
     const exchangeCoupon = (coupon) => {
-      if (userInfo.pandaCoins < coupon.coinsCost) {
+      if (utils_userData.userData.pandaCoins < coupon.coinsCost) {
         common_vendor.index.showToast({
           title: "熊猫币不足",
           icon: "none"
         });
         return;
       }
-      const newCoins = userInfo.pandaCoins - coupon.coinsCost;
+      const newCoins = utils_userData.userData.pandaCoins - coupon.coinsCost;
       let newCoupon;
       const now = Date.now();
       if (coupon.category === "lightStar") {
-        const currentStars = userInfo.lightningStars || 0;
+        const currentStars = utils_userData.userData.lightningStars || 0;
         const updatedUserInfo2 = {
           pandaCoins: newCoins,
           lightningStars: currentStars + coupon.value
         };
-        userInfo.pandaCoins = newCoins;
-        userInfo.lightningStars = currentStars + coupon.value;
+        utils_userData.userData.pandaCoins = newCoins;
+        utils_userData.userData.lightningStars = currentStars + coupon.value;
         const success = utils_userState.updateUserState(updatedUserInfo2);
         if (success) {
+          createTransaction(coupon, null, "lightstar", coupon.value);
           common_vendor.index.showToast({
             title: `获得${coupon.value}个点亮星`,
             icon: "success"
@@ -246,18 +182,35 @@ const _sfc_main = {
             source: "pandaStore"
           };
       }
-      userInfo.pandaCoins = newCoins;
-      if (!userInfo.coupons) {
-        userInfo.coupons = [];
+      utils_userData.userData.pandaCoins = newCoins;
+      if (!utils_userData.userData.coupons) {
+        utils_userData.userData.coupons = [];
       }
-      userInfo.coupons.push(newCoupon);
+      utils_userData.userData.coupons.push(newCoupon);
       const updatedUserInfo = {
         pandaCoins: newCoins,
-        coupons: [...userInfo.coupons || [], newCoupon]
+        coupons: [...utils_userData.userData.coupons || [], newCoupon]
       };
       utils_userState.updateUserState(updatedUserInfo);
+      createTransaction(coupon, newCoupon, "coupon", 1);
       exchangedCoupon.value = newCoupon;
       showSuccessPopup.value = true;
+    };
+    const createTransaction = (coupon, newCoupon, transactionType, amount) => {
+      const transactionData = {
+        userId: utils_userData.userData.userId,
+        productId: coupon.id,
+        transactionType,
+        coinsSpent: coupon.coinsCost,
+        quantity: 1,
+        couponId: newCoupon ? newCoupon.id : null,
+        lightstarAmount: transactionType === "lightstar" ? amount : null
+      };
+      utils_request.post("/api/transactions", transactionData, {
+        showError: false
+      }).catch((err) => {
+        common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:524", "创建交易记录失败:", err);
+      });
     };
     const closeSuccessPopup = () => {
       showSuccessPopup.value = false;
@@ -289,7 +242,7 @@ const _sfc_main = {
         c: common_assets._imports_0$8,
         d: common_vendor.o((...args) => _ctx.showEarnCoinsPopup && _ctx.showEarnCoinsPopup(...args)),
         e: common_assets._imports_1$3,
-        f: common_vendor.t(userInfo.pandaCoins),
+        f: common_vendor.t(common_vendor.unref(utils_userData.userData).pandaCoins),
         g: common_vendor.p({
           type: "",
           size: "24"
@@ -325,9 +278,9 @@ const _sfc_main = {
             m: common_vendor.t(coupon.description),
             n: common_vendor.t(coupon.validity || "30天"),
             o: common_vendor.t(coupon.coinsCost),
-            p: common_vendor.t(userInfo.pandaCoins < coupon.coinsCost ? "熊猫币不足" : "立即兑换"),
+            p: common_vendor.t(common_vendor.unref(utils_userData.userData).pandaCoins < coupon.coinsCost ? "熊猫币不足" : "立即兑换"),
             q: common_vendor.o(($event) => exchangeCoupon(coupon), index),
-            r: userInfo.pandaCoins < coupon.coinsCost,
+            r: common_vendor.unref(utils_userData.userData).pandaCoins < coupon.coinsCost,
             s: index,
             t: common_vendor.n(getCouponColorClass(coupon.type))
           });
