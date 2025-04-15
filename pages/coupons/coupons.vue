@@ -27,54 +27,59 @@
                             v-for="coupon in validCoupons"
                             :key="coupon.id"
                             class="coupon-card"
-                            :class="[getCouponColorClass(coupon.type)]"
+                            :class="[getCouponColorClass(coupon)]"
                         >
                             <!-- 优惠券左侧 -->
                             <view class="coupon-left">
                                 <view class="coupon-value">
                                     <template
                                         v-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.DISCOUNT
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'discount'
                                         "
                                     >
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                         <text class="unit">折</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.CASH
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'cash'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.FREE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'free'
                                         "
                                     >
                                         <text class="value">免单</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SPECIAL_PRICE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'specialPrice'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SHIPPING
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'shipping'
                                         "
                                     >
                                         <text class="value">免运费</text>
@@ -82,9 +87,16 @@
                                 </view>
                                 <view
                                     class="coupon-limit"
-                                    v-if="coupon.minOrderAmount > 0"
+                                    v-if="
+                                        (coupon.couponTemplate
+                                            ?.minOrderAmount ||
+                                            coupon.minOrderAmount) > 0
+                                    "
                                 >
-                                    满{{ coupon.minOrderAmount }}元可用
+                                    满{{
+                                        coupon.couponTemplate?.minOrderAmount ||
+                                        coupon.minOrderAmount
+                                    }}元可用
                                 </view>
                             </view>
 
@@ -98,14 +110,26 @@
                             <!-- 优惠券右侧 -->
                             <view class="coupon-right">
                                 <view class="coupon-title">{{
-                                    coupon.title
+                                    coupon.couponTemplate?.title || coupon.title
                                 }}</view>
                                 <view class="coupon-desc">{{
+                                    coupon.couponTemplate?.description ||
                                     coupon.description
                                 }}</view>
                                 <view class="coupon-time">
-                                    {{ formatDate(coupon.startTime) }} -
-                                    {{ formatDate(coupon.endTime) }}
+                                    {{
+                                        formatDate(
+                                            coupon.couponTemplate?.startTime ||
+                                                coupon.startTime
+                                        )
+                                    }}
+                                    -
+                                    {{
+                                        formatDate(
+                                            coupon.couponTemplate?.endTime ||
+                                                coupon.endTime
+                                        )
+                                    }}
                                 </view>
                                 <view class="coupon-btn">
                                     <button @click="useCouponClick(coupon)">
@@ -143,47 +167,52 @@
                                 <view class="coupon-value">
                                     <template
                                         v-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.DISCOUNT
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'discount'
                                         "
                                     >
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                         <text class="unit">折</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.CASH
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'cash'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.FREE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'free'
                                         "
                                     >
                                         <text class="value">免单</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SPECIAL_PRICE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'specialPrice'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SHIPPING
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'shipping'
                                         "
                                     >
                                         <text class="value">免运费</text>
@@ -191,9 +220,16 @@
                                 </view>
                                 <view
                                     class="coupon-limit"
-                                    v-if="coupon.minOrderAmount > 0"
+                                    v-if="
+                                        (coupon.couponTemplate
+                                            ?.minOrderAmount ||
+                                            coupon.minOrderAmount) > 0
+                                    "
                                 >
-                                    满{{ coupon.minOrderAmount }}元可用
+                                    满{{
+                                        coupon.couponTemplate?.minOrderAmount ||
+                                        coupon.minOrderAmount
+                                    }}元可用
                                 </view>
                             </view>
 
@@ -205,9 +241,10 @@
 
                             <view class="coupon-right">
                                 <view class="coupon-title">{{
-                                    coupon.title
+                                    coupon.couponTemplate?.title || coupon.title
                                 }}</view>
                                 <view class="coupon-desc">{{
+                                    coupon.couponTemplate?.description ||
                                     coupon.description
                                 }}</view>
                                 <view class="coupon-time">
@@ -244,47 +281,52 @@
                                 <view class="coupon-value">
                                     <template
                                         v-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.DISCOUNT
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'discount'
                                         "
                                     >
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                         <text class="unit">折</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.CASH
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'cash'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.FREE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'free'
                                         "
                                     >
                                         <text class="value">免单</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SPECIAL_PRICE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'specialPrice'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SHIPPING
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'shipping'
                                         "
                                     >
                                         <text class="value">免运费</text>
@@ -292,9 +334,16 @@
                                 </view>
                                 <view
                                     class="coupon-limit"
-                                    v-if="coupon.minOrderAmount > 0"
+                                    v-if="
+                                        (coupon.couponTemplate
+                                            ?.minOrderAmount ||
+                                            coupon.minOrderAmount) > 0
+                                    "
                                 >
-                                    满{{ coupon.minOrderAmount }}元可用
+                                    满{{
+                                        coupon.couponTemplate?.minOrderAmount ||
+                                        coupon.minOrderAmount
+                                    }}元可用
                                 </view>
                             </view>
 
@@ -306,9 +355,10 @@
 
                             <view class="coupon-right">
                                 <view class="coupon-title">{{
-                                    coupon.title
+                                    coupon.couponTemplate?.title || coupon.title
                                 }}</view>
                                 <view class="coupon-desc">{{
+                                    coupon.couponTemplate?.description ||
                                     coupon.description
                                 }}</view>
                                 <view class="coupon-time">
@@ -353,53 +403,58 @@
                             v-for="(coupon, index) in availableCoupons"
                             :key="index"
                             class="center-coupon-item"
-                            :class="[getCouponColorClass(coupon.type)]"
+                            :class="[getCouponColorClass(coupon)]"
                         >
                             <view class="center-coupon-top">
                                 <view class="center-coupon-value">
                                     <template
                                         v-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.DISCOUNT
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'discount'
                                         "
                                     >
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                         <text class="unit">折</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.CASH
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'cash'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type === COUPON_TYPES.FREE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'free'
                                         "
                                     >
                                         <text class="value">免单</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SPECIAL_PRICE
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'specialPrice'
                                         "
                                     >
                                         <text class="symbol">¥</text>
                                         <text class="value">{{
+                                            coupon.couponTemplate?.value ||
                                             coupon.value
                                         }}</text>
                                     </template>
                                     <template
                                         v-else-if="
-                                            coupon.type ===
-                                            COUPON_TYPES.SHIPPING
+                                            (coupon.couponTemplate?.type ||
+                                                coupon.type) === 'shipping'
                                         "
                                     >
                                         <text class="value">免运费</text>
@@ -407,15 +462,22 @@
                                 </view>
                                 <view
                                     class="center-coupon-limit"
-                                    v-if="coupon.minOrderAmount > 0"
+                                    v-if="
+                                        (coupon.couponTemplate
+                                            ?.minOrderAmount ||
+                                            coupon.minOrderAmount) > 0
+                                    "
                                 >
-                                    满{{ coupon.minOrderAmount }}元可用
+                                    满{{
+                                        coupon.couponTemplate?.minOrderAmount ||
+                                        coupon.minOrderAmount
+                                    }}元可用
                                 </view>
                             </view>
 
                             <view class="center-coupon-bottom">
                                 <view class="center-coupon-title">{{
-                                    coupon.title
+                                    coupon.couponTemplate?.title || coupon.title
                                 }}</view>
                                 <button
                                     class="claim-coupon-btn"
@@ -435,11 +497,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { COUPON_TYPES, COUPON_STATUS } from '../../utils/couponModel'
-import {
-    getUserCoupons,
-    getCouponsByStatus,
-    claimCoupon
-} from '../../utils/couponService'
+import { userData } from '../../utils/userData'
 
 // 标签页
 const tabs = ref(['可用优惠券', '已使用', '已过期'])
@@ -475,11 +533,29 @@ onMounted(() => {
 
 // 加载优惠券数据
 const loadCoupons = () => {
-    // 获取不同状态的优惠券
-    validCoupons.value = getCouponsByStatus(COUPON_STATUS.VALID)
-    console.log(validCoupons.value)
-    usedCoupons.value = getCouponsByStatus(COUPON_STATUS.USED)
-    expiredCoupons.value = getCouponsByStatus(COUPON_STATUS.EXPIRED)
+    // 如果userData.coupons不存在，使用空数组
+    const userCoupons = userData.coupons || []
+
+    // 按状态过滤优惠券
+    validCoupons.value = userCoupons.filter(
+        (coupon) =>
+            (coupon.status === 'valid' ||
+                coupon.status === 'active' ||
+                coupon.status === 'notStarted') &&
+            !coupon.usedTime
+    )
+
+    usedCoupons.value = userCoupons.filter(
+        (coupon) => coupon.status === 'used' || coupon.usedTime
+    )
+
+    expiredCoupons.value = userCoupons.filter(
+        (coupon) =>
+            coupon.status === 'expired' ||
+            (coupon.endTime && new Date(coupon.endTime) < new Date())
+    )
+
+    console.log('有效优惠券:', validCoupons.value)
 }
 
 // 切换标签页
@@ -517,20 +593,36 @@ const useCouponClick = (coupon) => {
 
 // 获取优惠券颜色类名
 const getCouponColorClass = (type) => {
+    // 支持直接传入优惠券对象
+    if (typeof type === 'object') {
+        // 如果是完整的优惠券对象
+        if (type.couponTemplate) {
+            type = type.couponTemplate.type
+        } else {
+            // 直接使用优惠券对象自身的type
+            type = type.type
+        }
+    }
+
     switch (type) {
         case COUPON_TYPES.DISCOUNT:
+        case 'discount':
             return 'discount-coupon'
 
         case COUPON_TYPES.CASH:
+        case 'cash':
             return 'cash-coupon'
 
         case COUPON_TYPES.FREE:
+        case 'free':
             return 'free-coupon'
 
         case COUPON_TYPES.SPECIAL_PRICE:
+        case 'specialPrice':
             return 'special-coupon'
 
         case COUPON_TYPES.SHIPPING:
+        case 'shipping':
             return 'shipping-coupon'
 
         default:

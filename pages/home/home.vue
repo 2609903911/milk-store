@@ -80,18 +80,20 @@
                     <view class="avatar-container">
                         <image
                             class="avatar"
-                            :src="userState.avatar || '/static/images/avatar'"
+                            :src="
+                                userData.avatar || '/static/images/avatar.png'
+                            "
                             @error="handleAvatarError"
                         ></image>
                     </view>
                     <view class="user-greeting">
-                        <text>Hi~{{ userState.nickname }}</text>
+                        <text>Hi~{{ userData.nickname }}</text>
                     </view>
                     <view class="coupon-btn" @click="navigateToCoupons">
                         <text
                             >优惠券
                             {{
-                                userState.coupons ? userState.coupons.length : 0
+                                userData.coupons ? userData.coupons.length : 0
                             }}</text
                         >
                     </view>
@@ -256,12 +258,22 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { userState } from '../../utils/userState'
+import { userData, initUserData } from '../../utils/userData'
 import { bannerApi } from '../../utils/api'
 
-console.log(userState)
+// 初始化用户数据
+onMounted(() => {
+    initUserData()
+    // 从后端获取轮播图数据
+    fetchBannerData()
+})
+
+console.log(userData)
 
 const currentSwiper = ref(0)
+const swiperChange = (e) => {
+    currentSwiper.value = e.detail.current
+}
 
 // 轮播图数据
 const bannerList = ref([])
@@ -279,49 +291,54 @@ const fetchBannerData = async () => {
     }
 }
 
-// // 本地备用数据，当API请求失败时使用
-// const loadLocalBannerData = () => {
-//     bannerList.value = [
-//         {
-//             tag: '超级蔬食 轻畅系列焕新',
-//             title: ['早畅晚轻', '24h轻畅循环'],
-//             desc: ['鲜果每日鲜榨', '一杯轻启肠道SPA'],
-//             image: '/static/images/scroll01.png',
-//             bgColor: '#8a9a5b' // 橄榄绿色背景
-//         },
-//         {
-//             tag: '桑葚系列',
-//             title: ['三重花青素', '自然好气色'],
-//             desc: ['爆款回归 一年卖出一千万杯！', '三重莓果 唤醒春日好气色'],
-//             image: '/static/images/scroll02.jpg',
-//             bgColor: '#e6f7ff' // 浅蓝色背景
-//         },
-//         {
-//             tag: '人气推荐',
-//             title: ['生椰系列', '醇香浓郁'],
-//             desc: ['精选海南生椰乳', '口感香浓醇厚'],
-//             image: '/static/images/scroll03.jpg',
-//             bgColor: '#f9e7d2' // 浅橙色背景
-//         },
-//         {
-//             tag: '季节限定',
-//             title: ['多肉葡萄', '果肉满满'],
-//             desc: ['精选当季葡萄', '多重口感层次'],
-//             image: '/static/images/scroll04.jpg',
-//             bgColor: '#e6d7f2' // 浅紫色背景
-//         }
-//     ]
-//     console.log('已加载本地备用轮播图数据')
-// }
+// 本地备用数据，当API请求失败时使用
+const loadLocalBannerData = () => {
+    bannerList.value = [
+        {
+            tag: '超级蔬食 轻畅系列焕新',
+            title: ['早畅晚轻', '24h轻畅循环'],
+            desc: ['鲜果每日鲜榨', '一杯轻启肠道SPA'],
+            image: '/static/images/scroll01.png',
+            bgColor: '#8a9a5b' // 橄榄绿色背景
+        },
+        {
+            tag: '桑葚系列',
+            title: ['三重花青素', '自然好气色'],
+            desc: ['爆款回归 一年卖出一千万杯！', '三重莓果 唤醒春日好气色'],
+            image: '/static/images/scroll02.jpg',
+            bgColor: '#e6f7ff' // 浅蓝色背景
+        },
+        {
+            tag: '人气推荐',
+            title: ['生椰系列', '醇香浓郁'],
+            desc: ['精选海南生椰乳', '口感香浓醇厚'],
+            image: '/static/images/scroll03.jpg',
+            bgColor: '#f9e7d2' // 浅橙色背景
+        },
+        {
+            tag: '季节限定',
+            title: ['多肉葡萄', '果肉满满'],
+            desc: ['精选当季葡萄', '多重口感层次'],
+            image: '/static/images/scroll04.jpg',
+            bgColor: '#e6d7f2' // 浅紫色背景
+        }
+    ]
+    console.log('已加载本地备用轮播图数据')
+}
 
-// 页面加载时获取轮播图数据
-onMounted(() => {
-    fetchBannerData()
-})
+// 处理头像加载错误
+const handleAvatarError = () => {
+    // 如果头像加载失败，使用默认头像
+    if (userData.avatar !== '/static/images/avatar.png') {
+        userData.avatar = '/static/images/avatar.png'
+    }
+}
 
-// 轮播图切换事件
-const swiperChange = (e) => {
-    currentSwiper.value = e.detail.current
+// 导航到优惠券页面
+const navigateToCoupons = () => {
+    uni.navigateTo({
+        url: '/pages/coupons/coupons'
+    })
 }
 
 // 跳转到点单页面
@@ -331,24 +348,11 @@ const navigateToOrder = () => {
     })
 }
 
-// 跳转到优惠券页面
-const navigateToCoupons = () => {
-    uni.navigateTo({
-        url: '/pages/coupons/coupons'
-    })
-}
-
 // 跳转到熊猫币商城页面
 const navigateToPandaStore = () => {
     uni.navigateTo({
         url: '/pages/panda-store/panda-store'
     })
-}
-
-// 处理头像加载错误
-const handleAvatarError = () => {
-    // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
-    console.log('头像加载失败，使用默认头像')
 }
 </script>
 

@@ -45,4 +45,42 @@ export function logout() {
  */
 export function checkLoginStatus() {
   return get(API_PATHS.AUTH_STATUS);
-} 
+}
+
+// 添加用户登录后的存储逻辑
+export const saveUserToStorage = (userData, token) => {
+    try {
+        // 存储用户数据
+        uni.setStorageSync('userInfo', userData);
+        // 存储token
+        uni.setStorageSync('token', token);
+        console.log('用户数据已保存到本地存储');
+        return true;
+    } catch (error) {
+        console.error('保存用户数据失败:', error);
+        return false;
+    }
+};
+
+// 从本地存储获取用户数据
+export const getUserFromStorage = () => {
+    try {
+        const userInfo = uni.getStorageSync('userInfo');
+        return userInfo || null;
+    } catch (error) {
+        console.error('获取用户数据失败:', error);
+        return null;
+    }
+};
+
+// 清除用户数据
+export const clearUserStorage = () => {
+    try {
+        uni.removeStorageSync('userInfo');
+        uni.removeStorageSync('token');
+        return true;
+    } catch (error) {
+        console.error('清除用户数据失败:', error);
+        return false;
+    }
+}; 

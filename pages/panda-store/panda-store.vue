@@ -39,7 +39,7 @@
                         src="/static/images/coin.png"
                         mode="aspectFit"
                     ></image>
-                    {{ userState.pandaCoins }}
+                    {{ userInfo.pandaCoins }}
                 </view>
 
                 <view class="user-info-tabs">
@@ -181,11 +181,11 @@
                                 class="exchange-btn"
                                 @click="exchangeCoupon(coupon)"
                                 :disabled="
-                                    userState.pandaCoins < coupon.coinsCost
+                                    userInfo.pandaCoins < coupon.coinsCost
                                 "
                             >
                                 {{
-                                    userState.pandaCoins < coupon.coinsCost
+                                    userInfo.pandaCoins < coupon.coinsCost
                                         ? '熊猫币不足'
                                         : '立即兑换'
                                 }}
@@ -240,7 +240,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
-import { userState, updateUserState } from '../../utils/userState'
+import { updateUserState } from '../../utils/userState'
 import {
     COUPON_TYPES,
     COUPON_STATUS,
@@ -260,118 +260,125 @@ const couponList = ref([])
 const showSuccessPopup = ref(false)
 const exchangedCoupon = ref(null)
 
+// 本地用户信息
+const userInfo = reactive({
+    userId: '',
+    nickname: '',
+    avatar: '',
+    pandaCoins: 0,
+    lightningStars: 0,
+    coupons: [],
+    medals: []
+})
+
 // 所有可兑换的优惠券
-const allCoupons = reactive([
-    // 折扣券
-    {
-        id: 'ex_discount_1',
-        title: '奶茶8折券',
-        type: COUPON_TYPES.DISCOUNT,
-        value: 8,
-        minOrderAmount: 20,
-        description: '全场奶茶8折优惠',
-        validity: '30天',
-        coinsCost: 100,
-        category: 'discount'
-    },
-    {
-        id: 'ex_discount_2',
-        title: '饮品7折券',
-        type: COUPON_TYPES.DISCOUNT,
-        value: 7,
-        minOrderAmount: 30,
-        description: '全场饮品7折优惠',
-        validity: '15天',
-        coinsCost: 150,
-        category: 'discount'
-    },
-    // 现金券
-    {
-        id: 'ex_cash_1',
-        title: '满30减10元券',
-        type: COUPON_TYPES.CASH,
-        value: 10,
-        minOrderAmount: 30,
-        description: '满30元立减10元',
-        validity: '30天',
-        coinsCost: 120,
-        category: 'cash'
-    },
-    {
-        id: 'ex_cash_2',
-        title: '满50减20元券',
-        type: COUPON_TYPES.CASH,
-        value: 20,
-        minOrderAmount: 50,
-        description: '满50元立减20元',
-        validity: '30天',
-        coinsCost: 200,
-        category: 'cash'
-    },
-    // 免单券
-    {
-        id: 'ex_free_1',
-        title: '小杯饮品免单券',
-        type: COUPON_TYPES.FREE,
-        value: 15,
-        minOrderAmount: 0,
-        description: '小杯饮品免费，最高15元',
-        validity: '7天',
-        coinsCost: 300,
-        category: 'free'
-    },
-    // 点亮星商品
-    {
-        id: 'ex_star_1',
-        title: '点亮星 x1',
-        type: COUPON_TYPES.SPECIAL_PRICE,
-        value: 1,
-        minOrderAmount: 0,
-        description: '点亮徽章的星星，永久有效',
-        validity: '永久',
-        coinsCost: 180,
-        category: 'lightStar'
-    },
-    {
-        id: 'ex_star_3',
-        title: '点亮星 x3',
-        type: COUPON_TYPES.SPECIAL_PRICE,
-        value: 3,
-        minOrderAmount: 0,
-        description: '点亮徽章的星星，永久有效',
-        validity: '永久',
-        coinsCost: 500,
-        category: 'lightStar'
-    },
-    {
-        id: 'ex_star_5',
-        title: '点亮星 x5',
-        type: COUPON_TYPES.SPECIAL_PRICE,
-        value: 5,
-        minOrderAmount: 0,
-        description: '点亮徽章的星星，永久有效',
-        validity: '永久',
-        coinsCost: 800,
-        category: 'lightStar'
-    },
-    // 免运费券
-    {
-        id: 'ex_shipping_1',
-        title: '免运费券',
-        type: COUPON_TYPES.SHIPPING,
-        value: 0,
-        minOrderAmount: 20,
-        description: '满20元免除配送费',
-        validity: '30天',
-        coinsCost: 80,
-        category: 'shipping'
-    }
-])
+const allCoupons = reactive([])
 
 // 初始化数据
 onMounted(() => {
-    updateCouponList()
+    // 获取用户信息
+    fetchUserInfo()
+    // 从后端获取商城商品数据
+    fetchStoreProducts()
 })
+
+// 获取用户信息
+const fetchUserInfo = () => {
+    uni.showLoading({
+        title: '加载中'
+    })
+
+    // 模拟从本地存储或API获取用户信息
+    uni.request({
+        url: '/api/user/info',
+        method: 'GET',
+        success: (res) => {
+            if (res.statusCode === 200 && res.data.code === 200) {
+                // 更新用户信息
+                const userData = res.data.data
+                Object.assign(userInfo, userData)
+            } else {
+                // 如果API获取失败，尝试使用本地存储的用户信息
+                const localUserInfo = uni.getStorageSync('userInfo')
+                if (localUserInfo) {
+                    Object.assign(userInfo, JSON.parse(localUserInfo))
+                } else {
+                    uni.showToast({
+                        title: '获取用户信息失败',
+                        icon: 'none'
+                    })
+                }
+            }
+        },
+        fail: () => {
+            // 测试模式：使用硬编码的用户信息
+            Object.assign(userInfo, {
+                userId: 'guest_1719396000000',
+                nickname: '奶茶爱好者',
+                avatar: '/static/images/avatar.png',
+                pandaCoins: 1739,
+                lightningStars: 6,
+                memberLevel: 2,
+                coupons: [],
+                medals: []
+            })
+        },
+        complete: () => {
+            uni.hideLoading()
+        }
+    })
+}
+
+// 从后端获取商城商品数据
+const fetchStoreProducts = () => {
+    return new Promise((resolve) => {
+        uni.showLoading({
+            title: '加载中'
+        })
+
+        uni.request({
+            url: '/api/store/home',
+            method: 'GET',
+            success: (res) => {
+                if (res.statusCode === 200 && res.data.code === 200) {
+                    // 更新商品列表
+                    const data = res.data.data
+                    if (data.allProducts && data.allProducts.length > 0) {
+                        // 清空原数组并添加新数据
+                        allCoupons.splice(
+                            0,
+                            allCoupons.length,
+                            ...data.allProducts
+                        )
+                        // 根据当前tab更新显示的优惠券
+                        updateCouponList()
+                    } else {
+                        uni.showToast({
+                            title: '暂无商品数据',
+                            icon: 'none'
+                        })
+                    }
+                } else {
+                    uni.showToast({
+                        title: '获取商品失败',
+                        icon: 'none'
+                    })
+                }
+            },
+            fail: (err) => {
+                console.error('获取商城商品失败:', err)
+                uni.showToast({
+                    title: '网络错误，请稍后再试',
+                    icon: 'none'
+                })
+            },
+            complete: () => {
+                uni.hideLoading()
+                resolve()
+            }
+        })
+    })
+}
 
 // 根据当前标签更新优惠券列表
 const updateCouponList = () => {
@@ -393,6 +400,13 @@ const updateCouponList = () => {
 const switchTab = (index) => {
     currentTab.value = index
     updateCouponList()
+}
+
+// 下拉刷新数据
+const onPullDownRefresh = () => {
+    fetchStoreProducts().then(() => {
+        uni.stopPullDownRefresh()
+    })
 }
 
 // 获取优惠券颜色类名
@@ -434,7 +448,7 @@ const getCouponTypeImage = (type) => {
 // 兑换优惠券
 const exchangeCoupon = (coupon) => {
     // 检查熊猫币是否足够
-    if (userState.pandaCoins < coupon.coinsCost) {
+    if (userInfo.pandaCoins < coupon.coinsCost) {
         uni.showToast({
             title: '熊猫币不足',
             icon: 'none'
@@ -443,7 +457,7 @@ const exchangeCoupon = (coupon) => {
     }
 
     // 减少熊猫币
-    const newCoins = userState.pandaCoins - coupon.coinsCost
+    const newCoins = userInfo.pandaCoins - coupon.coinsCost
 
     // 创建新的优惠券实例或增加点亮星
     let newCoupon
@@ -453,12 +467,17 @@ const exchangeCoupon = (coupon) => {
     // 处理点亮星特殊情况
     if (coupon.category === 'lightStar') {
         // 更新用户的点亮星数量
-        const currentStars = userState.lightningStars || 0
+        const currentStars = userInfo.lightningStars || 0
         const updatedUserInfo = {
             pandaCoins: newCoins,
             lightningStars: currentStars + coupon.value
         }
 
+        // 更新本地用户信息
+        userInfo.pandaCoins = newCoins
+        userInfo.lightningStars = currentStars + coupon.value
+
+        // 同步更新到全局状态
         const success = updateUserState(updatedUserInfo)
 
         if (success) {
@@ -530,12 +549,18 @@ const exchangeCoupon = (coupon) => {
             }
     }
 
-    // 更新用户状态
+    // 更新本地用户信息
+    userInfo.pandaCoins = newCoins
+    if (!userInfo.coupons) {
+        userInfo.coupons = []
+    }
+    userInfo.coupons.push(newCoupon)
+
+    // 同步更新到全局状态
     const updatedUserInfo = {
         pandaCoins: newCoins,
-        coupons: [...userState.coupons, newCoupon]
+        coupons: [...(userInfo.coupons || []), newCoupon]
     }
-
     updateUserState(updatedUserInfo)
 
     // 记录兑换的优惠券

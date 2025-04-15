@@ -19,115 +19,105 @@ const _sfc_main = {
     const couponList = common_vendor.ref([]);
     const showSuccessPopup = common_vendor.ref(false);
     const exchangedCoupon = common_vendor.ref(null);
-    const allCoupons = common_vendor.reactive([
-      // 折扣券
-      {
-        id: "ex_discount_1",
-        title: "奶茶8折券",
-        type: utils_couponModel.COUPON_TYPES.DISCOUNT,
-        value: 8,
-        minOrderAmount: 20,
-        description: "全场奶茶8折优惠",
-        validity: "30天",
-        coinsCost: 100,
-        category: "discount"
-      },
-      {
-        id: "ex_discount_2",
-        title: "饮品7折券",
-        type: utils_couponModel.COUPON_TYPES.DISCOUNT,
-        value: 7,
-        minOrderAmount: 30,
-        description: "全场饮品7折优惠",
-        validity: "15天",
-        coinsCost: 150,
-        category: "discount"
-      },
-      // 现金券
-      {
-        id: "ex_cash_1",
-        title: "满30减10元券",
-        type: utils_couponModel.COUPON_TYPES.CASH,
-        value: 10,
-        minOrderAmount: 30,
-        description: "满30元立减10元",
-        validity: "30天",
-        coinsCost: 120,
-        category: "cash"
-      },
-      {
-        id: "ex_cash_2",
-        title: "满50减20元券",
-        type: utils_couponModel.COUPON_TYPES.CASH,
-        value: 20,
-        minOrderAmount: 50,
-        description: "满50元立减20元",
-        validity: "30天",
-        coinsCost: 200,
-        category: "cash"
-      },
-      // 免单券
-      {
-        id: "ex_free_1",
-        title: "小杯饮品免单券",
-        type: utils_couponModel.COUPON_TYPES.FREE,
-        value: 15,
-        minOrderAmount: 0,
-        description: "小杯饮品免费，最高15元",
-        validity: "7天",
-        coinsCost: 300,
-        category: "free"
-      },
-      // 点亮星商品
-      {
-        id: "ex_star_1",
-        title: "点亮星 x1",
-        type: utils_couponModel.COUPON_TYPES.SPECIAL_PRICE,
-        value: 1,
-        minOrderAmount: 0,
-        description: "点亮徽章的星星，永久有效",
-        validity: "永久",
-        coinsCost: 180,
-        category: "lightStar"
-      },
-      {
-        id: "ex_star_3",
-        title: "点亮星 x3",
-        type: utils_couponModel.COUPON_TYPES.SPECIAL_PRICE,
-        value: 3,
-        minOrderAmount: 0,
-        description: "点亮徽章的星星，永久有效",
-        validity: "永久",
-        coinsCost: 500,
-        category: "lightStar"
-      },
-      {
-        id: "ex_star_5",
-        title: "点亮星 x5",
-        type: utils_couponModel.COUPON_TYPES.SPECIAL_PRICE,
-        value: 5,
-        minOrderAmount: 0,
-        description: "点亮徽章的星星，永久有效",
-        validity: "永久",
-        coinsCost: 800,
-        category: "lightStar"
-      },
-      // 免运费券
-      {
-        id: "ex_shipping_1",
-        title: "免运费券",
-        type: utils_couponModel.COUPON_TYPES.SHIPPING,
-        value: 0,
-        minOrderAmount: 20,
-        description: "满20元免除配送费",
-        validity: "30天",
-        coinsCost: 80,
-        category: "shipping"
-      }
-    ]);
-    common_vendor.onMounted(() => {
-      updateCouponList();
+    const userInfo = common_vendor.reactive({
+      userId: "",
+      nickname: "",
+      avatar: "",
+      pandaCoins: 0,
+      lightningStars: 0,
+      coupons: [],
+      medals: []
     });
+    const allCoupons = common_vendor.reactive([]);
+    common_vendor.onMounted(() => {
+      fetchUserInfo();
+      fetchStoreProducts();
+    });
+    const fetchUserInfo = () => {
+      common_vendor.index.showLoading({
+        title: "加载中"
+      });
+      common_vendor.index.request({
+        url: "/api/user/info",
+        method: "GET",
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.code === 200) {
+            const userData = res.data.data;
+            Object.assign(userInfo, userData);
+          } else {
+            const localUserInfo = common_vendor.index.getStorageSync("userInfo");
+            if (localUserInfo) {
+              Object.assign(userInfo, JSON.parse(localUserInfo));
+            } else {
+              common_vendor.index.showToast({
+                title: "获取用户信息失败",
+                icon: "none"
+              });
+            }
+          }
+        },
+        fail: () => {
+          Object.assign(userInfo, {
+            userId: "guest_1719396000000",
+            nickname: "奶茶爱好者",
+            avatar: "/static/images/avatar.png",
+            pandaCoins: 1739,
+            lightningStars: 6,
+            memberLevel: 2,
+            coupons: [],
+            medals: []
+          });
+        },
+        complete: () => {
+          common_vendor.index.hideLoading();
+        }
+      });
+    };
+    const fetchStoreProducts = () => {
+      return new Promise((resolve) => {
+        common_vendor.index.showLoading({
+          title: "加载中"
+        });
+        common_vendor.index.request({
+          url: "/api/store/home",
+          method: "GET",
+          success: (res) => {
+            if (res.statusCode === 200 && res.data.code === 200) {
+              const data = res.data.data;
+              if (data.allProducts && data.allProducts.length > 0) {
+                allCoupons.splice(
+                  0,
+                  allCoupons.length,
+                  ...data.allProducts
+                );
+                updateCouponList();
+              } else {
+                common_vendor.index.showToast({
+                  title: "暂无商品数据",
+                  icon: "none"
+                });
+              }
+            } else {
+              common_vendor.index.showToast({
+                title: "获取商品失败",
+                icon: "none"
+              });
+            }
+          },
+          fail: (err) => {
+            common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:369", "获取商城商品失败:", err);
+            common_vendor.index.showToast({
+              title: "网络错误，请稍后再试",
+              icon: "none"
+            });
+          },
+          complete: () => {
+            common_vendor.index.hideLoading();
+            resolve();
+          }
+        });
+      });
+    };
     const updateCouponList = () => {
       if (currentTab.value === 0) {
         couponList.value = allCoupons;
@@ -176,22 +166,24 @@ const _sfc_main = {
       }
     };
     const exchangeCoupon = (coupon) => {
-      if (utils_userState.userState.pandaCoins < coupon.coinsCost) {
+      if (userInfo.pandaCoins < coupon.coinsCost) {
         common_vendor.index.showToast({
           title: "熊猫币不足",
           icon: "none"
         });
         return;
       }
-      const newCoins = utils_userState.userState.pandaCoins - coupon.coinsCost;
+      const newCoins = userInfo.pandaCoins - coupon.coinsCost;
       let newCoupon;
       const now = Date.now();
       if (coupon.category === "lightStar") {
-        const currentStars = utils_userState.userState.lightningStars || 0;
+        const currentStars = userInfo.lightningStars || 0;
         const updatedUserInfo2 = {
           pandaCoins: newCoins,
           lightningStars: currentStars + coupon.value
         };
+        userInfo.pandaCoins = newCoins;
+        userInfo.lightningStars = currentStars + coupon.value;
         const success = utils_userState.updateUserState(updatedUserInfo2);
         if (success) {
           common_vendor.index.showToast({
@@ -254,9 +246,14 @@ const _sfc_main = {
             source: "pandaStore"
           };
       }
+      userInfo.pandaCoins = newCoins;
+      if (!userInfo.coupons) {
+        userInfo.coupons = [];
+      }
+      userInfo.coupons.push(newCoupon);
       const updatedUserInfo = {
         pandaCoins: newCoins,
-        coupons: [...utils_userState.userState.coupons, newCoupon]
+        coupons: [...userInfo.coupons || [], newCoupon]
       };
       utils_userState.updateUserState(updatedUserInfo);
       exchangedCoupon.value = newCoupon;
@@ -292,7 +289,7 @@ const _sfc_main = {
         c: common_assets._imports_0$8,
         d: common_vendor.o((...args) => _ctx.showEarnCoinsPopup && _ctx.showEarnCoinsPopup(...args)),
         e: common_assets._imports_1$3,
-        f: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
+        f: common_vendor.t(userInfo.pandaCoins),
         g: common_vendor.p({
           type: "",
           size: "24"
@@ -328,9 +325,9 @@ const _sfc_main = {
             m: common_vendor.t(coupon.description),
             n: common_vendor.t(coupon.validity || "30天"),
             o: common_vendor.t(coupon.coinsCost),
-            p: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins < coupon.coinsCost ? "熊猫币不足" : "立即兑换"),
+            p: common_vendor.t(userInfo.pandaCoins < coupon.coinsCost ? "熊猫币不足" : "立即兑换"),
             q: common_vendor.o(($event) => exchangeCoupon(coupon), index),
-            r: common_vendor.unref(utils_userState.userState).pandaCoins < coupon.coinsCost,
+            r: userInfo.pandaCoins < coupon.coinsCost,
             s: index,
             t: common_vendor.n(getCouponColorClass(coupon.type))
           });

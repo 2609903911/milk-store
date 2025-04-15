@@ -3,6 +3,7 @@ import { getUserInfo } from './utils/userStorage'
 import { createDefaultUserInfo } from './utils/userModel'
 import { initUserState, userState } from './utils/userState'
 import { loginUser } from './utils/userService'
+import { initUserData } from './utils/userData'
 
 export default {
     onLaunch: function () {
@@ -13,6 +14,9 @@ export default {
 
         // 初始化用户信息
         this.initUserInfo()
+
+        // 初始化用户数据
+        initUserData()
     },
     onShow: function () {
         console.log('App Show')

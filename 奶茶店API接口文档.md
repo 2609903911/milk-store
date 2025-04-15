@@ -174,3 +174,63 @@
 - **方法**: GET
 - **参数**:
   - `letter`: 城市首字母（大写） 
+
+  
+## 商城商品相关接口
+
+### 获取所有商城商品
+
+- **URL**: `/api/store/products`
+- **方法**: GET
+- **参数**: 无
+
+### 根据分类获取商城商品
+
+- **URL**: `/api/store/products/category/{category}`
+- **方法**: GET
+- **参数**:
+  - `category`: 商品分类（discount, cash, free, lightStar, shipping）
+
+### 根据ID获取商城商品
+
+- **URL**: `/api/store/products/{id}`
+- **方法**: GET
+- **参数**:
+  - `id`: 商品ID
+
+### 获取商城首页数据
+
+- **URL**: `/api/store/home`
+- **方法**: GET
+- **参数**: 无
+- **返回**: 所有商品及按分类分组的商品
+
+### 添加商城商品（管理员接口）
+
+- **URL**: `/api/store/admin/products`
+- **方法**: POST
+- **参数**: 商品对象（JSON格式）
+  - `title`: 商品标题
+  - `type`: 商品类型
+  - `value`: 商品价值
+  - `minOrderAmount`: 最低订单金额
+  - `description`: 商品描述
+  - `validity`: 有效期
+  - `coinsCost`: 所需熊猫币
+  - `category`: 分类
+  - `imageUrl`: 商品图片URL（可选）
+
+### 更新商城商品（管理员接口）
+
+- **URL**: `/api/store/admin/products/{id}`
+- **方法**: PUT
+- **参数**:
+  - `id`: 商品ID
+  - 商品对象（JSON格式）
+
+### 删除商城商品（管理员接口）
+
+- **URL**: `/api/store/admin/products/{id}`
+- **方法**: DELETE
+- **参数**:
+  - `id`: 商品ID

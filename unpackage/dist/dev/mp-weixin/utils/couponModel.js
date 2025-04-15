@@ -71,19 +71,6 @@ const createCoupon = (couponData) => {
   };
   return { ...defaultCoupon, ...couponData };
 };
-const calculateCouponStatus = (coupon) => {
-  const now = Date.now();
-  if (coupon.status === COUPON_STATUS.USED) {
-    return COUPON_STATUS.USED;
-  }
-  if (now < coupon.startTime) {
-    return COUPON_STATUS.NOT_STARTED;
-  }
-  if (now > coupon.endTime) {
-    return COUPON_STATUS.EXPIRED;
-  }
-  return COUPON_STATUS.VALID;
-};
 const createDiscountCoupon = (discountRate, minOrderAmount = 0, options = {}) => {
   return createCoupon({
     type: COUPON_TYPES.DISCOUNT,
@@ -118,7 +105,6 @@ const createFreeCoupon = (maxAmount = 0, options = {}) => {
 };
 exports.COUPON_STATUS = COUPON_STATUS;
 exports.COUPON_TYPES = COUPON_TYPES;
-exports.calculateCouponStatus = calculateCouponStatus;
 exports.createCashCoupon = createCashCoupon;
 exports.createDiscountCoupon = createDiscountCoupon;
 exports.createFreeCoupon = createFreeCoupon;

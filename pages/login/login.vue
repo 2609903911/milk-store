@@ -78,6 +78,7 @@
 
 <script>
 import { authApi } from '@/utils/api'
+import { saveUserToStorage } from '@/utils/api/authApi'
 
 export default {
     data() {
@@ -87,7 +88,7 @@ export default {
             isAgree: false,
             isCounting: false,
             countdown: 60,
-            timer: null // 添加timer变量保存定时器引用
+            timer: null
         }
     },
     methods: {
@@ -300,17 +301,12 @@ export default {
                         // 检查响应中的code字段 - 服务器成功码为200
                         if (res.statusCode >= 200 && res.statusCode < 300) {
                             if (res.data.code === 200) {
-                                // 保存用户信息和token到本地存储
-                                if (res.data.data) {
-                                    uni.setStorageSync(
-                                        'token',
-                                        res.data.data.token
-                                    )
-                                    uni.setStorageSync(
-                                        'userInfo',
-                                        res.data.data.user
-                                    )
-                                }
+                                // 获取用户信息和token
+                                const userData = res.data.data.user
+                                const token = res.data.data.token
+
+                                // 直接保存后端返回的完整用户数据到本地存储
+                                saveUserToStorage(userData, token)
 
                                 uni.showToast({
                                     title: '登录成功',

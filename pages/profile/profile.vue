@@ -15,12 +15,12 @@
                 <view class="avatar-box">
                     <image
                         class="avatar"
-                        :src="userState.avatar || '/static/images/avatar'"
+                        :src="userData.avatar || '/static/images/avatar.png'"
                         @error="handleAvatarError"
                     ></image>
                 </view>
                 <view class="user-details">
-                    <text class="nickname">{{ userState.nickname }}</text>
+                    <text class="nickname">{{ userData.nickname }}</text>
                     <view class="medal-wall-btn" @click="openMedalWall">
                         <image
                             class="medal-icon"
@@ -37,14 +37,14 @@
                     <view class="account-item" @click="navigateToPandaStore">
                         <view class="account-label">熊猫币</view>
                         <view class="account-value">{{
-                            userState.pandaCoins
+                            userData.pandaCoins
                         }}</view>
                     </view>
                     <view class="divider"></view>
                     <view class="account-item" @click="navigateToCoupons">
                         <view class="account-label">优惠券</view>
                         <view class="account-value">{{
-                            userState.coupons ? userState.coupons.length : 0
+                            userData.coupons ? userData.coupons.length : 0
                         }}</view>
                     </view>
                 </view>
@@ -163,10 +163,15 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { userState } from '../../utils/userState'
+import { userData, initUserData } from '../../utils/userData'
 import { updateUserProfile } from '../../utils/userService'
 
 const title = ref('我的')
+
+// 页面加载时初始化用户数据
+onMounted(() => {
+    initUserData()
+})
 
 // 打开勋章墙
 const openMedalWall = () => {

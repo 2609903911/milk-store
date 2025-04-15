@@ -1,0 +1,1 @@
+{"version":3,"file":"privacy-policy.js","sources":["../../HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvYWdyZWVtZW50L3ByaXZhY3ktcG9saWN5LnZ1ZQ"],"sourcesContent":["import MiniProgramPage from 'E:/uni-app/milk-store/pages/agreement/privacy-policy.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,WAAW,eAAe;"}

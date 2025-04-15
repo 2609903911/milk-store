@@ -14,7 +14,9 @@
     "pages/panda-store/panda-store",
     "pages/personal-data/personal-data",
     "pages/search/search",
-    "pages/ai-chat/index"
+    "pages/ai-chat/index",
+    "pages/agreement/user-agreement",
+    "pages/agreement/privacy-policy"
   ],
   "window": {
     "navigationBarTextStyle": "black",

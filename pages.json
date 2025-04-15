@@ -96,6 +96,20 @@
             "style" : {
                 "navigationBarTitleText" : "胖达管家"
             }
+        },
+        {
+            "path" : "pages/agreement/user-agreement",
+            "style" : {
+                "navigationBarTitleText" : "用户协议",
+                "navigationStyle" : "custom"
+            }
+        },
+        {
+            "path" : "pages/agreement/privacy-policy",
+            "style" : {
+                "navigationBarTitleText" : "隐私政策",
+                "navigationStyle" : "custom"
+            }
         }
     ],
     "globalStyle" : {

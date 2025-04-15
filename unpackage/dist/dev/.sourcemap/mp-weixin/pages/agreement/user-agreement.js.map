@@ -1,0 +1,1 @@
+{"version":3,"file":"user-agreement.js","sources":["../../HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvYWdyZWVtZW50L3VzZXItYWdyZWVtZW50LnZ1ZQ"],"sourcesContent":["import MiniProgramPage from 'E:/uni-app/milk-store/pages/agreement/user-agreement.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,WAAW,eAAe;"}

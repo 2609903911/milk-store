@@ -1,11 +1,15 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
-const utils_userState = require("../../utils/userState.js");
+const utils_userData = require("../../utils/userData.js");
+require("../../utils/userState.js");
 const _sfc_main = {
   __name: "profile",
   setup(__props) {
     common_vendor.ref("我的");
+    common_vendor.onMounted(() => {
+      utils_userData.initUserData();
+    });
     const openMedalWall = () => {
       common_vendor.index.navigateTo({
         url: "/pages/order-medal/order-medal"
@@ -66,19 +70,19 @@ const _sfc_main = {
       });
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/profile/profile.vue:254", "头像加载失败，使用默认头像");
+      common_vendor.index.__f__("log", "at pages/profile/profile.vue:259", "头像加载失败，使用默认头像");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0$4,
-        b: common_vendor.unref(utils_userState.userState).avatar || "/static/images/avatar",
+        b: common_vendor.unref(utils_userData.userData).avatar || "/static/images/avatar.png",
         c: common_vendor.o(handleAvatarError),
-        d: common_vendor.t(common_vendor.unref(utils_userState.userState).nickname),
+        d: common_vendor.t(common_vendor.unref(utils_userData.userData).nickname),
         e: common_assets._imports_1$1,
         f: common_vendor.o(openMedalWall),
-        g: common_vendor.t(common_vendor.unref(utils_userState.userState).pandaCoins),
+        g: common_vendor.t(common_vendor.unref(utils_userData.userData).pandaCoins),
         h: common_vendor.o(navigateToPandaStore),
-        i: common_vendor.t(common_vendor.unref(utils_userState.userState).coupons ? common_vendor.unref(utils_userState.userState).coupons.length : 0),
+        i: common_vendor.t(common_vendor.unref(utils_userData.userData).coupons ? common_vendor.unref(utils_userData.userData).coupons.length : 0),
         j: common_vendor.o(navigateToCoupons),
         k: common_assets._imports_2$1,
         l: common_vendor.o(goToMall),
