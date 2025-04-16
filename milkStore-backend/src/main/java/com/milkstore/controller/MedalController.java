@@ -59,4 +59,21 @@ public class MedalController {
         Map<String, Object> userMedals = medalService.findUserMedals(userId);
         return Result.success("获取用户勋章成功", userMedals);
     }
+    
+    /**
+     * 使用点亮星激活勋章
+     */
+    @PostMapping("/activate")
+    public Result<Map<String, Object>> activateMedal(@RequestParam String userId, @RequestParam String medalId) {
+        Map<String, Object> result = medalService.activateMedalWithStar(userId, medalId);
+        
+        boolean success = (boolean) result.get("success");
+        String message = (String) result.get("message");
+        
+        if (success) {
+            return Result.success(message, result);
+        } else {
+            return Result.error(400, message);
+        }
+    }
 } 

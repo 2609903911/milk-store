@@ -10,7 +10,7 @@ const _sfc_main = {
       utils_userData.initUserData();
       fetchBannerData();
     });
-    common_vendor.index.__f__("log", "at pages/home/home.vue:271", utils_userData.userData);
+    common_vendor.index.__f__("log", "at pages/home/home.vue:271", "请求到的用户数据", utils_userData.userData);
     const currentSwiper = common_vendor.ref(0);
     const swiperChange = (e) => {
       currentSwiper.value = e.detail.current;

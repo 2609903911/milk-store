@@ -2,7 +2,8 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userState = require("../../utils/userState.js");
-const utils_userModel = require("../../utils/userModel.js");
+const utils_userData = require("../../utils/userData.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -20,326 +21,365 @@ const _sfc_main = {
     const userAvatar = common_vendor.ref(((_c = utils_userState.userState) == null ? void 0 : _c.avatar) || "/static/images/avatar.png");
     const currentType = common_vendor.ref(0);
     const navScrollLeft = common_vendor.ref(0);
-    const medalTypes = common_vendor.reactive([
-      "二十四节气限定",
-      "大自然限定微章",
-      "崩铁联动限定",
-      "等级徽章"
-    ]);
-    const allSeasonalMedals = common_vendor.reactive([
-      {
-        id: "season_01",
-        name: "节气 · 立春",
-        icon: "../../static/images/medal/season01.png",
-        isActive: false
-      },
-      {
-        id: "season_02",
-        name: "节气 · 雨水",
-        icon: "../../static/images/medal/season02.png",
-        isActive: false
-      },
-      {
-        id: "season_03",
-        name: "节气 · 惊蛰",
-        icon: "../../static/images/medal/season03.png",
-        isActive: false
-      },
-      {
-        id: "season_04",
-        name: "节气 · 春分",
-        icon: "../../static/images/medal/season04.png",
-        isActive: false
-      },
-      {
-        id: "season_05",
-        name: "节气 · 清明",
-        icon: "../../static/images/medal/season05.png",
-        isActive: false
-      },
-      {
-        id: "season_06",
-        name: "节气 · 谷雨",
-        icon: "../../static/images/medal/season06.png",
-        isActive: false
-      },
-      {
-        id: "season_07",
-        name: "节气 · 立夏",
-        icon: "../../static/images/medal/season07.png",
-        isActive: false
-      },
-      {
-        id: "season_08",
-        name: "节气 · 小满",
-        icon: "../../static/images/medal/season08.png",
-        isActive: false
-      },
-      {
-        id: "season_09",
-        name: "节气 · 芒种",
-        icon: "../../static/images/medal/season09.png",
-        isActive: false
-      },
-      {
-        id: "season_10",
-        name: "节气 · 夏至",
-        icon: "../../static/images/medal/season10.png",
-        isActive: false
-      },
-      {
-        id: "season_11",
-        name: "节气 · 小暑",
-        icon: "../../static/images/medal/season11.png",
-        isActive: false
-      },
-      {
-        id: "season_12",
-        name: "节气 · 大暑",
-        icon: "../../static/images/medal/season12.png",
-        isActive: false
-      },
-      {
-        id: "season_13",
-        name: "节气 · 立秋",
-        icon: "../../static/images/medal/season13.png",
-        isActive: false
-      },
-      {
-        id: "season_14",
-        name: "节气 · 处暑",
-        icon: "../../static/images/medal/season14.png",
-        isActive: false
-      },
-      {
-        id: "season_15",
-        name: "节气 · 白露",
-        icon: "../../static/images/medal/season15.png",
-        isActive: false
-      },
-      {
-        id: "season_16",
-        name: "节气 · 秋分",
-        icon: "../../static/images/medal/season16.png",
-        isActive: false
-      },
-      {
-        id: "season_17",
-        name: "节气 · 寒露",
-        icon: "../../static/images/medal/season17.png",
-        isActive: false
-      },
-      {
-        id: "season_18",
-        name: "节气 · 霜降",
-        icon: "../../static/images/medal/season18.png",
-        isActive: false
-      },
-      {
-        id: "season_19",
-        name: "节气 · 立冬",
-        icon: "../../static/images/medal/season19.png",
-        isActive: false
-      },
-      {
-        id: "season_20",
-        name: "节气 · 小雪",
-        icon: "../../static/images/medal/season20.png",
-        isActive: false
-      }
-    ]);
-    const allNatureMedals = common_vendor.reactive([
-      {
-        id: "nature_bee",
-        name: "大自然 · 蜜蜂",
-        icon: "../../static/images/medal/nature-bee.png",
-        isActive: false
-      },
-      {
-        id: "nature_butterfly",
-        name: "大自然 · 蝴蝶",
-        icon: "../../static/images/medal/nature-butterfly.png",
-        isActive: false
-      },
-      {
-        id: "nature_bird",
-        name: "大自然 · 小鸟",
-        icon: "../../static/images/medal/nature-bird.png",
-        isActive: false
-      },
-      {
-        id: "nature_dragonfly",
-        name: "大自然 · 蜻蜓",
-        icon: "../../static/images/medal/nature-dragonfly.png",
-        isActive: false
-      },
-      {
-        id: "nature_cactus",
-        name: "大自然 · 仙人掌",
-        icon: "../../static/images/medal/nature-cactus.png",
-        isActive: false
-      },
-      {
-        id: "nature_mouse",
-        name: "大自然 · 老鼠",
-        icon: "../../static/images/medal/nature-mouse.png",
-        isActive: false
-      },
-      {
-        id: "nature_duck",
-        name: "大自然 · 鸭子",
-        icon: "../../static/images/medal/nature-duck.png",
-        isActive: false
-      }
-    ]);
-    const allBtMedals = common_vendor.reactive([
-      {
-        id: "star_medal_01",
-        name: "开拓者-穹",
-        icon: "../../static/images/medal/bt-star-01.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_02",
-        name: "开拓者-星",
-        icon: "../../static/images/medal/bt-star-02.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_03",
-        name: "垃圾桶",
-        icon: "../../static/images/medal/bt-star-03.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_04",
-        name: "景元",
-        icon: "../../static/images/medal/bt-star-04.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_05",
-        name: "星核猎手-卡芙卡",
-        icon: "../../static/images/medal/bt-star-05.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_06",
-        name: "星核猎手-刃",
-        icon: "../../static/images/medal/bt-star-06.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_07",
-        name: "开拓者-三月七",
-        icon: "../../static/images/medal/bt-star-07.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_08",
-        name: "开拓者-姬子",
-        icon: "../../static/images/medal/bt-star-08.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_09",
-        name: "开拓者-瓦尔特",
-        icon: "../../static/images/medal/bt-star-09.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_10",
-        name: "开拓者-丹恒",
-        icon: "../../static/images/medal/bt-star-10.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_11",
-        name: "假面愚者-花火",
-        icon: "../../static/images/medal/bt-star-11.png",
-        isActive: false
-      },
-      {
-        id: "star_medal_12",
-        name: "假面愚者-桑博",
-        icon: "../../static/images/medal/bt-star-12.png",
-        isActive: false
-      }
-    ]);
-    const allLevelMedals = common_vendor.reactive([
-      {
-        id: "rank_01",
-        name: "等级 · Lv1",
-        icon: "../../static/images/medal/rank01.png",
-        isActive: false
-      },
-      {
-        id: "rank_02",
-        name: "等级 · Lv2",
-        icon: "../../static/images/medal/rank02.png",
-        isActive: false
-      },
-      {
-        id: "rank_03",
-        name: "等级 · Lv3",
-        icon: "../../static/images/medal/rank03.png",
-        isActive: false
-      },
-      {
-        id: "rank_04",
-        name: "等级 · Lv4",
-        icon: "../../static/images/medal/rank04.png",
-        isActive: false
-      },
-      {
-        id: "rank_05",
-        name: "等级 · Lv5",
-        icon: "../../static/images/medal/rank05.png",
-        isActive: false
-      },
-      {
-        id: "rank_06",
-        name: "等级 · Lv6",
-        icon: "../../static/images/medal/rank06.png",
-        isActive: false
-      }
-    ]);
-    const seasonalMedals = common_vendor.reactive([...allSeasonalMedals]);
-    const natureMedals = common_vendor.reactive([...allNatureMedals]);
-    const levelMedals = common_vendor.reactive([...allLevelMedals]);
+    const medalTypes = common_vendor.reactive([]);
+    const allSeasonalMedals = common_vendor.reactive([]);
+    const allNatureMedals = common_vendor.reactive([]);
+    const allBtMedals = common_vendor.reactive([]);
+    const allLevelMedals = common_vendor.reactive([]);
+    const seasonalMedals = common_vendor.reactive([]);
+    const natureMedals = common_vendor.reactive([]);
+    const btMedals = common_vendor.reactive([]);
+    const levelMedals = common_vendor.reactive([]);
     const lastAcquiredMedal = common_vendor.ref(null);
-    const initUserMedals = () => {
-      if (!utils_userState.userState || !utils_userState.userState.medals || !Array.isArray(utils_userState.userState.medals)) {
-        return;
-      }
-      const userSeasonalMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "seasonal");
-      const userNatureMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "nature");
-      utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "level");
-      const userStarRailMedals = utils_userModel.getUserMedalsByType(utils_userState.userState.medals, "starRail");
-      seasonalMedals.forEach((medal) => {
-        const userMedal = userSeasonalMedals.find((m) => m.id === medal.id);
-        medal.isActive = userMedal ? userMedal.isActive !== false : false;
-      });
-      natureMedals.forEach((medal) => {
-        const userMedal = userNatureMedals.find((m) => m.id === medal.id);
-        medal.isActive = userMedal ? userMedal.isActive !== false : false;
-      });
-      allBtMedals.forEach((medal) => {
-        const userMedal = userStarRailMedals.find((m) => m.id === medal.id);
-        medal.isActive = userMedal ? userMedal.isActive !== false : false;
-      });
-      levelMedals.forEach((medal, index) => {
-        medal.isActive = userLevel.value >= index + 1;
-      });
-      if (utils_userState.userState.medals.length > 0) {
-        const sortedMedals = [...utils_userState.userState.medals].sort(
-          (a, b) => b.acquireTime - a.acquireTime
+    const fetchMedalTypes = async () => {
+      try {
+        const apiUrl = "/api/medals/types";
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:380", "发送勋章类型请求到:", apiUrl);
+        const response = await utils_request.get(
+          apiUrl,
+          {},
+          {
+            showError: true,
+            loading: true,
+            loadingText: "加载勋章类型中..."
+          }
         );
-        lastAcquiredMedal.value = sortedMedals[0];
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:391", "勋章类型响应:", response);
+        if (response && response.code === 200 && response.data) {
+          medalTypes.splice(0, medalTypes.length);
+          response.data.forEach((type) => {
+            medalTypes.push(type.typeName);
+          });
+        } else {
+          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:401", "勋章类型响应格式异常，使用默认值");
+          medalTypes.splice(
+            0,
+            medalTypes.length,
+            "二十四节气限定",
+            "大自然限定微章",
+            "崩铁联动限定",
+            "等级徽章"
+          );
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:413", "获取勋章类型失败:", error);
+        common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:414", "使用默认勋章类型");
+        medalTypes.splice(
+          0,
+          medalTypes.length,
+          "二十四节气限定",
+          "大自然限定微章",
+          "崩铁联动限定",
+          "等级徽章"
+        );
       }
     };
-    common_vendor.onMounted(() => {
-      initUserMedals();
+    const fetchAllMedals = async () => {
+      try {
+        const apiUrl = "/api/medals";
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:431", "发送所有勋章请求到:", apiUrl);
+        const response = await utils_request.get(
+          apiUrl,
+          {},
+          {
+            showError: true,
+            loading: true,
+            loadingText: "加载勋章数据中..."
+          }
+        );
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:442", "所有勋章响应:", response);
+        if (response && response.code === 200 && response.data) {
+          const medals = response.data;
+          allSeasonalMedals.splice(0, allSeasonalMedals.length);
+          allNatureMedals.splice(0, allNatureMedals.length);
+          allBtMedals.splice(0, allBtMedals.length);
+          allLevelMedals.splice(0, allLevelMedals.length);
+          medals.forEach((medal) => {
+            const medalData = {
+              id: medal.medalId,
+              name: medal.medalName,
+              icon: medal.iconPath || medal.icon || `../../static/images/medal/${medal.medalId}.png`,
+              isActive: false,
+              description: medal.description
+            };
+            if (medal.type && medal.type.typeId) {
+              const typeId = medal.type.typeId;
+              if (typeId === "seasonal") {
+                allSeasonalMedals.push(medalData);
+              } else if (typeId === "nature") {
+                allNatureMedals.push(medalData);
+              } else if (typeId === "starrail") {
+                allBtMedals.push(medalData);
+              } else if (typeId === "rank") {
+                allLevelMedals.push(medalData);
+              }
+            }
+          });
+        } else {
+          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:482", "勋章数据响应格式异常:", response);
+          loadDefaultMedalData();
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:487", "获取所有勋章失败:", error);
+        loadDefaultMedalData();
+      }
+    };
+    const loadDefaultMedalData = () => {
+      allSeasonalMedals.splice(0, allSeasonalMedals.length);
+      allNatureMedals.splice(0, allNatureMedals.length);
+      allBtMedals.splice(0, allBtMedals.length);
+      allLevelMedals.splice(0, allLevelMedals.length);
+      allSeasonalMedals.push(
+        {
+          id: "season_01",
+          name: "节气 · 立春",
+          icon: "../../static/images/medal/season01.png",
+          isActive: false
+        },
+        {
+          id: "season_02",
+          name: "节气 · 雨水",
+          icon: "../../static/images/medal/season02.png",
+          isActive: false
+        },
+        {
+          id: "season_03",
+          name: "节气 · 惊蛰",
+          icon: "../../static/images/medal/season03.png",
+          isActive: false
+        }
+      );
+      allNatureMedals.push(
+        {
+          id: "nature_bee",
+          name: "大自然 · 蜜蜂",
+          icon: "../../static/images/medal/nature-bee.png",
+          isActive: false
+        },
+        {
+          id: "nature_butterfly",
+          name: "大自然 · 蝴蝶",
+          icon: "../../static/images/medal/nature-butterfly.png",
+          isActive: false
+        }
+      );
+      allBtMedals.push(
+        {
+          id: "star_medal_01",
+          name: "开拓者-穹",
+          icon: "../../static/images/medal/bt-star-01.png",
+          isActive: false
+        },
+        {
+          id: "star_medal_02",
+          name: "开拓者-星",
+          icon: "../../static/images/medal/bt-star-02.png",
+          isActive: false
+        }
+      );
+      allLevelMedals.push(
+        {
+          id: "rank_01",
+          name: "等级 · Lv1",
+          icon: "../../static/images/medal/rank01.png",
+          isActive: false
+        },
+        {
+          id: "rank_02",
+          name: "等级 · Lv2",
+          icon: "../../static/images/medal/rank02.png",
+          isActive: false
+        }
+      );
+    };
+    const fetchUserProfile = async () => {
+      try {
+        const userInfo = common_vendor.index.getStorageSync("userInfo");
+        if (!userInfo || !userInfo.userId) {
+          common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:579", "未找到用户ID，无法获取用户信息");
+          return;
+        }
+        const userId = userInfo.userId;
+        const apiUrl = `/api/user/profile?userId=${userId}`;
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:585", "发送用户信息请求到:", apiUrl);
+        const response = await utils_request.get(
+          apiUrl,
+          {},
+          {
+            showError: true,
+            loading: true,
+            loadingText: "加载用户信息中..."
+          }
+        );
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:596", "用户信息响应:", response);
+        if (response && response.code === 200 && response.data) {
+          const userData = response.data;
+          userAvatar.value = userData.avatar || "/static/images/avatar.png";
+          userNickname.value = userData.nickname || "熊猫奶茶会员";
+          userLevel.value = userData.memberLevel || 1;
+          utils_userState.userState.lightningStars = userData.lightningStars || 0;
+          utils_userState.userState.medals = userData.medals || [];
+          common_vendor.index.__f__(
+            "log",
+            "at pages/order-medal/order-medal.vue:616",
+            "用户信息更新完成:",
+            userNickname.value,
+            userLevel.value
+          );
+        } else {
+          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:622", "用户信息响应格式异常:", response);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:625", "获取用户信息失败:", error);
+      }
+    };
+    const getUserMedals = async () => {
+      try {
+        await utils_userData.initUserData();
+        const userInfo = common_vendor.index.getStorageSync("userInfo");
+        if (!userInfo || !userInfo.userId) {
+          common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:638", "未找到用户ID，无法获取用户勋章");
+          return;
+        }
+        const userId = userInfo.userId;
+        const apiUrl = `/api/medals/user/${userId}`;
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:644", "发送用户勋章请求到:", apiUrl);
+        const response = await utils_request.get(
+          apiUrl,
+          {},
+          {
+            showError: true,
+            loading: true,
+            loadingText: "加载用户勋章中..."
+          }
+        );
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:655", "用户勋章响应:", response);
+        if (response && response.code === 200 && response.data) {
+          seasonalMedals.splice(0, seasonalMedals.length);
+          natureMedals.splice(0, natureMedals.length);
+          btMedals.splice(0, btMedals.length);
+          levelMedals.splice(0, levelMedals.length);
+          const userMedalsData = response.data.medals || [];
+          const userMedalMap = /* @__PURE__ */ new Map();
+          userMedalsData.forEach((item) => {
+            if (item.medal && item.medal.medalId) {
+              userMedalMap.set(item.medal.medalId, {
+                isActive: item.isActive,
+                obtainTime: item.obtainTime,
+                medal: item.medal
+              });
+            }
+          });
+          allSeasonalMedals.forEach((medal) => {
+            const clonedMedal = { ...medal };
+            const userMedal = userMedalMap.get(medal.id);
+            clonedMedal.isActive = userMedal ? userMedal.isActive : false;
+            clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null;
+            seasonalMedals.push(clonedMedal);
+          });
+          allNatureMedals.forEach((medal) => {
+            const clonedMedal = { ...medal };
+            const userMedal = userMedalMap.get(medal.id);
+            clonedMedal.isActive = userMedal ? userMedal.isActive : false;
+            clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null;
+            natureMedals.push(clonedMedal);
+          });
+          allBtMedals.forEach((medal) => {
+            const clonedMedal = { ...medal };
+            const userMedal = userMedalMap.get(medal.id);
+            clonedMedal.isActive = userMedal ? userMedal.isActive : false;
+            clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null;
+            btMedals.push(clonedMedal);
+          });
+          allLevelMedals.forEach((medal) => {
+            const clonedMedal = { ...medal };
+            const userMedal = userMedalMap.get(medal.id);
+            clonedMedal.isActive = userMedal ? userMedal.isActive : false;
+            clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null;
+            levelMedals.push(clonedMedal);
+          });
+          if (userMedalsData.length > 0) {
+            const sortedMedals = [...userMedalsData].sort((a, b) => {
+              const timeA = a.obtainTime ? new Date(a.obtainTime).getTime() : 0;
+              const timeB = b.obtainTime ? new Date(b.obtainTime).getTime() : 0;
+              return timeB - timeA;
+            });
+            if (sortedMedals[0] && sortedMedals[0].medal) {
+              const lastMedalId = sortedMedals[0].medal.medalId;
+              const allMedals = [
+                ...allSeasonalMedals,
+                ...allNatureMedals,
+                ...allBtMedals,
+                ...allLevelMedals
+              ];
+              lastAcquiredMedal.value = allMedals.find((medal) => medal.id === lastMedalId) || null;
+            }
+          }
+          utils_userState.userState.medals = userMedalsData;
+        } else {
+          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:745", "用户勋章响应格式异常:", response);
+          setAllMedalsInactive();
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:750", "获取用户勋章失败:", error);
+        setAllMedalsInactive();
+      }
+    };
+    const setAllMedalsInactive = () => {
+      seasonalMedals.splice(0, seasonalMedals.length);
+      natureMedals.splice(0, natureMedals.length);
+      btMedals.splice(0, btMedals.length);
+      levelMedals.splice(0, levelMedals.length);
+      seasonalMedals.push(
+        ...allSeasonalMedals.map((medal) => ({ ...medal, isActive: false }))
+      );
+      natureMedals.push(
+        ...allNatureMedals.map((medal) => ({ ...medal, isActive: false }))
+      );
+      btMedals.push(
+        ...allBtMedals.map((medal) => ({ ...medal, isActive: false }))
+      );
+      levelMedals.push(
+        ...allLevelMedals.map((medal) => ({ ...medal, isActive: false }))
+      );
+    };
+    common_vendor.onMounted(async () => {
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:779", "开始初始化勋章数据...");
+      try {
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:783", "正在获取用户信息...");
+        await fetchUserProfile();
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:785", "用户信息获取完成");
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:788", "正在获取勋章类型...");
+        await fetchMedalTypes();
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:790", "勋章类型获取完成，结果:", medalTypes);
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:792", "正在获取所有勋章...");
+        await fetchAllMedals();
+        common_vendor.index.__f__(
+          "log",
+          "at pages/order-medal/order-medal.vue:794",
+          "所有勋章获取完成，数量:",
+          allSeasonalMedals.length + allNatureMedals.length + allBtMedals.length + allLevelMedals.length
+        );
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:803", "正在获取用户勋章...");
+        await getUserMedals();
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:805", "用户勋章获取完成");
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:807", "勋章初始化过程中出错:", error);
+        if (medalTypes.length === 0) {
+          medalTypes.splice(
+            0,
+            medalTypes.length,
+            "二十四节气限定",
+            "大自然限定微章",
+            "崩铁联动限定",
+            "等级徽章"
+          );
+        }
+        if (allSeasonalMedals.length === 0 && allNatureMedals.length === 0 && allBtMedals.length === 0 && allLevelMedals.length === 0) {
+          loadDefaultMedalData();
+          setAllMedalsInactive();
+        }
+      }
     });
     const switchType = (index) => {
       currentType.value = index;
@@ -363,7 +403,7 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:741", "头像加载失败，使用默认头像");
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:871", "头像加载失败，使用默认头像");
     };
     const selectedItemId = common_vendor.ref(null);
     const selectMedal = (medal, type) => {
@@ -375,7 +415,7 @@ const _sfc_main = {
       } else {
         selectedItemId.value = medal.id;
       }
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:762", "当前选中徽章ID:", selectedItemId.value);
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:892", "当前选中徽章ID:", selectedItemId.value);
     };
     const handleMedalClick = (medal, type) => {
       selectedMedal.value = medal;
@@ -391,7 +431,7 @@ const _sfc_main = {
       selectedMedal.value = null;
       selectedMedalType.value = "";
     };
-    const confirmActivate = () => {
+    const confirmActivate = async () => {
       if (!utils_userState.userState.lightningStars || utils_userState.userState.lightningStars <= 0) {
         common_vendor.index.showToast({
           title: "点亮星不足",
@@ -402,69 +442,79 @@ const _sfc_main = {
       if (!selectedMedal.value || !selectedMedalType.value) {
         return;
       }
-      let typeDescription = "限定徽章";
-      switch (selectedMedalType.value) {
-        case "seasonal":
-          typeDescription = "二十四节气限定徽章";
-          break;
-        case "nature":
-          typeDescription = "大自然限定徽章";
-          break;
-        case "starRail":
-          typeDescription = "星穹铁道限定徽章";
-          break;
-      }
-      const newMedal = {
-        id: selectedMedal.value.id,
-        name: selectedMedal.value.name,
-        icon: selectedMedal.value.icon,
-        type: selectedMedalType.value,
-        description: `${typeDescription}：${selectedMedal.value.name}`,
-        acquireTime: Date.now(),
-        isActive: true
-      };
-      const currentMedals = [...utils_userState.userState.medals || []];
-      const medalExists = currentMedals.some((medal) => medal.id === newMedal.id);
-      const updatedMedals = medalExists ? currentMedals : [...currentMedals, newMedal];
-      const updatedUserInfo = {
-        lightningStars: utils_userState.userState.lightningStars - 1,
-        medals: updatedMedals
-      };
-      const success = utils_userState.updateUserState(updatedUserInfo);
-      if (success) {
-        common_vendor.index.showToast({
-          title: "徽章点亮成功",
-          icon: "success"
+      try {
+        common_vendor.index.showLoading({
+          title: "点亮中..."
         });
-        initUserMedals();
-        if (selectedMedalType.value === "seasonal") {
-          const medalToUpdate = seasonalMedals.find(
-            (m) => m.id === selectedMedal.value.id
-          );
-          if (medalToUpdate)
-            medalToUpdate.isActive = true;
-        } else if (selectedMedalType.value === "nature") {
-          const medalToUpdate = natureMedals.find(
-            (m) => m.id === selectedMedal.value.id
-          );
-          if (medalToUpdate)
-            medalToUpdate.isActive = true;
-        } else if (selectedMedalType.value === "starRail") {
-          const medalToUpdate = allBtMedals.find(
-            (m) => m.id === selectedMedal.value.id
-          );
-          if (medalToUpdate)
-            medalToUpdate.isActive = true;
+        const userInfo = common_vendor.index.getStorageSync("userInfo");
+        if (!userInfo || !userInfo.userId) {
+          common_vendor.index.hideLoading();
+          common_vendor.index.showToast({
+            title: "用户信息不存在",
+            icon: "none"
+          });
+          return;
         }
-      } else {
+        const userId = userInfo.userId;
+        const medalId = selectedMedal.value.id;
+        const apiUrl = `/api/medals/activate?userId=${userId}&medalId=${medalId}`;
+        const response = await utils_request.post(
+          apiUrl,
+          {},
+          // 参数放在URL中，请求体为空
+          {
+            showError: true
+          }
+        );
+        common_vendor.index.hideLoading();
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:963", "点亮勋章响应:", response);
+        if (response && response.code === 200) {
+          common_vendor.index.showToast({
+            title: "徽章点亮成功",
+            icon: "success"
+          });
+          if (response.data && response.data.user) {
+            utils_userState.userState.lightningStars = response.data.user.lightning_stars;
+          }
+          await fetchUserProfile();
+          await getUserMedals();
+          if (selectedMedalType.value === "seasonal") {
+            const medalToUpdate = seasonalMedals.find(
+              (m) => m.id === selectedMedal.value.id
+            );
+            if (medalToUpdate)
+              medalToUpdate.isActive = true;
+          } else if (selectedMedalType.value === "nature") {
+            const medalToUpdate = natureMedals.find(
+              (m) => m.id === selectedMedal.value.id
+            );
+            if (medalToUpdate)
+              medalToUpdate.isActive = true;
+          } else if (selectedMedalType.value === "starRail") {
+            const medalToUpdate = btMedals.find(
+              (m) => m.id === selectedMedal.value.id
+            );
+            if (medalToUpdate)
+              medalToUpdate.isActive = true;
+          }
+        } else {
+          common_vendor.index.showToast({
+            title: (response == null ? void 0 : response.message) || "徽章点亮失败",
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        common_vendor.index.hideLoading();
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:1007", "点亮徽章失败:", error);
         common_vendor.index.showToast({
-          title: "徽章点亮失败",
+          title: "网络错误，请重试",
           icon: "none"
         });
+      } finally {
+        showActivatePopup.value = false;
+        selectedMedal.value = null;
+        selectedMedalType.value = "";
       }
-      showActivatePopup.value = false;
-      selectedMedal.value = null;
-      selectedMedalType.value = "";
     };
     return (_ctx, _cache) => {
       var _a2, _b2, _c2;
@@ -524,7 +574,7 @@ const _sfc_main = {
             j: index
           });
         }),
-        o: common_vendor.f(allBtMedals, (item, index, i0) => {
+        o: common_vendor.f(btMedals, (item, index, i0) => {
           return common_vendor.e({
             a: item.icon,
             b: !item.isActive ? 1 : "",

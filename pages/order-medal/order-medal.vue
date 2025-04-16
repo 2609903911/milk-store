@@ -199,7 +199,7 @@
                         <view class="medal-row">
                             <view
                                 class="medal-item"
-                                v-for="(item, index) in allBtMedals"
+                                v-for="(item, index) in btMedals"
                                 :key="index"
                             >
                                 <view
@@ -336,9 +336,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { userState, updateUserState } from '../../utils/userState'
-import { getUserMedalsByType } from '../../utils/userModel'
+import { userData, initUserData } from '../../utils/userData'
+import { get, post } from '../../utils/request'
 
-// 当前用户等级
+// 当前用户等级+
 const userLevel = ref(userState?.memberLevel || 1)
 // 用户昵称
 const userNickname = ref(userState?.nickname || '熊猫奶茶会员')
@@ -351,354 +352,483 @@ const currentType = ref(0)
 const navScrollLeft = ref(0)
 
 // 勋章类型
-const medalTypes = reactive([
-    '二十四节气限定',
-    '大自然限定微章',
-    '崩铁联动限定',
-    '等级徽章'
-])
+const medalTypes = reactive([])
 
 // 季节勋章列表 - 所有可能的勋章
-const allSeasonalMedals = reactive([
-    {
-        id: 'season_01',
-        name: '节气 · 立春',
-        icon: '../../static/images/medal/season01.png',
-        isActive: false
-    },
-    {
-        id: 'season_02',
-        name: '节气 · 雨水',
-        icon: '../../static/images/medal/season02.png',
-        isActive: false
-    },
-    {
-        id: 'season_03',
-        name: '节气 · 惊蛰',
-        icon: '../../static/images/medal/season03.png',
-        isActive: false
-    },
-    {
-        id: 'season_04',
-        name: '节气 · 春分',
-        icon: '../../static/images/medal/season04.png',
-        isActive: false
-    },
-    {
-        id: 'season_05',
-        name: '节气 · 清明',
-        icon: '../../static/images/medal/season05.png',
-        isActive: false
-    },
-    {
-        id: 'season_06',
-        name: '节气 · 谷雨',
-        icon: '../../static/images/medal/season06.png',
-        isActive: false
-    },
-    {
-        id: 'season_07',
-        name: '节气 · 立夏',
-        icon: '../../static/images/medal/season07.png',
-        isActive: false
-    },
-    {
-        id: 'season_08',
-        name: '节气 · 小满',
-        icon: '../../static/images/medal/season08.png',
-        isActive: false
-    },
-    {
-        id: 'season_09',
-        name: '节气 · 芒种',
-        icon: '../../static/images/medal/season09.png',
-        isActive: false
-    },
-    {
-        id: 'season_10',
-        name: '节气 · 夏至',
-        icon: '../../static/images/medal/season10.png',
-        isActive: false
-    },
-    {
-        id: 'season_11',
-        name: '节气 · 小暑',
-        icon: '../../static/images/medal/season11.png',
-        isActive: false
-    },
-    {
-        id: 'season_12',
-        name: '节气 · 大暑',
-        icon: '../../static/images/medal/season12.png',
-        isActive: false
-    },
-    {
-        id: 'season_13',
-        name: '节气 · 立秋',
-        icon: '../../static/images/medal/season13.png',
-        isActive: false
-    },
-    {
-        id: 'season_14',
-        name: '节气 · 处暑',
-        icon: '../../static/images/medal/season14.png',
-        isActive: false
-    },
-    {
-        id: 'season_15',
-        name: '节气 · 白露',
-        icon: '../../static/images/medal/season15.png',
-        isActive: false
-    },
-    {
-        id: 'season_16',
-        name: '节气 · 秋分',
-        icon: '../../static/images/medal/season16.png',
-        isActive: false
-    },
-    {
-        id: 'season_17',
-        name: '节气 · 寒露',
-        icon: '../../static/images/medal/season17.png',
-        isActive: false
-    },
-    {
-        id: 'season_18',
-        name: '节气 · 霜降',
-        icon: '../../static/images/medal/season18.png',
-        isActive: false
-    },
-    {
-        id: 'season_19',
-        name: '节气 · 立冬',
-        icon: '../../static/images/medal/season19.png',
-        isActive: false
-    },
-    {
-        id: 'season_20',
-        name: '节气 · 小雪',
-        icon: '../../static/images/medal/season20.png',
-        isActive: false
-    }
-])
+const allSeasonalMedals = reactive([])
 
 // 大自然限定微章 - 所有可能的勋章
-const allNatureMedals = reactive([
-    {
-        id: 'nature_bee',
-        name: '大自然 · 蜜蜂',
-        icon: '../../static/images/medal/nature-bee.png',
-        isActive: false
-    },
-    {
-        id: 'nature_butterfly',
-        name: '大自然 · 蝴蝶',
-        icon: '../../static/images/medal/nature-butterfly.png',
-        isActive: false
-    },
-    {
-        id: 'nature_bird',
-        name: '大自然 · 小鸟',
-        icon: '../../static/images/medal/nature-bird.png',
-        isActive: false
-    },
-    {
-        id: 'nature_dragonfly',
-        name: '大自然 · 蜻蜓',
-        icon: '../../static/images/medal/nature-dragonfly.png',
-        isActive: false
-    },
-    {
-        id: 'nature_cactus',
-        name: '大自然 · 仙人掌',
-        icon: '../../static/images/medal/nature-cactus.png',
-        isActive: false
-    },
-    {
-        id: 'nature_mouse',
-        name: '大自然 · 老鼠',
-        icon: '../../static/images/medal/nature-mouse.png',
-        isActive: false
-    },
-    {
-        id: 'nature_duck',
-        name: '大自然 · 鸭子',
-        icon: '../../static/images/medal/nature-duck.png',
-        isActive: false
-    }
-])
+const allNatureMedals = reactive([])
 
 // 崩铁联动限定微章 - 所有可能的勋章
-const allBtMedals = reactive([
-    {
-        id: 'star_medal_01',
-        name: '开拓者-穹',
-        icon: '../../static/images/medal/bt-star-01.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_02',
-        name: '开拓者-星',
-        icon: '../../static/images/medal/bt-star-02.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_03',
-        name: '垃圾桶',
-        icon: '../../static/images/medal/bt-star-03.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_04',
-        name: '景元',
-        icon: '../../static/images/medal/bt-star-04.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_05',
-        name: '星核猎手-卡芙卡',
-        icon: '../../static/images/medal/bt-star-05.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_06',
-        name: '星核猎手-刃',
-        icon: '../../static/images/medal/bt-star-06.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_07',
-        name: '开拓者-三月七',
-        icon: '../../static/images/medal/bt-star-07.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_08',
-        name: '开拓者-姬子',
-        icon: '../../static/images/medal/bt-star-08.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_09',
-        name: '开拓者-瓦尔特',
-        icon: '../../static/images/medal/bt-star-09.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_10',
-        name: '开拓者-丹恒',
-        icon: '../../static/images/medal/bt-star-10.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_11',
-        name: '假面愚者-花火',
-        icon: '../../static/images/medal/bt-star-11.png',
-        isActive: false
-    },
-    {
-        id: 'star_medal_12',
-        name: '假面愚者-桑博',
-        icon: '../../static/images/medal/bt-star-12.png',
-        isActive: false
-    }
-])
+const allBtMedals = reactive([])
+
 // 等级徽章 - 所有可能的勋章
-const allLevelMedals = reactive([
-    {
-        id: 'rank_01',
-        name: '等级 · Lv1',
-        icon: '../../static/images/medal/rank01.png',
-        isActive: false
-    },
-    {
-        id: 'rank_02',
-        name: '等级 · Lv2',
-        icon: '../../static/images/medal/rank02.png',
-        isActive: false
-    },
-    {
-        id: 'rank_03',
-        name: '等级 · Lv3',
-        icon: '../../static/images/medal/rank03.png',
-        isActive: false
-    },
-    {
-        id: 'rank_04',
-        name: '等级 · Lv4',
-        icon: '../../static/images/medal/rank04.png',
-        isActive: false
-    },
-    {
-        id: 'rank_05',
-        name: '等级 · Lv5',
-        icon: '../../static/images/medal/rank05.png',
-        isActive: false
-    },
-    {
-        id: 'rank_06',
-        name: '等级 · Lv6',
-        icon: '../../static/images/medal/rank06.png',
-        isActive: false
-    }
-])
+const allLevelMedals = reactive([])
 
 // 用户的勋章数据
-const seasonalMedals = reactive([...allSeasonalMedals])
-const natureMedals = reactive([...allNatureMedals])
-const levelMedals = reactive([...allLevelMedals])
+const seasonalMedals = reactive([])
+const natureMedals = reactive([])
+const btMedals = reactive([])
+const levelMedals = reactive([])
 const lastAcquiredMedal = ref(null)
 
-// 初始化用户勋章数据
-const initUserMedals = () => {
-    if (!userState || !userState.medals || !Array.isArray(userState.medals)) {
-        return
-    }
+// 从后端获取勋章类型
+const fetchMedalTypes = async () => {
+    try {
+        const apiUrl = '/api/medals/types'
+        console.log('发送勋章类型请求到:', apiUrl)
 
-    // 获取用户各类型勋章
-    const userSeasonalMedals = getUserMedalsByType(userState.medals, 'seasonal')
-    const userNatureMedals = getUserMedalsByType(userState.medals, 'nature')
-    const userLevelMedals = getUserMedalsByType(userState.medals, 'level')
-    const userStarRailMedals = getUserMedalsByType(userState.medals, 'starRail')
-
-    // 更新季节勋章激活状态
-    seasonalMedals.forEach((medal) => {
-        const userMedal = userSeasonalMedals.find((m) => m.id === medal.id)
-        // 如果找到用户勋章，并且勋章的isActive不是显式设为false，则认为是激活的
-        medal.isActive = userMedal ? userMedal.isActive !== false : false
-    })
-
-    // 更新自然勋章激活状态
-    natureMedals.forEach((medal) => {
-        const userMedal = userNatureMedals.find((m) => m.id === medal.id)
-        // 如果找到用户勋章，并且勋章的isActive不是显式设为false，则认为是激活的
-        medal.isActive = userMedal ? userMedal.isActive !== false : false
-    })
-
-    // 更新崩铁联动勋章激活状态
-    allBtMedals.forEach((medal) => {
-        const userMedal = userStarRailMedals.find((m) => m.id === medal.id)
-        // 如果找到用户勋章，并且勋章的isActive不是显式设为false，则认为是激活的
-        medal.isActive = userMedal ? userMedal.isActive !== false : false
-    })
-
-    // 更新等级勋章激活状态
-    levelMedals.forEach((medal, index) => {
-        medal.isActive = userLevel.value >= index + 1
-    })
-
-    // 设置最近获得的勋章（按获取时间排序）
-    if (userState.medals.length > 0) {
-        const sortedMedals = [...userState.medals].sort(
-            (a, b) => b.acquireTime - a.acquireTime
+        const response = await get(
+            apiUrl,
+            {},
+            {
+                showError: true,
+                loading: true,
+                loadingText: '加载勋章类型中...'
+            }
         )
-        lastAcquiredMedal.value = sortedMedals[0]
+        console.log('勋章类型响应:', response)
+
+        if (response && response.code === 200 && response.data) {
+            // 清空原数组
+            medalTypes.splice(0, medalTypes.length)
+            // 添加新数据 - 正确解析返回的数据结构
+            response.data.forEach((type) => {
+                medalTypes.push(type.typeName)
+            })
+        } else {
+            console.warn('勋章类型响应格式异常，使用默认值')
+            // 设置默认类型，防止页面空白
+            medalTypes.splice(
+                0,
+                medalTypes.length,
+                '二十四节气限定',
+                '大自然限定微章',
+                '崩铁联动限定',
+                '等级徽章'
+            )
+        }
+    } catch (error) {
+        console.error('获取勋章类型失败:', error)
+        console.warn('使用默认勋章类型')
+        // 设置默认类型，防止页面空白
+        medalTypes.splice(
+            0,
+            medalTypes.length,
+            '二十四节气限定',
+            '大自然限定微章',
+            '崩铁联动限定',
+            '等级徽章'
+        )
     }
 }
 
-// 页面加载时初始化用户勋章
-onMounted(() => {
-    initUserMedals()
+// 从后端获取所有勋章
+const fetchAllMedals = async () => {
+    try {
+        const apiUrl = '/api/medals'
+        console.log('发送所有勋章请求到:', apiUrl)
+
+        const response = await get(
+            apiUrl,
+            {},
+            {
+                showError: true,
+                loading: true,
+                loadingText: '加载勋章数据中...'
+            }
+        )
+        console.log('所有勋章响应:', response)
+
+        if (response && response.code === 200 && response.data) {
+            // 根据类型分类勋章
+            const medals = response.data
+
+            // 清空原数组
+            allSeasonalMedals.splice(0, allSeasonalMedals.length)
+            allNatureMedals.splice(0, allNatureMedals.length)
+            allBtMedals.splice(0, allBtMedals.length)
+            allLevelMedals.splice(0, allLevelMedals.length)
+
+            // 分类添加
+            medals.forEach((medal) => {
+                const medalData = {
+                    id: medal.medalId,
+                    name: medal.medalName,
+                    icon:
+                        medal.iconPath ||
+                        medal.icon ||
+                        `../../static/images/medal/${medal.medalId}.png`,
+                    isActive: false,
+                    description: medal.description
+                }
+
+                // 根据类型分类
+                if (medal.type && medal.type.typeId) {
+                    const typeId = medal.type.typeId
+                    if (typeId === 'seasonal') {
+                        allSeasonalMedals.push(medalData)
+                    } else if (typeId === 'nature') {
+                        allNatureMedals.push(medalData)
+                    } else if (typeId === 'starrail') {
+                        allBtMedals.push(medalData)
+                    } else if (typeId === 'rank') {
+                        allLevelMedals.push(medalData)
+                    }
+                }
+            })
+        } else {
+            console.warn('勋章数据响应格式异常:', response)
+            // 加载默认数据，以防请求失败
+            loadDefaultMedalData()
+        }
+    } catch (error) {
+        console.error('获取所有勋章失败:', error)
+        // 加载默认数据，以防请求失败
+        loadDefaultMedalData()
+    }
+}
+
+// 加载默认勋章数据，当API请求失败时使用
+const loadDefaultMedalData = () => {
+    // 清空原数组
+    allSeasonalMedals.splice(0, allSeasonalMedals.length)
+    allNatureMedals.splice(0, allNatureMedals.length)
+    allBtMedals.splice(0, allBtMedals.length)
+    allLevelMedals.splice(0, allLevelMedals.length)
+
+    // 添加一些默认勋章数据
+    // 节气勋章
+    allSeasonalMedals.push(
+        {
+            id: 'season_01',
+            name: '节气 · 立春',
+            icon: '../../static/images/medal/season01.png',
+            isActive: false
+        },
+        {
+            id: 'season_02',
+            name: '节气 · 雨水',
+            icon: '../../static/images/medal/season02.png',
+            isActive: false
+        },
+        {
+            id: 'season_03',
+            name: '节气 · 惊蛰',
+            icon: '../../static/images/medal/season03.png',
+            isActive: false
+        }
+    )
+
+    // 大自然勋章
+    allNatureMedals.push(
+        {
+            id: 'nature_bee',
+            name: '大自然 · 蜜蜂',
+            icon: '../../static/images/medal/nature-bee.png',
+            isActive: false
+        },
+        {
+            id: 'nature_butterfly',
+            name: '大自然 · 蝴蝶',
+            icon: '../../static/images/medal/nature-butterfly.png',
+            isActive: false
+        }
+    )
+
+    // 崩铁勋章
+    allBtMedals.push(
+        {
+            id: 'star_medal_01',
+            name: '开拓者-穹',
+            icon: '../../static/images/medal/bt-star-01.png',
+            isActive: false
+        },
+        {
+            id: 'star_medal_02',
+            name: '开拓者-星',
+            icon: '../../static/images/medal/bt-star-02.png',
+            isActive: false
+        }
+    )
+
+    // 等级勋章
+    allLevelMedals.push(
+        {
+            id: 'rank_01',
+            name: '等级 · Lv1',
+            icon: '../../static/images/medal/rank01.png',
+            isActive: false
+        },
+        {
+            id: 'rank_02',
+            name: '等级 · Lv2',
+            icon: '../../static/images/medal/rank02.png',
+            isActive: false
+        }
+    )
+}
+
+// 获取用户信息
+const fetchUserProfile = async () => {
+    try {
+        // 从本地存储获取用户ID
+        const userInfo = uni.getStorageSync('userInfo')
+        if (!userInfo || !userInfo.userId) {
+            console.error('未找到用户ID，无法获取用户信息')
+            return
+        }
+
+        const userId = userInfo.userId
+        const apiUrl = `/api/user/profile?userId=${userId}`
+        console.log('发送用户信息请求到:', apiUrl)
+
+        const response = await get(
+            apiUrl,
+            {},
+            {
+                showError: true,
+                loading: true,
+                loadingText: '加载用户信息中...'
+            }
+        )
+        console.log('用户信息响应:', response)
+
+        if (response && response.code === 200 && response.data) {
+            const userData = response.data
+
+            // 更新用户头像
+            userAvatar.value = userData.avatar || '/static/images/avatar.png'
+
+            // 更新用户昵称
+            userNickname.value = userData.nickname || '熊猫奶茶会员'
+
+            // 更新用户等级
+            userLevel.value = userData.memberLevel || 1
+
+            // 更新点亮星数量
+            userState.lightningStars = userData.lightningStars || 0
+
+            // 更新勋章信息
+            userState.medals = userData.medals || []
+
+            console.log(
+                '用户信息更新完成:',
+                userNickname.value,
+                userLevel.value
+            )
+        } else {
+            console.warn('用户信息响应格式异常:', response)
+        }
+    } catch (error) {
+        console.error('获取用户信息失败:', error)
+    }
+}
+
+// 从后端获取用户拥有的勋章
+const getUserMedals = async () => {
+    try {
+        // 确保用户数据已初始化
+        await initUserData()
+
+        // 从本地存储获取用户ID
+        const userInfo = uni.getStorageSync('userInfo')
+        if (!userInfo || !userInfo.userId) {
+            console.error('未找到用户ID，无法获取用户勋章')
+            return
+        }
+
+        const userId = userInfo.userId
+        const apiUrl = `/api/medals/user/${userId}`
+        console.log('发送用户勋章请求到:', apiUrl)
+
+        const response = await get(
+            apiUrl,
+            {},
+            {
+                showError: true,
+                loading: true,
+                loadingText: '加载用户勋章中...'
+            }
+        )
+        console.log('用户勋章响应:', response)
+
+        if (response && response.code === 200 && response.data) {
+            // 清空原数组
+            seasonalMedals.splice(0, seasonalMedals.length)
+            natureMedals.splice(0, natureMedals.length)
+            btMedals.splice(0, btMedals.length)
+            levelMedals.splice(0, levelMedals.length)
+
+            // 获取用户拥有的勋章信息
+            const userMedalsData = response.data.medals || []
+
+            // 创建一个映射来快速查找用户拥有的勋章
+            const userMedalMap = new Map()
+            userMedalsData.forEach((item) => {
+                if (item.medal && item.medal.medalId) {
+                    userMedalMap.set(item.medal.medalId, {
+                        isActive: item.isActive,
+                        obtainTime: item.obtainTime,
+                        medal: item.medal
+                    })
+                }
+            })
+
+            // 复制所有勋章并标记激活状态
+            allSeasonalMedals.forEach((medal) => {
+                const clonedMedal = { ...medal }
+                const userMedal = userMedalMap.get(medal.id)
+                clonedMedal.isActive = userMedal ? userMedal.isActive : false
+                clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null
+                seasonalMedals.push(clonedMedal)
+            })
+
+            allNatureMedals.forEach((medal) => {
+                const clonedMedal = { ...medal }
+                const userMedal = userMedalMap.get(medal.id)
+                clonedMedal.isActive = userMedal ? userMedal.isActive : false
+                clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null
+                natureMedals.push(clonedMedal)
+            })
+
+            allBtMedals.forEach((medal) => {
+                const clonedMedal = { ...medal }
+                const userMedal = userMedalMap.get(medal.id)
+                clonedMedal.isActive = userMedal ? userMedal.isActive : false
+                clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null
+                btMedals.push(clonedMedal)
+            })
+
+            allLevelMedals.forEach((medal) => {
+                const clonedMedal = { ...medal }
+                const userMedal = userMedalMap.get(medal.id)
+                clonedMedal.isActive = userMedal ? userMedal.isActive : false
+                clonedMedal.obtainTime = userMedal ? userMedal.obtainTime : null
+                levelMedals.push(clonedMedal)
+            })
+
+            // 设置最近获得的勋章（根据获取时间排序）
+            if (userMedalsData.length > 0) {
+                // 根据obtainTime排序
+                const sortedMedals = [...userMedalsData].sort((a, b) => {
+                    const timeA = a.obtainTime
+                        ? new Date(a.obtainTime).getTime()
+                        : 0
+                    const timeB = b.obtainTime
+                        ? new Date(b.obtainTime).getTime()
+                        : 0
+                    return timeB - timeA // 降序，最新获得的排在前面
+                })
+
+                // 获取最近获得勋章的ID
+                if (sortedMedals[0] && sortedMedals[0].medal) {
+                    const lastMedalId = sortedMedals[0].medal.medalId
+
+                    // 在所有勋章中查找完整信息
+                    const allMedals = [
+                        ...allSeasonalMedals,
+                        ...allNatureMedals,
+                        ...allBtMedals,
+                        ...allLevelMedals
+                    ]
+                    lastAcquiredMedal.value =
+                        allMedals.find((medal) => medal.id === lastMedalId) ||
+                        null
+                }
+            }
+
+            // 更新用户状态中的勋章数量显示
+            userState.medals = userMedalsData
+        } else {
+            console.warn('用户勋章响应格式异常:', response)
+            // Fallback: 将所有勋章复制为未激活状态
+            setAllMedalsInactive()
+        }
+    } catch (error) {
+        console.error('获取用户勋章失败:', error)
+        // Fallback: 将所有勋章复制为未激活状态
+        setAllMedalsInactive()
+    }
+}
+
+// 辅助函数：将所有勋章设置为未激活状态
+const setAllMedalsInactive = () => {
+    seasonalMedals.splice(0, seasonalMedals.length)
+    natureMedals.splice(0, natureMedals.length)
+    btMedals.splice(0, btMedals.length)
+    levelMedals.splice(0, levelMedals.length)
+
+    seasonalMedals.push(
+        ...allSeasonalMedals.map((medal) => ({ ...medal, isActive: false }))
+    )
+    natureMedals.push(
+        ...allNatureMedals.map((medal) => ({ ...medal, isActive: false }))
+    )
+    btMedals.push(
+        ...allBtMedals.map((medal) => ({ ...medal, isActive: false }))
+    )
+    levelMedals.push(
+        ...allLevelMedals.map((medal) => ({ ...medal, isActive: false }))
+    )
+}
+
+// 初始化
+onMounted(async () => {
+    console.log('开始初始化勋章数据...')
+
+    try {
+        // 先获取用户信息
+        console.log('正在获取用户信息...')
+        await fetchUserProfile()
+        console.log('用户信息获取完成')
+
+        // 再获取勋章类型和所有勋章
+        console.log('正在获取勋章类型...')
+        await fetchMedalTypes()
+        console.log('勋章类型获取完成，结果:', medalTypes)
+
+        console.log('正在获取所有勋章...')
+        await fetchAllMedals()
+        console.log(
+            '所有勋章获取完成，数量:',
+            allSeasonalMedals.length +
+                allNatureMedals.length +
+                allBtMedals.length +
+                allLevelMedals.length
+        )
+
+        // 然后获取用户勋章
+        console.log('正在获取用户勋章...')
+        await getUserMedals()
+        console.log('用户勋章获取完成')
+    } catch (error) {
+        console.error('勋章初始化过程中出错:', error)
+
+        // 确保即使发生错误，页面也不会空白
+        if (medalTypes.length === 0) {
+            medalTypes.splice(
+                0,
+                medalTypes.length,
+                '二十四节气限定',
+                '大自然限定微章',
+                '崩铁联动限定',
+                '等级徽章'
+            )
+        }
+
+        // 加载默认数据
+        if (
+            allSeasonalMedals.length === 0 &&
+            allNatureMedals.length === 0 &&
+            allBtMedals.length === 0 &&
+            allLevelMedals.length === 0
+        ) {
+            loadDefaultMedalData()
+            setAllMedalsInactive()
+        }
+    }
 })
 
 // 切换类型方法
@@ -785,7 +915,7 @@ const cancelActivate = () => {
 }
 
 // 确认点亮
-const confirmActivate = () => {
+const confirmActivate = async () => {
     // 检查点亮星是否足够
     if (!userState.lightningStars || userState.lightningStars <= 0) {
         uni.showToast({
@@ -799,87 +929,92 @@ const confirmActivate = () => {
         return
     }
 
-    // 获取徽章类型的中文描述
-    let typeDescription = '限定徽章'
-    switch (selectedMedalType.value) {
-        case 'seasonal':
-            typeDescription = '二十四节气限定徽章'
-            break
-        case 'nature':
-            typeDescription = '大自然限定徽章'
-            break
-        case 'starRail':
-            typeDescription = '星穹铁道限定徽章'
-            break
-    }
-
-    // 创建新的勋章对象
-    const newMedal = {
-        id: selectedMedal.value.id,
-        name: selectedMedal.value.name,
-        icon: selectedMedal.value.icon,
-        type: selectedMedalType.value,
-        description: `${typeDescription}：${selectedMedal.value.name}`,
-        acquireTime: Date.now(),
-        isActive: true
-    }
-
-    // 准备当前用户的勋章列表，确保不重复添加
-    const currentMedals = [...(userState.medals || [])]
-    const medalExists = currentMedals.some((medal) => medal.id === newMedal.id)
-
-    // 只有当勋章不存在时才添加到列表中
-    const updatedMedals = medalExists
-        ? currentMedals
-        : [...currentMedals, newMedal]
-
-    // 更新用户信息：减少点亮星，添加新勋章
-    const updatedUserInfo = {
-        lightningStars: userState.lightningStars - 1,
-        medals: updatedMedals
-    }
-
-    // 更新用户状态
-    const success = updateUserState(updatedUserInfo)
-
-    if (success) {
-        // 显示成功提示
-        uni.showToast({
-            title: '徽章点亮成功',
-            icon: 'success'
+    try {
+        // 显示加载提示
+        uni.showLoading({
+            title: '点亮中...'
         })
 
-        // 重新初始化勋章数据，确保UI更新
-        initUserMedals()
-
-        // 更新本地勋章状态，确保UI立即反映变化
-        if (selectedMedalType.value === 'seasonal') {
-            const medalToUpdate = seasonalMedals.find(
-                (m) => m.id === selectedMedal.value.id
-            )
-            if (medalToUpdate) medalToUpdate.isActive = true
-        } else if (selectedMedalType.value === 'nature') {
-            const medalToUpdate = natureMedals.find(
-                (m) => m.id === selectedMedal.value.id
-            )
-            if (medalToUpdate) medalToUpdate.isActive = true
-        } else if (selectedMedalType.value === 'starRail') {
-            const medalToUpdate = allBtMedals.find(
-                (m) => m.id === selectedMedal.value.id
-            )
-            if (medalToUpdate) medalToUpdate.isActive = true
+        // 获取用户ID
+        const userInfo = uni.getStorageSync('userInfo')
+        if (!userInfo || !userInfo.userId) {
+            uni.hideLoading()
+            uni.showToast({
+                title: '用户信息不存在',
+                icon: 'none'
+            })
+            return
         }
-    } else {
+
+        // 调用后端接口进行勋章点亮
+        const userId = userInfo.userId
+        const medalId = selectedMedal.value.id
+        const apiUrl = `/api/medals/activate?userId=${userId}&medalId=${medalId}`
+        const response = await post(
+            apiUrl,
+            {}, // 参数放在URL中，请求体为空
+            {
+                showError: true
+            }
+        )
+
+        uni.hideLoading()
+
+        console.log('点亮勋章响应:', response)
+
+        if (response && response.code === 200) {
+            // 显示成功提示
+            uni.showToast({
+                title: '徽章点亮成功',
+                icon: 'success'
+            })
+
+            // 更新用户点亮星数量
+            if (response.data && response.data.user) {
+                userState.lightningStars = response.data.user.lightning_stars
+            }
+
+            // 重新获取用户信息和勋章信息
+            await fetchUserProfile()
+            await getUserMedals()
+
+            // 更新本地勋章状态，确保UI立即反映变化
+            if (selectedMedalType.value === 'seasonal') {
+                const medalToUpdate = seasonalMedals.find(
+                    (m) => m.id === selectedMedal.value.id
+                )
+                if (medalToUpdate) medalToUpdate.isActive = true
+            } else if (selectedMedalType.value === 'nature') {
+                const medalToUpdate = natureMedals.find(
+                    (m) => m.id === selectedMedal.value.id
+                )
+                if (medalToUpdate) medalToUpdate.isActive = true
+            } else if (selectedMedalType.value === 'starRail') {
+                const medalToUpdate = btMedals.find(
+                    (m) => m.id === selectedMedal.value.id
+                )
+                if (medalToUpdate) medalToUpdate.isActive = true
+            }
+        } else {
+            // 显示错误提示
+            uni.showToast({
+                title: response?.message || '徽章点亮失败',
+                icon: 'none'
+            })
+        }
+    } catch (error) {
+        uni.hideLoading()
+        console.error('点亮徽章失败:', error)
         uni.showToast({
-            title: '徽章点亮失败',
+            title: '网络错误，请重试',
             icon: 'none'
         })
+    } finally {
+        // 关闭弹窗
+        showActivatePopup.value = false
+        selectedMedal.value = null
+        selectedMedalType.value = ''
     }
-
-    // 关闭弹窗
-    showActivatePopup.value = false
-    selectedMedal.value = null
-    selectedMedalType.value = ''
 }
 </script>
 

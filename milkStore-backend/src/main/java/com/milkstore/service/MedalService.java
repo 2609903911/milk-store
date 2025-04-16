@@ -29,4 +29,11 @@ public interface MedalService {
      */
     Map<String, Object> findUserMedals(String userId);
     
+    /**
+     * 使用点亮星点亮用户勋章
+     * @param userId 用户ID
+     * @param medalId 勋章ID
+     * @return 点亮结果，包含更新后的用户和勋章信息
+     */
+    Map<String, Object> activateMedalWithStar(String userId, String medalId);
 } 

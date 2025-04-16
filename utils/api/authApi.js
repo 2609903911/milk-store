@@ -50,11 +50,16 @@ export function checkLoginStatus() {
 // 添加用户登录后的存储逻辑
 export const saveUserToStorage = (userData, token) => {
     try {
-        // 存储用户数据
-        uni.setStorageSync('userInfo', userData);
+        // 只存储用户ID
+        const userMinimalInfo = {
+            userId: userData.userId
+        };
+        
+        // 存储简化的用户数据
+        uni.setStorageSync('userInfo', userMinimalInfo);
         // 存储token
         uni.setStorageSync('token', token);
-        console.log('用户数据已保存到本地存储');
+        console.log('用户ID和token已保存到本地存储');
         return true;
     } catch (error) {
         console.error('保存用户数据失败:', error);
@@ -66,7 +71,16 @@ export const saveUserToStorage = (userData, token) => {
 export const getUserFromStorage = () => {
     try {
         const userInfo = uni.getStorageSync('userInfo');
-        return userInfo || null;
+        const token = uni.getStorageSync('token');
+        
+        if (!userInfo || !userInfo.userId) {
+            return null;
+        }
+        
+        return {
+            ...userInfo,
+            token: token
+        };
     } catch (error) {
         console.error('获取用户数据失败:', error);
         return null;

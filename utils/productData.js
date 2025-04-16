@@ -3,13 +3,6 @@ import { fetchCategories, fetchCategoryById } from './api/categoryApi';
 import { fetchProductsByCategory } from './api/productApi';
 import { getDefaultProductData } from './productService';
 
-// 存储键名
-const STORAGE_KEY = 'milk_tea_products';
-const STORAGE_TIMESTAMP_KEY = 'milk_tea_products_timestamp';
-const STORAGE_VERSION_KEY = 'milk_tea_products_version';
-const DATA_CACHE_TIME = 60 * 60 * 1000; // 缓存有效期，默认1小时
-const CURRENT_DATA_VERSION = '1.0'; // 数据结构版本号，当修改数据结构时更新此值
-
 // 从API获取产品和分类数据
 const fetchProductDataFromAPI = async () => {
     try {
@@ -56,152 +49,32 @@ const fetchProductDataFromAPI = async () => {
     }
 }
 
-// 保存产品数据到本地存储
-export const saveProductData = (data) => {
-    try {
-        // 保存数据、时间戳和版本号
-        uni.setStorageSync(STORAGE_KEY, JSON.stringify(data));
-        uni.setStorageSync(STORAGE_TIMESTAMP_KEY, Date.now());
-        uni.setStorageSync(STORAGE_VERSION_KEY, CURRENT_DATA_VERSION);
-        console.log('产品数据保存成功');
-        return true;
-    } catch (e) {
-        console.error('保存产品数据失败：', e);
-        return false;
-    }
-}
-
-// 从本地存储获取产品数据
-const getProductDataFromStorage = () => {
-    try {
-        const storageData = uni.getStorageSync(STORAGE_KEY);
-        const timestamp = uni.getStorageSync(STORAGE_TIMESTAMP_KEY) || 0;
-        const version = uni.getStorageSync(STORAGE_VERSION_KEY) || '';
-        const now = Date.now();
-        
-        // 检查数据是否存在、未过期且版本匹配
-        if (storageData && 
-            (now - timestamp < DATA_CACHE_TIME) && 
-            version === CURRENT_DATA_VERSION) {
-            return JSON.parse(storageData);
-        }
-        
-        // 如果版本不匹配，清除旧数据
-        if (version !== CURRENT_DATA_VERSION) {
-            console.log(`数据版本不匹配(本地:${version}, 当前:${CURRENT_DATA_VERSION})，清除旧数据`);
-            clearProductDataCache();
-        }
-        
-        return null;
-    } catch (e) {
-        console.error('从本地存储获取产品数据失败：', e);
-        return null;
-    }
-}
-
-// 清除产品数据缓存
-export const clearProductDataCache = () => {
-    try {
-        uni.removeStorageSync(STORAGE_KEY);
-        uni.removeStorageSync(STORAGE_TIMESTAMP_KEY);
-        uni.removeStorageSync(STORAGE_VERSION_KEY);
-        console.log('产品数据缓存已清除');
-        return true;
-    } catch (e) {
-        console.error('清除产品数据缓存失败：', e);
-        return false;
-    }
-}
-
-// 获取产品数据缓存信息
-export const getProductDataCacheInfo = () => {
-    try {
-        const timestamp = uni.getStorageSync(STORAGE_TIMESTAMP_KEY) || 0;
-        const version = uni.getStorageSync(STORAGE_VERSION_KEY) || '';
-        const now = Date.now();
-        
-        // 如果缓存存在
-        if (timestamp > 0) {
-            const cacheAge = now - timestamp;
-            const expiresIn = Math.max(0, DATA_CACHE_TIME - cacheAge);
-            const isExpired = cacheAge >= DATA_CACHE_TIME;
-            const isOutdated = version !== CURRENT_DATA_VERSION;
-            
-            return {
-                exists: true,
-                timestamp,
-                formattedTime: new Date(timestamp).toLocaleString(),
-                age: cacheAge,
-                expiresIn,
-                isExpired,
-                version,
-                isOutdated,
-                currentVersion: CURRENT_DATA_VERSION
-            };
-        }
-        
-        // 无缓存
-        return {
-            exists: false,
-            currentVersion: CURRENT_DATA_VERSION
-        };
-    } catch (e) {
-        console.error('获取产品数据缓存信息失败：', e);
-        return {
-            exists: false,
-            error: e.message,
-            currentVersion: CURRENT_DATA_VERSION
-        };
-    }
-}
-
-// 获取产品数据 - 先尝试从API获取，如果失败则从本地存储获取，如果还是没有则使用默认数据
+// 获取产品数据 - 直接从API获取，如果失败则使用默认数据
 export const getProductData = async () => {
     try {
-        // 先尝试从缓存获取
-        const cachedData = getProductDataFromStorage();
-        if (cachedData) {
-            console.log('从本地存储获取产品数据成功');
-            return cachedData;
-        }
-        
-        // 缓存不存在或已过期，从API获取
+        // 直接从API获取
         console.log('开始从API获取产品数据...');
         const apiData = await fetchProductDataFromAPI();
-        
-        // 保存到本地存储
-        saveProductData(apiData);
-        console.log('从API获取产品数据成功并保存到本地');
-        
+        console.log('从API获取产品数据成功');
         return apiData;
     } catch (e) {
         console.error('获取产品数据失败，使用默认数据：', e);
-        // 如果API和本地存储都失败，返回默认数据
+        // 如果API失败，返回默认数据
         return getDefaultProductData();
     }
 }
 
-// 重置产品数据为默认数据
-export const resetProductData = () => {
-    return saveProductData(getDefaultProductData());
-}
-
-// 刷新产品数据（强制从API获取）
+// 刷新产品数据（从API获取）
 export const refreshProductData = async () => {
     try {
         // 从API获取
         const apiData = await fetchProductDataFromAPI();
-        
-        // 保存到本地存储
-        saveProductData(apiData);
         console.log('产品数据刷新成功');
-        
         return apiData;
     } catch (e) {
         console.error('刷新产品数据失败：', e);
-        // 如果API获取失败，尝试从本地获取
-        const localData = getProductDataFromStorage();
-        return localData || getDefaultProductData();
+        // 如果API获取失败，返回默认数据
+        return getDefaultProductData();
     }
 }
 
@@ -222,8 +95,9 @@ export const updateProduct = async (categoryIndex, productIndex, updatedProduct)
                 ...updatedProduct
             };
             
-            // 保存更新后的数据
-            return saveProductData(allProducts);
+            // 这里可以添加API调用来同步更新到后端
+            
+            return true;
         }
         return false;
     } catch (e) {
@@ -242,8 +116,9 @@ export const addProduct = async (categoryIndex, newProduct) => {
             // 添加新产品
             allProducts[categoryIndex].products.push(newProduct);
             
-            // 保存更新后的数据
-            return saveProductData(allProducts);
+            // 这里可以添加API调用来同步更新到后端
+            
+            return true;
         }
         return false;
     } catch (e) {
@@ -266,8 +141,9 @@ export const deleteProduct = async (categoryIndex, productIndex) => {
             // 删除产品
             allProducts[categoryIndex].products.splice(productIndex, 1);
             
-            // 保存更新后的数据
-            return saveProductData(allProducts);
+            // 这里可以添加API调用来同步更新到后端
+            
+            return true;
         }
         return false;
     } catch (e) {
@@ -287,8 +163,9 @@ export const addCategory = async (newCategory) => {
             products: newCategory.products || []
         });
         
-        // 保存更新后的数据
-        return saveProductData(allProducts);
+        // 这里可以添加API调用来同步更新到后端
+        
+        return true;
     } catch (e) {
         console.error('添加分类失败：', e);
         return false;
@@ -305,8 +182,9 @@ export const deleteCategory = async (categoryIndex) => {
             // 删除分类
             allProducts.splice(categoryIndex, 1);
             
-            // 保存更新后的数据
-            return saveProductData(allProducts);
+            // 这里可以添加API调用来同步更新到后端
+            
+            return true;
         }
         return false;
     } catch (e) {
@@ -518,18 +396,8 @@ export const getRecommendedProducts = async (categoryName, limit = 4) => {
 // 初始化产品数据 - 用于应用启动时
 export const initProductData = async () => {
     try {
-        // 检查是否需要刷新数据
-        const timestamp = uni.getStorageSync(STORAGE_TIMESTAMP_KEY) || 0;
-        const now = Date.now();
-        
-        // 如果数据过期或不存在，则从API获取
-        if (now - timestamp >= DATA_CACHE_TIME || !uni.getStorageSync(STORAGE_KEY)) {
-            console.log('产品数据需要刷新');
-            return await refreshProductData();
-        } else {
-            console.log('使用本地缓存的产品数据');
-            return getProductDataFromStorage();
-        }
+        console.log('初始化产品数据...');
+        return await refreshProductData();
     } catch (e) {
         console.error('初始化产品数据失败：', e);
         return getDefaultProductData();
@@ -683,8 +551,6 @@ export const getCategoriesStats = async () => {
 // 默认导出
 export default {
     getProductData,
-    saveProductData,
-    resetProductData,
     updateProduct,
     addProduct,
     deleteProduct,
@@ -695,8 +561,6 @@ export default {
     getHotProducts,
     getRecommendedProducts,
     initProductData,
-    clearProductDataCache,
-    getProductDataCacheInfo,
     getProductsWithPagination,
     getCategoriesStats
 } 

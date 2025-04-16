@@ -37,7 +37,10 @@ export const API_PATHS = {
   AUTH_SEND_CODE: '/api/auth/code/send',
   AUTH_LOGIN_CODE: '/api/auth/login/code',
   AUTH_LOGOUT: '/api/auth/logout',
-  AUTH_STATUS: '/api/auth/status'
+  AUTH_STATUS: '/api/auth/status',
+  
+  // 用户相关
+  USER_PROFILE: '/api/user/profile' // 获取用户详细信息
 };
 
 // 请求方法

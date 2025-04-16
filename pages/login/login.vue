@@ -79,6 +79,7 @@
 <script>
 import { authApi } from '@/utils/api'
 import { saveUserToStorage } from '@/utils/api/authApi'
+import { fetchUserDataFromServer } from '@/utils/userData'
 
 export default {
     data() {
@@ -294,8 +295,7 @@ export default {
                 uni.request({
                     url: url,
                     method: 'POST',
-                    success: (res) => {
-                        console.log('登录响应:', JSON.stringify(res.data))
+                    success: async (res) => {
                         uni.hideLoading()
 
                         // 检查响应中的code字段 - 服务器成功码为200
@@ -305,8 +305,11 @@ export default {
                                 const userData = res.data.data.user
                                 const token = res.data.data.token
 
-                                // 直接保存后端返回的完整用户数据到本地存储
+                                // 只保存用户ID和token到本地存储
                                 saveUserToStorage(userData, token)
+
+                                // 从服务器获取最新的用户数据
+                                await fetchUserDataFromServer()
 
                                 uni.showToast({
                                     title: '登录成功',

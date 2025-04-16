@@ -268,7 +268,7 @@ onMounted(() => {
     fetchBannerData()
 })
 
-console.log(userData)
+console.log('请求到的用户数据', userData)
 
 const currentSwiper = ref(0)
 const swiperChange = (e) => {
