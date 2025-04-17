@@ -1,7 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
-const utils_userState = require("../../utils/userState.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -13,13 +13,17 @@ if (!Math) {
 const _sfc_main = {
   __name: "personal-data",
   setup(__props) {
+    const loading = common_vendor.ref(true);
     const userInfo = common_vendor.ref({
+      userId: "",
       avatar: "/static/images/avatar.png",
-      nickname: "醇厚的生椰西瓜",
-      phone: "13012341234",
+      nickname: "",
+      phone: "",
       gender: "male",
-      // male或female
-      birthday: ""
+      birthday: "",
+      memberLevel: 1,
+      pandaCoins: 0,
+      lightningStars: 0
     });
     const isDatePickerVisible = common_vendor.ref(false);
     const today = /* @__PURE__ */ new Date();
@@ -46,48 +50,123 @@ const _sfc_main = {
       todayDay - 1
     ];
     const datePickerValue = common_vendor.ref(defaultDatePickerValue);
-    common_vendor.onMounted(() => {
-      if (utils_userState.userState) {
-        userInfo.value = {
-          avatar: utils_userState.userState.avatar || "/static/images/avatar.png",
-          nickname: utils_userState.userState.nickname || "醇厚的生椰西瓜",
-          phone: utils_userState.userState.phone || "13012341234",
-          gender: utils_userState.userState.gender || "male",
-          birthday: utils_userState.userState.birthday || ""
-        };
-        if (userInfo.value.birthday) {
-          const [year, month, day] = userInfo.value.birthday.split("-").map(Number);
-          selectedYear.value = year;
-          selectedMonth.value = month;
-          selectedDay.value = day;
-          datePickerValue.value = [
-            years.findIndex((y) => y === year),
-            months.findIndex((m) => m === month),
-            days.value.findIndex((d) => d === day)
-          ];
+    const fetchUserProfile = async () => {
+      loading.value = true;
+      try {
+        const userInfoStorage = common_vendor.index.getStorageSync("userInfo");
+        if (!userInfoStorage || !userInfoStorage.userId) {
+          common_vendor.index.showToast({
+            title: "用户未登录",
+            icon: "none"
+          });
+          loading.value = false;
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 1500);
+          return;
         }
+        const userId = userInfoStorage.userId;
+        const response = await utils_request.get(
+          `/api/user/profile-info?userId=${userId}`,
+          {},
+          {
+            showError: true
+          }
+        );
+        const responseData = response.data && response.data.data ? response.data.data : response.data && response.data.code === 200 ? response.data.data : null;
+        if (responseData) {
+          let formattedBirthday = "";
+          if (responseData.birthday) {
+            const birthdayDate = new Date(responseData.birthday);
+            const year = birthdayDate.getFullYear();
+            const month = String(birthdayDate.getMonth() + 1).padStart(
+              2,
+              "0"
+            );
+            const day = String(birthdayDate.getDate()).padStart(2, "0");
+            formattedBirthday = `${year}-${month}-${day}`;
+          }
+          userInfo.value = {
+            userId: responseData.userId,
+            avatar: responseData.avatar || "/static/images/avatar.png",
+            nickname: responseData.nickname || "",
+            phone: responseData.phone || "",
+            gender: responseData.gender || "male",
+            birthday: formattedBirthday,
+            memberLevel: responseData.memberLevel || 1,
+            pandaCoins: responseData.pandaCoins || 0,
+            lightningStars: responseData.lightningStars || 0
+          };
+        } else {
+          common_vendor.index.showToast({
+            title: "获取用户信息失败",
+            icon: "none"
+          });
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 1500);
+        }
+      } catch (error) {
+        common_vendor.index.showToast({
+          title: "网络异常，请稍后再试",
+          icon: "none"
+        });
+        setTimeout(() => {
+          common_vendor.index.navigateBack();
+        }, 1500);
+      } finally {
+        loading.value = false;
       }
+    };
+    common_vendor.onMounted(() => {
+      fetchUserProfile();
     });
     const formatPhone = (phone) => {
       if (!phone)
         return "";
+      if (phone.length < 11)
+        return phone;
       return phone.substring(0, 3) + "****" + phone.substring(7);
     };
+    const updateUserProfile = async () => {
+      try {
+        loading.value = true;
+        const updateData = {
+          userId: userInfo.value.userId,
+          nickname: userInfo.value.nickname,
+          gender: userInfo.value.gender,
+          birthday: userInfo.value.birthday,
+          // 已格式化为YYYY-MM-DD
+          avatar: userInfo.value.avatar
+        };
+        const response = await utils_request.post("/api/user/update-info", updateData, {
+          showError: true
+        });
+        if (response && (response.code === 200 || response.data && response.data.code === 200)) {
+          common_vendor.index.showToast({
+            title: "保存成功",
+            icon: "success"
+          });
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 1500);
+        } else {
+          common_vendor.index.showToast({
+            title: "保存失败，请重试",
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        common_vendor.index.showToast({
+          title: "网络异常，请稍后再试",
+          icon: "none"
+        });
+      } finally {
+        loading.value = false;
+      }
+    };
     const saveUserInfo = () => {
-      utils_userState.updateUserState({
-        avatar: userInfo.value.avatar,
-        nickname: userInfo.value.nickname,
-        phone: userInfo.value.phone,
-        gender: userInfo.value.gender,
-        birthday: userInfo.value.birthday
-      });
-      common_vendor.index.showToast({
-        title: "保存成功",
-        icon: "success"
-      });
-      setTimeout(() => {
-        common_vendor.index.navigateBack();
-      }, 1500);
+      updateUserProfile();
     };
     const showDatePicker = () => {
       if (userInfo.value.birthday) {
@@ -180,64 +259,69 @@ const _sfc_main = {
       });
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:403", "头像加载失败，使用默认头像");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: userInfo.value.avatar || "/static/images/avatar",
-        b: common_vendor.o(handleAvatarError),
-        c: common_vendor.o(chooseAvatar),
-        d: common_assets._imports_0$9,
-        e: userInfo.value.nickname,
-        f: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
-        g: common_vendor.t(formatPhone(userInfo.value.phone)),
-        h: common_vendor.o(bindPhone),
-        i: userInfo.value.gender === "male" ? 1 : "",
-        j: common_vendor.o(($event) => userInfo.value.gender = "male"),
-        k: userInfo.value.gender === "female" ? 1 : "",
-        l: common_vendor.o(($event) => userInfo.value.gender = "female"),
-        m: common_vendor.t(userInfo.value.birthday || "未设置"),
-        n: common_vendor.o(showDatePicker),
-        o: common_vendor.p({
+        a: loading.value
+      }, loading.value ? {} : {
+        b: userInfo.value.avatar || "/static/images/avatar.png",
+        c: common_vendor.o(handleAvatarError),
+        d: common_vendor.o(chooseAvatar),
+        e: common_assets._imports_0$9,
+        f: userInfo.value.nickname,
+        g: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
+        h: common_vendor.t(formatPhone(userInfo.value.phone)),
+        i: common_vendor.o(bindPhone),
+        j: userInfo.value.gender === "male" ? 1 : "",
+        k: common_vendor.o(($event) => userInfo.value.gender = "male"),
+        l: userInfo.value.gender === "female" ? 1 : "",
+        m: common_vendor.o(($event) => userInfo.value.gender = "female"),
+        n: common_vendor.t(userInfo.value.birthday || "未设置"),
+        o: common_vendor.o(showDatePicker),
+        p: common_vendor.p({
           type: "right",
           size: "20",
           color: "#ccc"
         }),
-        p: common_vendor.o(goToAddressManage),
-        q: common_vendor.p({
+        q: common_vendor.o(goToAddressManage),
+        r: common_vendor.p({
           type: "right",
           size: "20",
           color: "#ccc"
         }),
-        r: common_vendor.o(switchAccount),
-        s: common_vendor.o(saveUserInfo),
-        t: isDatePickerVisible.value
+        s: common_vendor.o(switchAccount)
+      }, {
+        t: !loading.value
+      }, !loading.value ? {
+        v: common_vendor.o(saveUserInfo)
+      } : {}, {
+        w: isDatePickerVisible.value
       }, isDatePickerVisible.value ? {
-        v: common_vendor.o(hideDatePicker),
-        w: common_vendor.o(confirmDateSelection),
-        x: common_vendor.f(common_vendor.unref(years), (year, index, i0) => {
+        x: common_vendor.o(hideDatePicker),
+        y: common_vendor.o(confirmDateSelection),
+        z: common_vendor.f(common_vendor.unref(years), (year, index, i0) => {
           return {
             a: common_vendor.t(year),
             b: "year-" + index
           };
         }),
-        y: common_vendor.f(common_vendor.unref(months), (month, index, i0) => {
+        A: common_vendor.f(common_vendor.unref(months), (month, index, i0) => {
           return {
             a: common_vendor.t(month),
             b: "month-" + index
           };
         }),
-        z: common_vendor.f(days.value, (day, index, i0) => {
+        B: common_vendor.f(days.value, (day, index, i0) => {
           return {
             a: common_vendor.t(day),
             b: "day-" + index
           };
         }),
-        A: datePickerValue.value,
-        B: common_vendor.o(onDatePickerChange),
-        C: common_vendor.o(() => {
+        C: datePickerValue.value,
+        D: common_vendor.o(onDatePickerChange),
+        E: common_vendor.o(() => {
         }),
-        D: common_vendor.o(hideDatePicker)
+        F: common_vendor.o(hideDatePicker)
       } : {});
     };
   }

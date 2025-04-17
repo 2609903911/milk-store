@@ -587,7 +587,7 @@ const fetchUserProfile = async () => {
         }
 
         const userId = userInfo.userId
-        const apiUrl = `/api/user/profile?userId=${userId}`
+        const apiUrl = `/api/user/profile-info?userId=${userId}`
 
         const response = await get(
             apiUrl,
@@ -967,7 +967,7 @@ const confirmActivate = async () => {
 
         console.log('点亮勋章响应:', response)
 
-        if (response && response.code === 200) {
+        if (response && response.data.code === 200) {
             // 显示成功提示
             uni.showToast({
                 title: '徽章点亮成功',

@@ -7,6 +7,28 @@ const BASE_URL = 'http://localhost:8082'; // 开发环境
 // const BASE_URL = ''; // 生产环境，根据实际部署情况配置
 
 /**
+ * 检查当前环境是否支持XMLHttpRequest
+ * @returns {boolean} 是否支持XMLHttpRequest
+ */
+const isXHRSupported = () => {
+    try {
+        // 检查是否在小程序环境
+        const isMiniProgram = typeof uni !== 'undefined' && !!uni.getSystemInfoSync 
+            && (typeof window === 'undefined' || !window.XMLHttpRequest);
+        
+        // 如果是小程序环境或XMLHttpRequest不存在则返回false
+        if (isMiniProgram) {
+            return false;
+        }
+        
+        // 检查XMLHttpRequest是否存在且可用
+        return typeof XMLHttpRequest === 'function';
+    } catch (e) {
+        return false;
+    }
+};
+
+/**
  * 发送请求的统一方法
  * @param {Object} options - 请求配置
  * @returns {Promise} 请求结果的Promise
@@ -32,10 +54,10 @@ export const request = (options) => {
             ...options.header // 合并自定义请求头
         };
         
-        // 本地开发环境下，使用XMLHttpRequest模式进行请求
-        if (process.env.NODE_ENV === 'development') {
-            console.log('发送请求:', url, options.method, options.data);
-            
+        // 判断是否使用XMLHttpRequest
+        const useXHR = process.env.NODE_ENV === 'development' && isXHRSupported();
+        
+        if (useXHR) {
             try {
                 // 创建XHR对象
                 const xhr = new XMLHttpRequest();
@@ -62,10 +84,8 @@ export const request = (options) => {
                         } catch (e) {
                             response = xhr.responseText;
                         }
-                        console.log('请求成功:', response);
                         resolve({ data: response, statusCode: xhr.status });
                     } else {
-                        console.error('请求失败:', xhr.status, xhr.statusText);
                         if (options.showError !== false) {
                             uni.showToast({
                                 title: `请求失败(${xhr.status})`,
@@ -81,7 +101,6 @@ export const request = (options) => {
                     if (options.loading !== false) {
                         uni.hideLoading();
                     }
-                    console.error('请求错误:', e);
                     if (options.showError !== false) {
                         uni.showToast({
                             title: '网络异常，请稍后再试',
@@ -114,7 +133,6 @@ export const request = (options) => {
                 
                 return;
             } catch (e) {
-                console.error('XHR初始化失败，回退到uni.request:', e);
                 // 如果XHR模式失败，回退到uni.request
             }
         }
@@ -127,7 +145,6 @@ export const request = (options) => {
             header,
             withCredentials: false, // 跨域请求不发送cookie
             success: (res) => {
-                console.log('请求成功:', res);
                 // 请求成功，但需检查业务状态码
                 if (res.statusCode === 200) {
                     // 如果返回直接是数据对象，则直接使用
@@ -161,7 +178,6 @@ export const request = (options) => {
                 }
             },
             fail: (err) => {
-                console.error('请求失败详情:', err);
                 // 网络错误或其他错误
                 const errorMsg = err.errMsg || '网络异常，请稍后再试';
                 if (options.showError !== false) {

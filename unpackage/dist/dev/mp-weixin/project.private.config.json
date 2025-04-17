@@ -9,15 +9,22 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/panda-store/panda-store",
-          "pathName": "pages/panda-store/panda-store",
+          "name": "pages/order/order",
+          "pathName": "pages/order/order",
           "query": "",
           "launchMode": "default",
           "scene": null
         },
         {
-          "name": "pages/home/home",
-          "pathName": "pages/home/home",
+          "name": "pages/profile/profile",
+          "pathName": "pages/profile/profile",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/login/login",
+          "pathName": "pages/login/login",
           "query": "",
           "launchMode": "default",
           "scene": null

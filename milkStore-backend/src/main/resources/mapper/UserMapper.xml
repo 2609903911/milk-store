@@ -48,4 +48,16 @@
             #{pandaCoins}, #{lightningStars}, #{memberLevel}
         )
     </insert>
+    
+    <!-- 更新用户信息 -->
+    <update id="updateUser" parameterType="com.milkstore.entity.User">
+        UPDATE users 
+        SET 
+            nickname = #{nickname},
+            avatar = #{avatar},
+            gender = #{gender},
+            birthday = #{birthday}
+        WHERE 
+            user_id = #{userId}
+    </update>
 </mapper> 

@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 public class AuthController {
     
     @Autowired
@@ -39,7 +39,7 @@ public class AuthController {
      * @param type 验证码类型
      * @return 发送结果
      */
-    @PostMapping("/code/send")
+    @PostMapping("/auth/code/send")
     public Result<Object> sendVerificationCode(
             @RequestParam("phone") String phone,
             @RequestParam(value = "type", defaultValue = "login") String type) {
@@ -65,7 +65,7 @@ public class AuthController {
      * @param code 验证码
      * @return 登录结果，包括用户信息、勋章、优惠券和token
      */
-    @PostMapping("/login/code")
+    @PostMapping("/auth/login/code")
     public Result<Object> loginWithCode(
             @RequestParam("phone") String phone,
             @RequestParam("code") String code) {
@@ -137,6 +137,115 @@ public class AuthController {
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error(500, "登录失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 更新用户信息
+     * @param userData 用户要更新的数据
+     * @return 更新结果
+     */
+    @PostMapping("/user/update-info")
+    public Result<Object> updateUserProfile(@RequestBody Map<String, Object> userData) {
+        try {
+            // 1. 获取用户ID并查询用户是否存在
+            String userId = (String) userData.get("userId");
+            if (userId == null || userId.isEmpty()) {
+                return Result.error(400, "用户ID不能为空");
+            }
+            
+            User existingUser = userMapper.findById(userId);
+            if (existingUser == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            // 2. 更新用户信息
+            if (userData.containsKey("nickname")) {
+                existingUser.setNickname((String) userData.get("nickname"));
+            }
+            
+            if (userData.containsKey("gender")) {
+                existingUser.setGender((String) userData.get("gender"));
+            }
+            
+            if (userData.containsKey("birthday")) {
+                // 前端传来的是字符串格式的日期 (YYYY-MM-DD)
+                String birthdayStr = (String) userData.get("birthday");
+                if (birthdayStr != null && !birthdayStr.isEmpty()) {
+                    try {
+                        // 将字符串日期转换为java.sql.Date格式
+                        java.sql.Date birthday = java.sql.Date.valueOf(birthdayStr);
+                        existingUser.setBirthday(birthday);
+                    } catch (IllegalArgumentException e) {
+                        return Result.error(400, "生日格式不正确，请使用YYYY-MM-DD格式");
+                    }
+                }
+            }
+            
+            if (userData.containsKey("avatar")) {
+                existingUser.setAvatar((String) userData.get("avatar"));
+            }
+            
+            // 3. 更新用户信息到数据库
+            int rows = userMapper.updateUser(existingUser);
+            
+            if (rows > 0) {
+                // 4. 构建用户数据响应
+                Map<String, Object> updatedUserData = new HashMap<>();
+                updatedUserData.put("userId", existingUser.getUserId());
+                updatedUserData.put("nickname", existingUser.getNickname());
+                updatedUserData.put("avatar", existingUser.getAvatar());
+                updatedUserData.put("phone", existingUser.getPhone());
+                updatedUserData.put("gender", existingUser.getGender());
+                updatedUserData.put("birthday", existingUser.getBirthday());
+                updatedUserData.put("pandaCoins", existingUser.getPandaCoins());
+                updatedUserData.put("lightningStars", existingUser.getLightningStars());
+                updatedUserData.put("memberLevel", existingUser.getMemberLevel());
+                
+                return Result.success("用户信息更新成功", updatedUserData);
+            } else {
+                return Result.error(500, "用户信息更新失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "更新用户信息失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取用户个人资料
+     * @param userId 用户ID
+     * @return 用户个人资料
+     */
+    @GetMapping("/user/profile-info")
+    public Result<Object> getUserProfile(@RequestParam("userId") String userId) {
+        try {
+            if (userId == null || userId.isEmpty()) {
+                return Result.error(400, "用户ID不能为空");
+            }
+            
+            User user = userMapper.findById(userId);
+            if (user == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("userId", user.getUserId());
+            userData.put("nickname", user.getNickname());
+            userData.put("avatar", user.getAvatar());
+            userData.put("phone", user.getPhone());
+            userData.put("gender", user.getGender());
+            userData.put("birthday", user.getBirthday());
+            userData.put("pandaCoins", user.getPandaCoins());
+            userData.put("lightningStars", user.getLightningStars());
+            userData.put("memberLevel", user.getMemberLevel());
+            userData.put("createTime", user.getCreateTime());
+            userData.put("lastLoginTime", user.getLastLoginTime());
+            
+            return Result.success("获取用户信息成功", userData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "获取用户信息失败: " + e.getMessage());
         }
     }
     

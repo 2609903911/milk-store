@@ -192,7 +192,7 @@ const _sfc_main = {
           return;
         }
         const userId = userInfo.userId;
-        const apiUrl = `/api/user/profile?userId=${userId}`;
+        const apiUrl = `/api/user/profile-info?userId=${userId}`;
         const response = await utils_request.get(
           apiUrl,
           {},
@@ -440,7 +440,7 @@ const _sfc_main = {
         );
         common_vendor.index.hideLoading();
         common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:968", "点亮勋章响应:", response);
-        if (response && response.code === 200) {
+        if (response && response.data.code === 200) {
           common_vendor.index.showToast({
             title: "徽章点亮成功",
             icon: "success"

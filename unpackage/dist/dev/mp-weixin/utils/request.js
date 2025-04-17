@@ -1,6 +1,17 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const BASE_URL = "http://localhost:8082";
+const isXHRSupported = () => {
+  try {
+    const isMiniProgram = typeof common_vendor.index !== "undefined" && !!common_vendor.index.getSystemInfoSync && (typeof window === "undefined" || !window.XMLHttpRequest);
+    if (isMiniProgram) {
+      return false;
+    }
+    return typeof XMLHttpRequest === "function";
+  } catch (e) {
+    return false;
+  }
+};
 const request = (options) => {
   return new Promise((resolve, reject) => {
     const url = options.url.startsWith("http") ? options.url : `${BASE_URL}${options.url}`;
@@ -15,8 +26,8 @@ const request = (options) => {
       ...options.header
       // 合并自定义请求头
     };
-    {
-      common_vendor.index.__f__("log", "at utils/request.js:37", "发送请求:", url, options.method, options.data);
+    const useXHR = isXHRSupported();
+    if (useXHR) {
       try {
         const xhr = new XMLHttpRequest();
         xhr.open(options.method || "GET", url, true);
@@ -35,10 +46,8 @@ const request = (options) => {
             } catch (e) {
               response = xhr.responseText;
             }
-            common_vendor.index.__f__("log", "at utils/request.js:65", "请求成功:", response);
             resolve({ data: response, statusCode: xhr.status });
           } else {
-            common_vendor.index.__f__("error", "at utils/request.js:68", "请求失败:", xhr.status, xhr.statusText);
             if (options.showError !== false) {
               common_vendor.index.showToast({
                 title: `请求失败(${xhr.status})`,
@@ -52,7 +61,6 @@ const request = (options) => {
           if (options.loading !== false) {
             common_vendor.index.hideLoading();
           }
-          common_vendor.index.__f__("error", "at utils/request.js:84", "请求错误:", e);
           if (options.showError !== false) {
             common_vendor.index.showToast({
               title: "网络异常，请稍后再试",
@@ -80,7 +88,6 @@ const request = (options) => {
         }
         return;
       } catch (e) {
-        common_vendor.index.__f__("error", "at utils/request.js:117", "XHR初始化失败，回退到uni.request:", e);
       }
     }
     common_vendor.index.request({
@@ -92,7 +99,6 @@ const request = (options) => {
       // 跨域请求不发送cookie
       success: (res) => {
         var _a, _b;
-        common_vendor.index.__f__("log", "at utils/request.js:130", "请求成功:", res);
         if (res.statusCode === 200) {
           if (typeof res.data === "object" && res.data !== null) {
             resolve(res);
@@ -120,7 +126,6 @@ const request = (options) => {
         }
       },
       fail: (err) => {
-        common_vendor.index.__f__("error", "at utils/request.js:164", "请求失败详情:", err);
         const errorMsg = err.errMsg || "网络异常，请稍后再试";
         if (options.showError !== false) {
           common_vendor.index.showToast({

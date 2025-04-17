@@ -40,7 +40,7 @@ export const API_PATHS = {
   AUTH_STATUS: '/api/auth/status',
   
   // 用户相关
-  USER_PROFILE: '/api/user/profile' // 获取用户详细信息
+  USER_PROFILE: '/api/user/profile-info' // 获取用户详细信息
 };
 
 // 请求方法

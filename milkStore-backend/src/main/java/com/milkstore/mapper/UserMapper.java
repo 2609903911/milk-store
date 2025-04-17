@@ -29,6 +29,13 @@ public interface UserMapper {
      */
     int insert(User user);
 
+    /**
+     * 更新用户基本信息
+     * @param user 用户信息
+     * @return 影响行数
+     */
+    int updateUser(User user);
+
     @Update("UPDATE users SET panda_coins = #{pandaCoins} WHERE user_id = #{userId}")
     int updateCoins(@Param("userId") String userId, @Param("pandaCoins") int pandaCoins);
     

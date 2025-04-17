@@ -1,6 +1,13 @@
 <template>
     <view class="personal-data-container">
-        <view class="content">
+        <!-- 加载状态 -->
+        <view class="loading-container" v-if="loading">
+            <view class="loading-spinner"></view>
+            <text class="loading-text">加载中...</text>
+        </view>
+
+        <!-- 内容区域 -->
+        <view class="content" v-else>
             <!-- 个人资料表单 -->
             <view class="user-form">
                 <!-- 头像部分 -->
@@ -10,7 +17,8 @@
                             <image
                                 class="avatar"
                                 :src="
-                                    userInfo.avatar || '/static/images/avatar'
+                                    userInfo.avatar ||
+                                    '/static/images/avatar.png'
                                 "
                                 mode="aspectFill"
                                 @error="handleAvatarError"
@@ -107,7 +115,7 @@
         </view>
 
         <!-- 保存按钮 -->
-        <view class="save-btn" @tap="saveUserInfo">保存</view>
+        <view class="save-btn" @tap="saveUserInfo" v-if="!loading">保存</view>
 
         <!-- 日期选择器弹窗 -->
         <view
@@ -161,15 +169,22 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { userState, updateUserState } from '../../utils/userState'
+import { get, post } from '../../utils/request'
+
+// 加载状态
+const loading = ref(true)
 
 // 用户信息
 const userInfo = ref({
+    userId: '',
     avatar: '/static/images/avatar.png',
-    nickname: '醇厚的生椰西瓜',
-    phone: '13012341234',
-    gender: 'male', // male或female
-    birthday: ''
+    nickname: '',
+    phone: '',
+    gender: 'male',
+    birthday: '',
+    memberLevel: 1,
+    pandaCoins: 0,
+    lightningStars: 0
 })
 
 // 日期选择器相关数据
@@ -211,40 +226,108 @@ const defaultDatePickerValue = [
 ]
 const datePickerValue = ref(defaultDatePickerValue)
 
+// 从API获取用户信息
+const fetchUserProfile = async () => {
+    loading.value = true
+    try {
+        // 从本地存储获取用户ID
+        const userInfoStorage = uni.getStorageSync('userInfo')
+        if (!userInfoStorage || !userInfoStorage.userId) {
+            uni.showToast({
+                title: '用户未登录',
+                icon: 'none'
+            })
+            loading.value = false
+
+            // 未登录时跳转回上一页
+            setTimeout(() => {
+                uni.navigateBack()
+            }, 1500)
+            return
+        }
+
+        const userId = userInfoStorage.userId
+        const response = await get(
+            `/api/user/profile-info?userId=${userId}`,
+            {},
+            {
+                showError: true
+            }
+        )
+
+        // 处理嵌套的响应结构
+        const responseData =
+            response.data && response.data.data
+                ? response.data.data
+                : response.data && response.data.code === 200
+                ? response.data.data
+                : null
+
+        if (responseData) {
+            // 处理生日日期格式
+            let formattedBirthday = ''
+            if (responseData.birthday) {
+                // 处理ISO格式日期并转换为本地时区
+                const birthdayDate = new Date(responseData.birthday)
+                // 考虑到时区差异，使用本地日期
+                const year = birthdayDate.getFullYear()
+                // 月份从0开始，所以需要+1
+                const month = String(birthdayDate.getMonth() + 1).padStart(
+                    2,
+                    '0'
+                )
+                const day = String(birthdayDate.getDate()).padStart(2, '0')
+                formattedBirthday = `${year}-${month}-${day}`
+            }
+
+            // 更新用户信息
+            userInfo.value = {
+                userId: responseData.userId,
+                avatar: responseData.avatar || '/static/images/avatar.png',
+                nickname: responseData.nickname || '',
+                phone: responseData.phone || '',
+                gender: responseData.gender || 'male',
+                birthday: formattedBirthday,
+                memberLevel: responseData.memberLevel || 1,
+                pandaCoins: responseData.pandaCoins || 0,
+                lightningStars: responseData.lightningStars || 0
+            }
+        } else {
+            uni.showToast({
+                title: '获取用户信息失败',
+                icon: 'none'
+            })
+
+            // 获取失败时跳转回上一页
+            setTimeout(() => {
+                uni.navigateBack()
+            }, 1500)
+        }
+    } catch (error) {
+        uni.showToast({
+            title: '网络异常，请稍后再试',
+            icon: 'none'
+        })
+
+        // 错误时跳转回上一页
+        setTimeout(() => {
+            uni.navigateBack()
+        }, 1500)
+    } finally {
+        loading.value = false
+    }
+}
+
 // 初始化数据
 onMounted(() => {
-    // 从本地存储获取用户信息
-    if (userState) {
-        userInfo.value = {
-            avatar: userState.avatar || '/static/images/avatar.png',
-            nickname: userState.nickname || '醇厚的生椰西瓜',
-            phone: userState.phone || '13012341234',
-            gender: userState.gender || 'male',
-            birthday: userState.birthday || ''
-        }
-
-        // 如果存在生日，初始化日期选择器的值
-        if (userInfo.value.birthday) {
-            const [year, month, day] = userInfo.value.birthday
-                .split('-')
-                .map(Number)
-            selectedYear.value = year
-            selectedMonth.value = month
-            selectedDay.value = day
-
-            // 设置选择器初始位置
-            datePickerValue.value = [
-                years.findIndex((y) => y === year),
-                months.findIndex((m) => m === month),
-                days.value.findIndex((d) => d === day)
-            ]
-        }
-    }
+    // 从API获取用户信息
+    fetchUserProfile()
 })
 
 // 格式化手机号
 const formatPhone = (phone) => {
     if (!phone) return ''
+    if (phone.length < 11) return phone
     // 只显示前3位和后4位，中间用****代替
     return phone.substring(0, 3) + '****' + phone.substring(7)
 }
@@ -254,27 +337,59 @@ const goBack = () => {
     uni.navigateBack()
 }
 
+// 更新用户信息到后端
+const updateUserProfile = async () => {
+    try {
+        loading.value = true
+        // 构建要更新的数据，确保生日格式正确
+        const updateData = {
+            userId: userInfo.value.userId,
+            nickname: userInfo.value.nickname,
+            gender: userInfo.value.gender,
+            birthday: userInfo.value.birthday, // 已格式化为YYYY-MM-DD
+            avatar: userInfo.value.avatar
+        }
+
+        // 发送更新请求
+        const response = await post('/api/user/update-info', updateData, {
+            showError: true
+        })
+
+        if (
+            response &&
+            (response.code === 200 ||
+                (response.data && response.data.code === 200))
+        ) {
+            // 提示保存成功
+            uni.showToast({
+                title: '保存成功',
+                icon: 'success'
+            })
+
+            // 延迟返回
+            setTimeout(() => {
+                uni.navigateBack()
+            }, 1500)
+        } else {
+            uni.showToast({
+                title: '保存失败，请重试',
+                icon: 'none'
+            })
+        }
+    } catch (error) {
+        uni.showToast({
+            title: '网络异常，请稍后再试',
+            icon: 'none'
+        })
+    } finally {
+        loading.value = false
+    }
+}
+
 // 保存用户信息
 const saveUserInfo = () => {
-    // 更新用户信息
-    updateUserState({
-        avatar: userInfo.value.avatar,
-        nickname: userInfo.value.nickname,
-        phone: userInfo.value.phone,
-        gender: userInfo.value.gender,
-        birthday: userInfo.value.birthday
-    })
-
-    // 提示保存成功
-    uni.showToast({
-        title: '保存成功',
-        icon: 'success'
-    })
-
-    // 延迟返回
-    setTimeout(() => {
-        uni.navigateBack()
-    }, 1500)
+    // 更新到后端
+    updateUserProfile()
 }
 
 // 显示日期选择器
@@ -400,7 +515,6 @@ const chooseAvatar = () => {
 // 处理头像加载错误
 const handleAvatarError = () => {
     // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
-    console.log('头像加载失败，使用默认头像')
 }
 </script>
 
@@ -647,5 +761,38 @@ input {
     text-align: center;
     font-size: 28rpx;
     color: #333;
+}
+
+// 加载状态样式
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.loading-spinner {
+    width: 60rpx;
+    height: 60rpx;
+    border: 6rpx solid #f3f3f3;
+    border-top: 6rpx solid #0066cc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20rpx;
+}
+
+.loading-text {
+    font-size: 28rpx;
+    color: #666;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 </style> 

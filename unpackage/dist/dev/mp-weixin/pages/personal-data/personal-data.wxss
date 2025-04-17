@@ -231,3 +231,31 @@ input.data-v-7f356bf5 {
   font-size: 28rpx;
   color: #333;
 }
+.loading-container.data-v-7f356bf5 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.loading-spinner.data-v-7f356bf5 {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #0066cc;
+  border-radius: 50%;
+  animation: spin-7f356bf5 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+.loading-text.data-v-7f356bf5 {
+  font-size: 28rpx;
+  color: #666;
+}
+@keyframes spin-7f356bf5 {
+0% {
+    transform: rotate(0deg);
+}
+100% {
+    transform: rotate(360deg);
+}
+}
