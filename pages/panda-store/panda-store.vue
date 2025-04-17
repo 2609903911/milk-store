@@ -282,31 +282,15 @@ const fetchStoreProducts = () => {
             }
         )
             .then((res) => {
-                console.log('==== 检查后端返回的商品数据 ====')
-                console.log('整个响应:', res)
-
                 // 正确获取嵌套的数据结构
                 if (res.data && res.data.data) {
                     const responseData = res.data.data
-                    console.log('商品数据:', responseData.allProducts)
 
                     // 检查第一个商品的详细结构（如果存在）
                     if (
                         responseData.allProducts &&
                         responseData.allProducts.length > 0
                     ) {
-                        const firstProduct = responseData.allProducts[0]
-                        console.log('第一个商品详情:', firstProduct)
-                        console.log('id类型:', typeof firstProduct.id)
-                        console.log(
-                            'couponTemplateId类型:',
-                            typeof firstProduct.couponTemplateId
-                        )
-                        console.log(
-                            'couponTemplateId值:',
-                            firstProduct.couponTemplateId
-                        )
-
                         // 清空原数组并添加新数据
                         allCoupons.splice(
                             0,
@@ -323,15 +307,14 @@ const fetchStoreProducts = () => {
                         })
                     }
                 } else {
-                    console.error('响应数据格式不正确:', res)
                     uni.showToast({
                         title: '数据格式错误',
                         icon: 'none'
                     })
                 }
             })
-            .catch((err) => {
-                console.error('获取商城商品失败:', err)
+            .catch(() => {
+                // 错误处理但不输出到控制台
             })
             .finally(() => {
                 resolve()
@@ -406,23 +389,6 @@ const exchangeCoupon = (coupon, amount = 1) => {
 
     isExchanging.value = true
 
-    // 0. 在兑换前检查优惠券数据结构
-    console.log('===== 兑换优惠券的详细数据 =====')
-    console.log('优惠券完整数据:', coupon)
-    console.log('id类型:', typeof coupon.id, '值:', coupon.id)
-    console.log(
-        'couponTemplateId类型:',
-        typeof coupon.couponTemplateId,
-        '值:',
-        coupon.couponTemplateId
-    )
-    console.log(
-        'coinsCost类型:',
-        typeof coupon.coinsCost,
-        '值:',
-        coupon.coinsCost
-    )
-
     // 1. 检查熊猫币是否足够
     if (userData.pandaCoins < coupon.coinsCost) {
         uni.showToast({
@@ -446,63 +412,116 @@ const exchangeCoupon = (coupon, amount = 1) => {
         coinsSpent: coupon.coinsCost
     }
 
-    console.log('准备发送的购买数据:', purchaseData)
-    console.log('JSON数据:', JSON.stringify(purchaseData))
+    // 如果是点亮星商品，添加点亮星数量
+    if (coupon.category === 'lightStar') {
+        purchaseData.lightstarAmount = coupon.value // 使用value值作为点亮星数量
+        purchaseData.transactionType = 'lightstar'
 
-    // 直接调用购买接口
-    post('/api/transactions/coupon', purchaseData, {
-        showError: false,
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then((res) => {
-            console.log('购买响应:', res)
-
-            if (res.data && res.data.success) {
-                // 更新用户熊猫币
-                userData.pandaCoins -= coupon.coinsCost
-
-                // 保存用户数据更新
-                updateUserState({
-                    pandaCoins: userData.pandaCoins
-                })
-
-                // 设置成功弹窗数据
-                exchangedCoupon.value = coupon
-                showSuccessPopup.value = true
-
-                // 显示成功消息
-                uni.hideLoading()
-                uni.showToast({
-                    title: '兑换成功！',
-                    icon: 'success'
-                })
-            } else {
-                // 处理业务逻辑失败
-                uni.hideLoading()
-                uni.showToast({
-                    title: res.data?.message || '兑换失败',
-                    icon: 'none'
-                })
+        // 调用点亮星兑换接口
+        post('/api/transactions/lightstar', purchaseData, {
+            showError: false,
+            headers: {
+                'Content-Type': 'application/json'
             }
         })
-        .catch((err) => {
-            console.error('优惠券购买异常:', err)
-            console.log(
-                '错误详情:',
-                err.response ? err.response.data : '无响应数据'
-            )
+            .then((res) => {
+                if (res.data && res.data.success) {
+                    // 更新用户熊猫币
+                    userData.pandaCoins -= coupon.coinsCost
 
-            uni.hideLoading()
-            uni.showToast({
-                title: err?.message || '兑换失败',
-                icon: 'none'
+                    // 如果服务器返回了更新后的点亮星数量，更新本地数据
+                    if (res.data.lightStarAmount) {
+                        userData.lightStars = res.data.lightStarAmount
+                    } else {
+                        // 否则本地增加相应数量
+                        userData.lightStars =
+                            (userData.lightStars || 0) + coupon.value
+                    }
+
+                    // 保存用户数据更新
+                    updateUserState({
+                        pandaCoins: userData.pandaCoins,
+                        lightStars: userData.lightStars
+                    })
+
+                    // 设置成功弹窗数据
+                    exchangedCoupon.value = coupon
+                    showSuccessPopup.value = true
+
+                    // 显示成功消息
+                    uni.hideLoading()
+                    uni.showToast({
+                        title: '兑换成功！',
+                        icon: 'success'
+                    })
+                } else {
+                    // 处理业务逻辑失败
+                    uni.hideLoading()
+                    uni.showToast({
+                        title: res.data?.message || '兑换失败',
+                        icon: 'none'
+                    })
+                }
             })
+            .catch(() => {
+                uni.hideLoading()
+                uni.showToast({
+                    title: '兑换失败',
+                    icon: 'none'
+                })
+            })
+            .finally(() => {
+                isExchanging.value = false
+            })
+    } else {
+        // 普通优惠券购买逻辑
+        // 直接调用购买接口
+        post('/api/transactions/coupon', purchaseData, {
+            showError: false,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
-        .finally(() => {
-            isExchanging.value = false
-        })
+            .then((res) => {
+                if (res.data && res.data.success) {
+                    // 更新用户熊猫币
+                    userData.pandaCoins -= coupon.coinsCost
+
+                    // 保存用户数据更新
+                    updateUserState({
+                        pandaCoins: userData.pandaCoins
+                    })
+
+                    // 设置成功弹窗数据
+                    exchangedCoupon.value = coupon
+                    showSuccessPopup.value = true
+
+                    // 显示成功消息
+                    uni.hideLoading()
+                    uni.showToast({
+                        title: '兑换成功！',
+                        icon: 'success'
+                    })
+                } else {
+                    // 处理业务逻辑失败
+                    uni.hideLoading()
+                    uni.showToast({
+                        title: res.data?.message || '兑换失败',
+                        icon: 'none'
+                    })
+                }
+            })
+            .catch(() => {
+                uni.hideLoading()
+                uni.showToast({
+                    title: '兑换失败',
+                    icon: 'none'
+                })
+            })
+            .finally(() => {
+                isExchanging.value = false
+            })
+    }
 }
 
 // 关闭成功弹窗

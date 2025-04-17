@@ -37,27 +37,9 @@ const _sfc_main = {
             loadingText: "加载中"
           }
         ).then((res) => {
-          common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:285", "==== 检查后端返回的商品数据 ====");
-          common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:286", "整个响应:", res);
           if (res.data && res.data.data) {
             const responseData = res.data.data;
-            common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:291", "商品数据:", responseData.allProducts);
             if (responseData.allProducts && responseData.allProducts.length > 0) {
-              const firstProduct = responseData.allProducts[0];
-              common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:299", "第一个商品详情:", firstProduct);
-              common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:300", "id类型:", typeof firstProduct.id);
-              common_vendor.index.__f__(
-                "log",
-                "at pages/panda-store/panda-store.vue:301",
-                "couponTemplateId类型:",
-                typeof firstProduct.couponTemplateId
-              );
-              common_vendor.index.__f__(
-                "log",
-                "at pages/panda-store/panda-store.vue:305",
-                "couponTemplateId值:",
-                firstProduct.couponTemplateId
-              );
               allCoupons.splice(
                 0,
                 allCoupons.length,
@@ -71,14 +53,12 @@ const _sfc_main = {
               });
             }
           } else {
-            common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:326", "响应数据格式不正确:", res);
             common_vendor.index.showToast({
               title: "数据格式错误",
               icon: "none"
             });
           }
-        }).catch((err) => {
-          common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:334", "获取商城商品失败:", err);
+        }).catch(() => {
         }).finally(() => {
           resolve();
         });
@@ -136,25 +116,6 @@ const _sfc_main = {
         return;
       }
       isExchanging.value = true;
-      common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:410", "===== 兑换优惠券的详细数据 =====");
-      common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:411", "优惠券完整数据:", coupon);
-      common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:412", "id类型:", typeof coupon.id, "值:", coupon.id);
-      common_vendor.index.__f__(
-        "log",
-        "at pages/panda-store/panda-store.vue:413",
-        "couponTemplateId类型:",
-        typeof coupon.couponTemplateId,
-        "值:",
-        coupon.couponTemplateId
-      );
-      common_vendor.index.__f__(
-        "log",
-        "at pages/panda-store/panda-store.vue:419",
-        "coinsCost类型:",
-        typeof coupon.coinsCost,
-        "值:",
-        coupon.coinsCost
-      );
       if (utils_userData.userData.pandaCoins < coupon.coinsCost) {
         common_vendor.index.showToast({
           title: "熊猫币不足",
@@ -173,51 +134,87 @@ const _sfc_main = {
         // 确保是数字类型
         coinsSpent: coupon.coinsCost
       };
-      common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:449", "准备发送的购买数据:", purchaseData);
-      common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:450", "JSON数据:", JSON.stringify(purchaseData));
-      utils_request.post("/api/transactions/coupon", purchaseData, {
-        showError: false,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then((res) => {
-        var _a;
-        common_vendor.index.__f__("log", "at pages/panda-store/panda-store.vue:460", "购买响应:", res);
-        if (res.data && res.data.success) {
-          utils_userData.userData.pandaCoins -= coupon.coinsCost;
-          utils_userState.updateUserState({
-            pandaCoins: utils_userData.userData.pandaCoins
-          });
-          exchangedCoupon.value = coupon;
-          showSuccessPopup.value = true;
+      if (coupon.category === "lightStar") {
+        purchaseData.lightstarAmount = coupon.value;
+        purchaseData.transactionType = "lightstar";
+        utils_request.post("/api/transactions/lightstar", purchaseData, {
+          showError: false,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then((res) => {
+          var _a;
+          if (res.data && res.data.success) {
+            utils_userData.userData.pandaCoins -= coupon.coinsCost;
+            if (res.data.lightStarAmount) {
+              utils_userData.userData.lightStars = res.data.lightStarAmount;
+            } else {
+              utils_userData.userData.lightStars = (utils_userData.userData.lightStars || 0) + coupon.value;
+            }
+            utils_userState.updateUserState({
+              pandaCoins: utils_userData.userData.pandaCoins,
+              lightStars: utils_userData.userData.lightStars
+            });
+            exchangedCoupon.value = coupon;
+            showSuccessPopup.value = true;
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: "兑换成功！",
+              icon: "success"
+            });
+          } else {
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: ((_a = res.data) == null ? void 0 : _a.message) || "兑换失败",
+              icon: "none"
+            });
+          }
+        }).catch(() => {
           common_vendor.index.hideLoading();
           common_vendor.index.showToast({
-            title: "兑换成功！",
-            icon: "success"
-          });
-        } else {
-          common_vendor.index.hideLoading();
-          common_vendor.index.showToast({
-            title: ((_a = res.data) == null ? void 0 : _a.message) || "兑换失败",
+            title: "兑换失败",
             icon: "none"
           });
-        }
-      }).catch((err) => {
-        common_vendor.index.__f__("error", "at pages/panda-store/panda-store.vue:491", "优惠券购买异常:", err);
-        common_vendor.index.__f__(
-          "log",
-          "at pages/panda-store/panda-store.vue:492",
-          "错误详情:",
-          err.response ? err.response.data : "无响应数据"
-        );
-        common_vendor.index.hideLoading();
-        common_vendor.index.showToast({
-          title: (err == null ? void 0 : err.message) || "兑换失败",
-          icon: "none"
+        }).finally(() => {
+          isExchanging.value = false;
         });
-      }).finally(() => {
-        isExchanging.value = false;
-      });
+      } else {
+        utils_request.post("/api/transactions/coupon", purchaseData, {
+          showError: false,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then((res) => {
+          var _a;
+          if (res.data && res.data.success) {
+            utils_userData.userData.pandaCoins -= coupon.coinsCost;
+            utils_userState.updateUserState({
+              pandaCoins: utils_userData.userData.pandaCoins
+            });
+            exchangedCoupon.value = coupon;
+            showSuccessPopup.value = true;
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: "兑换成功！",
+              icon: "success"
+            });
+          } else {
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: ((_a = res.data) == null ? void 0 : _a.message) || "兑换失败",
+              icon: "none"
+            });
+          }
+        }).catch(() => {
+          common_vendor.index.hideLoading();
+          common_vendor.index.showToast({
+            title: "兑换失败",
+            icon: "none"
+          });
+        }).finally(() => {
+          isExchanging.value = false;
+        });
+      }
     };
     const closeSuccessPopup = () => {
       showSuccessPopup.value = false;

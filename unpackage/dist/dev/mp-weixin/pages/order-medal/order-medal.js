@@ -34,7 +34,6 @@ const _sfc_main = {
     const fetchMedalTypes = async () => {
       try {
         const apiUrl = "/api/medals/types";
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:380", "发送勋章类型请求到:", apiUrl);
         const response = await utils_request.get(
           apiUrl,
           {},
@@ -44,14 +43,13 @@ const _sfc_main = {
             loadingText: "加载勋章类型中..."
           }
         );
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:391", "勋章类型响应:", response);
-        if (response && response.code === 200 && response.data) {
+        const responseData = response.data && response.data.data ? response.data.data : response.data && response.data.code === 200 ? response.data.data : null;
+        if (responseData) {
           medalTypes.splice(0, medalTypes.length);
-          response.data.forEach((type) => {
+          responseData.forEach((type) => {
             medalTypes.push(type.typeName);
           });
         } else {
-          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:401", "勋章类型响应格式异常，使用默认值");
           medalTypes.splice(
             0,
             medalTypes.length,
@@ -62,8 +60,6 @@ const _sfc_main = {
           );
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:413", "获取勋章类型失败:", error);
-        common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:414", "使用默认勋章类型");
         medalTypes.splice(
           0,
           medalTypes.length,
@@ -77,7 +73,6 @@ const _sfc_main = {
     const fetchAllMedals = async () => {
       try {
         const apiUrl = "/api/medals";
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:431", "发送所有勋章请求到:", apiUrl);
         const response = await utils_request.get(
           apiUrl,
           {},
@@ -87,9 +82,9 @@ const _sfc_main = {
             loadingText: "加载勋章数据中..."
           }
         );
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:442", "所有勋章响应:", response);
-        if (response && response.code === 200 && response.data) {
-          const medals = response.data;
+        const responseData = response.data && response.data.data ? response.data.data : response.data && response.data.code === 200 ? response.data.data : null;
+        if (responseData) {
+          const medals = responseData;
           allSeasonalMedals.splice(0, allSeasonalMedals.length);
           allNatureMedals.splice(0, allNatureMedals.length);
           allBtMedals.splice(0, allBtMedals.length);
@@ -116,11 +111,9 @@ const _sfc_main = {
             }
           });
         } else {
-          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:482", "勋章数据响应格式异常:", response);
           loadDefaultMedalData();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:487", "获取所有勋章失败:", error);
         loadDefaultMedalData();
       }
     };
@@ -196,12 +189,10 @@ const _sfc_main = {
       try {
         const userInfo = common_vendor.index.getStorageSync("userInfo");
         if (!userInfo || !userInfo.userId) {
-          common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:579", "未找到用户ID，无法获取用户信息");
           return;
         }
         const userId = userInfo.userId;
         const apiUrl = `/api/user/profile?userId=${userId}`;
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:585", "发送用户信息请求到:", apiUrl);
         const response = await utils_request.get(
           apiUrl,
           {},
@@ -211,26 +202,16 @@ const _sfc_main = {
             loadingText: "加载用户信息中..."
           }
         );
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:596", "用户信息响应:", response);
-        if (response && response.code === 200 && response.data) {
-          const userData = response.data;
+        const responseData = response.data && response.data.data ? response.data.data : response.data && response.data.code === 200 ? response.data.data : null;
+        if (responseData) {
+          const userData = responseData;
           userAvatar.value = userData.avatar || "/static/images/avatar.png";
           userNickname.value = userData.nickname || "熊猫奶茶会员";
           userLevel.value = userData.memberLevel || 1;
           utils_userState.userState.lightningStars = userData.lightningStars || 0;
           utils_userState.userState.medals = userData.medals || [];
-          common_vendor.index.__f__(
-            "log",
-            "at pages/order-medal/order-medal.vue:616",
-            "用户信息更新完成:",
-            userNickname.value,
-            userLevel.value
-          );
-        } else {
-          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:622", "用户信息响应格式异常:", response);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:625", "获取用户信息失败:", error);
       }
     };
     const getUserMedals = async () => {
@@ -238,12 +219,10 @@ const _sfc_main = {
         await utils_userData.initUserData();
         const userInfo = common_vendor.index.getStorageSync("userInfo");
         if (!userInfo || !userInfo.userId) {
-          common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:638", "未找到用户ID，无法获取用户勋章");
           return;
         }
         const userId = userInfo.userId;
         const apiUrl = `/api/medals/user/${userId}`;
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:644", "发送用户勋章请求到:", apiUrl);
         const response = await utils_request.get(
           apiUrl,
           {},
@@ -253,13 +232,13 @@ const _sfc_main = {
             loadingText: "加载用户勋章中..."
           }
         );
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:655", "用户勋章响应:", response);
-        if (response && response.code === 200 && response.data) {
+        const responseData = response.data && response.data.data ? response.data.data : response.data && response.data.code === 200 ? response.data.data : null;
+        if (responseData) {
           seasonalMedals.splice(0, seasonalMedals.length);
           natureMedals.splice(0, natureMedals.length);
           btMedals.splice(0, btMedals.length);
           levelMedals.splice(0, levelMedals.length);
-          const userMedalsData = response.data.medals || [];
+          const userMedalsData = responseData.medals || responseData || [];
           const userMedalMap = /* @__PURE__ */ new Map();
           userMedalsData.forEach((item) => {
             if (item.medal && item.medal.medalId) {
@@ -267,6 +246,12 @@ const _sfc_main = {
                 isActive: item.isActive,
                 obtainTime: item.obtainTime,
                 medal: item.medal
+              });
+            } else if (item.medalId) {
+              userMedalMap.set(item.medalId, {
+                isActive: item.isActive || true,
+                obtainTime: item.obtainTime || item.claimTime || /* @__PURE__ */ new Date(),
+                medal: item
               });
             }
           });
@@ -300,28 +285,31 @@ const _sfc_main = {
           });
           if (userMedalsData.length > 0) {
             const sortedMedals = [...userMedalsData].sort((a, b) => {
-              const timeA = a.obtainTime ? new Date(a.obtainTime).getTime() : 0;
-              const timeB = b.obtainTime ? new Date(b.obtainTime).getTime() : 0;
+              const timeA = a.obtainTime || a.claimTime ? new Date(a.obtainTime || a.claimTime).getTime() : 0;
+              const timeB = b.obtainTime || b.claimTime ? new Date(b.obtainTime || b.claimTime).getTime() : 0;
               return timeB - timeA;
             });
-            if (sortedMedals[0] && sortedMedals[0].medal) {
-              const lastMedalId = sortedMedals[0].medal.medalId;
-              const allMedals = [
-                ...allSeasonalMedals,
-                ...allNatureMedals,
-                ...allBtMedals,
-                ...allLevelMedals
-              ];
-              lastAcquiredMedal.value = allMedals.find((medal) => medal.id === lastMedalId) || null;
+            const lastMedal = sortedMedals[0];
+            if (lastMedal) {
+              const lastMedalId = lastMedal.medal ? lastMedal.medal.medalId : lastMedal.medalId || null;
+              if (lastMedalId) {
+                const allMedals = [
+                  ...allSeasonalMedals,
+                  ...allNatureMedals,
+                  ...allBtMedals,
+                  ...allLevelMedals
+                ];
+                lastAcquiredMedal.value = allMedals.find(
+                  (medal) => medal.id === lastMedalId
+                ) || null;
+              }
             }
           }
           utils_userState.userState.medals = userMedalsData;
         } else {
-          common_vendor.index.__f__("warn", "at pages/order-medal/order-medal.vue:745", "用户勋章响应格式异常:", response);
           setAllMedalsInactive();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:750", "获取用户勋章失败:", error);
         setAllMedalsInactive();
       }
     };
@@ -344,27 +332,12 @@ const _sfc_main = {
       );
     };
     common_vendor.onMounted(async () => {
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:779", "开始初始化勋章数据...");
       try {
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:783", "正在获取用户信息...");
         await fetchUserProfile();
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:785", "用户信息获取完成");
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:788", "正在获取勋章类型...");
         await fetchMedalTypes();
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:790", "勋章类型获取完成，结果:", medalTypes);
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:792", "正在获取所有勋章...");
         await fetchAllMedals();
-        common_vendor.index.__f__(
-          "log",
-          "at pages/order-medal/order-medal.vue:794",
-          "所有勋章获取完成，数量:",
-          allSeasonalMedals.length + allNatureMedals.length + allBtMedals.length + allLevelMedals.length
-        );
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:803", "正在获取用户勋章...");
         await getUserMedals();
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:805", "用户勋章获取完成");
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:807", "勋章初始化过程中出错:", error);
         if (medalTypes.length === 0) {
           medalTypes.splice(
             0,
@@ -403,7 +376,6 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:871", "头像加载失败，使用默认头像");
     };
     const selectedItemId = common_vendor.ref(null);
     const selectMedal = (medal, type) => {
@@ -415,7 +387,7 @@ const _sfc_main = {
       } else {
         selectedItemId.value = medal.id;
       }
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:892", "当前选中徽章ID:", selectedItemId.value);
+      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:897", "当前选中徽章ID:", selectedItemId.value);
     };
     const handleMedalClick = (medal, type) => {
       selectedMedal.value = medal;
@@ -467,7 +439,7 @@ const _sfc_main = {
           }
         );
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:963", "点亮勋章响应:", response);
+        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:968", "点亮勋章响应:", response);
         if (response && response.code === 200) {
           common_vendor.index.showToast({
             title: "徽章点亮成功",
@@ -505,7 +477,7 @@ const _sfc_main = {
         }
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:1007", "点亮徽章失败:", error);
+        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:1012", "点亮徽章失败:", error);
         common_vendor.index.showToast({
           title: "网络错误，请重试",
           icon: "none"

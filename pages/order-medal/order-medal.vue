@@ -377,7 +377,6 @@ const lastAcquiredMedal = ref(null)
 const fetchMedalTypes = async () => {
     try {
         const apiUrl = '/api/medals/types'
-        console.log('发送勋章类型请求到:', apiUrl)
 
         const response = await get(
             apiUrl,
@@ -388,17 +387,23 @@ const fetchMedalTypes = async () => {
                 loadingText: '加载勋章类型中...'
             }
         )
-        console.log('勋章类型响应:', response)
 
-        if (response && response.code === 200 && response.data) {
+        // 处理嵌套的响应结构
+        const responseData =
+            response.data && response.data.data
+                ? response.data.data
+                : response.data && response.data.code === 200
+                ? response.data.data
+                : null
+
+        if (responseData) {
             // 清空原数组
             medalTypes.splice(0, medalTypes.length)
             // 添加新数据 - 正确解析返回的数据结构
-            response.data.forEach((type) => {
+            responseData.forEach((type) => {
                 medalTypes.push(type.typeName)
             })
         } else {
-            console.warn('勋章类型响应格式异常，使用默认值')
             // 设置默认类型，防止页面空白
             medalTypes.splice(
                 0,
@@ -410,8 +415,6 @@ const fetchMedalTypes = async () => {
             )
         }
     } catch (error) {
-        console.error('获取勋章类型失败:', error)
-        console.warn('使用默认勋章类型')
         // 设置默认类型，防止页面空白
         medalTypes.splice(
             0,
@@ -428,7 +431,6 @@ const fetchMedalTypes = async () => {
 const fetchAllMedals = async () => {
     try {
         const apiUrl = '/api/medals'
-        console.log('发送所有勋章请求到:', apiUrl)
 
         const response = await get(
             apiUrl,
@@ -439,11 +441,18 @@ const fetchAllMedals = async () => {
                 loadingText: '加载勋章数据中...'
             }
         )
-        console.log('所有勋章响应:', response)
 
-        if (response && response.code === 200 && response.data) {
+        // 处理嵌套的响应结构
+        const responseData =
+            response.data && response.data.data
+                ? response.data.data
+                : response.data && response.data.code === 200
+                ? response.data.data
+                : null
+
+        if (responseData) {
             // 根据类型分类勋章
-            const medals = response.data
+            const medals = responseData
 
             // 清空原数组
             allSeasonalMedals.splice(0, allSeasonalMedals.length)
@@ -479,12 +488,10 @@ const fetchAllMedals = async () => {
                 }
             })
         } else {
-            console.warn('勋章数据响应格式异常:', response)
             // 加载默认数据，以防请求失败
             loadDefaultMedalData()
         }
     } catch (error) {
-        console.error('获取所有勋章失败:', error)
         // 加载默认数据，以防请求失败
         loadDefaultMedalData()
     }
@@ -576,13 +583,11 @@ const fetchUserProfile = async () => {
         // 从本地存储获取用户ID
         const userInfo = uni.getStorageSync('userInfo')
         if (!userInfo || !userInfo.userId) {
-            console.error('未找到用户ID，无法获取用户信息')
             return
         }
 
         const userId = userInfo.userId
         const apiUrl = `/api/user/profile?userId=${userId}`
-        console.log('发送用户信息请求到:', apiUrl)
 
         const response = await get(
             apiUrl,
@@ -593,10 +598,17 @@ const fetchUserProfile = async () => {
                 loadingText: '加载用户信息中...'
             }
         )
-        console.log('用户信息响应:', response)
 
-        if (response && response.code === 200 && response.data) {
-            const userData = response.data
+        // 处理嵌套的响应结构
+        const responseData =
+            response.data && response.data.data
+                ? response.data.data
+                : response.data && response.data.code === 200
+                ? response.data.data
+                : null
+
+        if (responseData) {
+            const userData = responseData
 
             // 更新用户头像
             userAvatar.value = userData.avatar || '/static/images/avatar.png'
@@ -612,17 +624,9 @@ const fetchUserProfile = async () => {
 
             // 更新勋章信息
             userState.medals = userData.medals || []
-
-            console.log(
-                '用户信息更新完成:',
-                userNickname.value,
-                userLevel.value
-            )
-        } else {
-            console.warn('用户信息响应格式异常:', response)
         }
     } catch (error) {
-        console.error('获取用户信息失败:', error)
+        // 错误处理但不输出到控制台
     }
 }
 
@@ -635,13 +639,11 @@ const getUserMedals = async () => {
         // 从本地存储获取用户ID
         const userInfo = uni.getStorageSync('userInfo')
         if (!userInfo || !userInfo.userId) {
-            console.error('未找到用户ID，无法获取用户勋章')
             return
         }
 
         const userId = userInfo.userId
         const apiUrl = `/api/medals/user/${userId}`
-        console.log('发送用户勋章请求到:', apiUrl)
 
         const response = await get(
             apiUrl,
@@ -652,9 +654,16 @@ const getUserMedals = async () => {
                 loadingText: '加载用户勋章中...'
             }
         )
-        console.log('用户勋章响应:', response)
 
-        if (response && response.code === 200 && response.data) {
+        // 处理嵌套的响应结构
+        const responseData =
+            response.data && response.data.data
+                ? response.data.data
+                : response.data && response.data.code === 200
+                ? response.data.data
+                : null
+
+        if (responseData) {
             // 清空原数组
             seasonalMedals.splice(0, seasonalMedals.length)
             natureMedals.splice(0, natureMedals.length)
@@ -662,16 +671,25 @@ const getUserMedals = async () => {
             levelMedals.splice(0, levelMedals.length)
 
             // 获取用户拥有的勋章信息
-            const userMedalsData = response.data.medals || []
+            const userMedalsData = responseData.medals || responseData || []
 
             // 创建一个映射来快速查找用户拥有的勋章
             const userMedalMap = new Map()
             userMedalsData.forEach((item) => {
+                // 适配不同的数据结构
                 if (item.medal && item.medal.medalId) {
                     userMedalMap.set(item.medal.medalId, {
                         isActive: item.isActive,
                         obtainTime: item.obtainTime,
                         medal: item.medal
+                    })
+                } else if (item.medalId) {
+                    // 直接包含medalId的情况
+                    userMedalMap.set(item.medalId, {
+                        isActive: item.isActive || true,
+                        obtainTime:
+                            item.obtainTime || item.claimTime || new Date(),
+                        medal: item
                     })
                 }
             })
@@ -713,41 +731,47 @@ const getUserMedals = async () => {
             if (userMedalsData.length > 0) {
                 // 根据obtainTime排序
                 const sortedMedals = [...userMedalsData].sort((a, b) => {
-                    const timeA = a.obtainTime
-                        ? new Date(a.obtainTime).getTime()
-                        : 0
-                    const timeB = b.obtainTime
-                        ? new Date(b.obtainTime).getTime()
-                        : 0
+                    const timeA =
+                        a.obtainTime || a.claimTime
+                            ? new Date(a.obtainTime || a.claimTime).getTime()
+                            : 0
+                    const timeB =
+                        b.obtainTime || b.claimTime
+                            ? new Date(b.obtainTime || b.claimTime).getTime()
+                            : 0
                     return timeB - timeA // 降序，最新获得的排在前面
                 })
 
                 // 获取最近获得勋章的ID
-                if (sortedMedals[0] && sortedMedals[0].medal) {
-                    const lastMedalId = sortedMedals[0].medal.medalId
+                const lastMedal = sortedMedals[0]
+                if (lastMedal) {
+                    const lastMedalId = lastMedal.medal
+                        ? lastMedal.medal.medalId
+                        : lastMedal.medalId || null
 
-                    // 在所有勋章中查找完整信息
-                    const allMedals = [
-                        ...allSeasonalMedals,
-                        ...allNatureMedals,
-                        ...allBtMedals,
-                        ...allLevelMedals
-                    ]
-                    lastAcquiredMedal.value =
-                        allMedals.find((medal) => medal.id === lastMedalId) ||
-                        null
+                    if (lastMedalId) {
+                        // 在所有勋章中查找完整信息
+                        const allMedals = [
+                            ...allSeasonalMedals,
+                            ...allNatureMedals,
+                            ...allBtMedals,
+                            ...allLevelMedals
+                        ]
+                        lastAcquiredMedal.value =
+                            allMedals.find(
+                                (medal) => medal.id === lastMedalId
+                            ) || null
+                    }
                 }
             }
 
             // 更新用户状态中的勋章数量显示
             userState.medals = userMedalsData
         } else {
-            console.warn('用户勋章响应格式异常:', response)
             // Fallback: 将所有勋章复制为未激活状态
             setAllMedalsInactive()
         }
     } catch (error) {
-        console.error('获取用户勋章失败:', error)
         // Fallback: 将所有勋章复制为未激活状态
         setAllMedalsInactive()
     }
@@ -776,36 +800,18 @@ const setAllMedalsInactive = () => {
 
 // 初始化
 onMounted(async () => {
-    console.log('开始初始化勋章数据...')
-
     try {
         // 先获取用户信息
-        console.log('正在获取用户信息...')
         await fetchUserProfile()
-        console.log('用户信息获取完成')
 
         // 再获取勋章类型和所有勋章
-        console.log('正在获取勋章类型...')
         await fetchMedalTypes()
-        console.log('勋章类型获取完成，结果:', medalTypes)
 
-        console.log('正在获取所有勋章...')
         await fetchAllMedals()
-        console.log(
-            '所有勋章获取完成，数量:',
-            allSeasonalMedals.length +
-                allNatureMedals.length +
-                allBtMedals.length +
-                allLevelMedals.length
-        )
 
         // 然后获取用户勋章
-        console.log('正在获取用户勋章...')
         await getUserMedals()
-        console.log('用户勋章获取完成')
     } catch (error) {
-        console.error('勋章初始化过程中出错:', error)
-
         // 确保即使发生错误，页面也不会空白
         if (medalTypes.length === 0) {
             medalTypes.splice(
@@ -868,7 +874,6 @@ const goBack = () => {
 // 处理头像加载错误
 const handleAvatarError = () => {
     // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
-    console.log('头像加载失败，使用默认头像')
 }
 
 // 新增的selectedItemId，用于记录当前选中的徽章ID
