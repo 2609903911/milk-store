@@ -15,6 +15,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/store")
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowCredentials = "false", maxAge = 3600)
 public class StoreController {
 
     @Autowired

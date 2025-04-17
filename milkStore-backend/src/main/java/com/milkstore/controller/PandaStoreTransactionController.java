@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowCredentials = "false", maxAge = 3600)
 public class PandaStoreTransactionController {
 
     @Autowired
@@ -160,7 +160,14 @@ public class PandaStoreTransactionController {
                 couponCode = product.getId();
             }
             
-            userCoupon.setCouponCode("USER_" + transaction.getUserId() + "_" + couponCode + "_" + System.currentTimeMillis());
+            // 生成短优惠券代码，防止超出数据库限制
+            String shortUserId = transaction.getUserId().length() > 8 ? 
+                transaction.getUserId().substring(0, 8) : transaction.getUserId();
+            String shortCode = couponCode.length() > 10 ? 
+                couponCode.substring(0, 10) : couponCode;
+            String shortTimestamp = String.valueOf(System.currentTimeMillis() % 10000000); // 只取7位
+            
+            userCoupon.setCouponCode("U" + shortUserId + "C" + shortCode + "T" + shortTimestamp);
             
             // 调用优惠券交易服务
             Map<String, Object> result = transactionService.createCouponTransaction(transaction, userCoupon);
