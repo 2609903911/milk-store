@@ -242,17 +242,11 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { updateUserState } from '../../utils/userState'
 import { userData, initUserData } from '../../utils/userData'
-import {
-    COUPON_TYPES,
-    COUPON_STATUS,
-    createDiscountCoupon,
-    createCashCoupon,
-    createFreeCoupon
-} from '../../utils/couponModel'
+import { COUPON_TYPES } from '../../utils/couponModel'
 import { get, post } from '../../utils/request'
 
 // 标签页
-const tabs = ref(['人气兑换', '折扣券', '现金券', '免费券', '点亮星'])
+const tabs = ref(['人气兑换', '折扣券', '满减券', '免费券', '点亮星'])
 const currentTab = ref(0)
 
 // 当前显示的优惠券列表
@@ -261,6 +255,8 @@ const couponList = ref([])
 // 弹窗状态
 const showSuccessPopup = ref(false)
 const exchangedCoupon = ref(null)
+// 增加防止重复点击标志
+const isExchanging = ref(false)
 
 // 所有可兑换的优惠券
 const allCoupons = reactive([])
@@ -286,15 +282,50 @@ const fetchStoreProducts = () => {
             }
         )
             .then((res) => {
-                const data = res.data
-                if (data.allProducts && data.allProducts.length > 0) {
-                    // 清空原数组并添加新数据
-                    allCoupons.splice(0, allCoupons.length, ...data.allProducts)
-                    // 根据当前tab更新显示的优惠券
-                    updateCouponList()
+                console.log('==== 检查后端返回的商品数据 ====')
+                console.log('整个响应:', res)
+
+                // 正确获取嵌套的数据结构
+                if (res.data && res.data.data) {
+                    const responseData = res.data.data
+                    console.log('商品数据:', responseData.allProducts)
+
+                    // 检查第一个商品的详细结构（如果存在）
+                    if (
+                        responseData.allProducts &&
+                        responseData.allProducts.length > 0
+                    ) {
+                        const firstProduct = responseData.allProducts[0]
+                        console.log('第一个商品详情:', firstProduct)
+                        console.log('id类型:', typeof firstProduct.id)
+                        console.log(
+                            'couponTemplateId类型:',
+                            typeof firstProduct.couponTemplateId
+                        )
+                        console.log(
+                            'couponTemplateId值:',
+                            firstProduct.couponTemplateId
+                        )
+
+                        // 清空原数组并添加新数据
+                        allCoupons.splice(
+                            0,
+                            allCoupons.length,
+                            ...responseData.allProducts
+                        )
+
+                        // 根据当前tab更新显示的优惠券
+                        updateCouponList()
+                    } else {
+                        uni.showToast({
+                            title: '暂无商品数据',
+                            icon: 'none'
+                        })
+                    }
                 } else {
+                    console.error('响应数据格式不正确:', res)
                     uni.showToast({
-                        title: '暂无商品数据',
+                        title: '数据格式错误',
                         icon: 'none'
                     })
                 }
@@ -328,13 +359,6 @@ const updateCouponList = () => {
 const switchTab = (index) => {
     currentTab.value = index
     updateCouponList()
-}
-
-// 下拉刷新数据
-const onPullDownRefresh = () => {
-    fetchStoreProducts().then(() => {
-        uni.stopPullDownRefresh()
-    })
 }
 
 // 获取优惠券颜色类名
@@ -373,157 +397,112 @@ const getCouponTypeImage = (type) => {
     }
 }
 
-// 兑换优惠券
-const exchangeCoupon = (coupon) => {
-    // 检查熊猫币是否足够
+// 添加优惠券兑换主函数
+const exchangeCoupon = (coupon, amount = 1) => {
+    // 防止重复点击
+    if (isExchanging.value) {
+        return
+    }
+
+    isExchanging.value = true
+
+    // 0. 在兑换前检查优惠券数据结构
+    console.log('===== 兑换优惠券的详细数据 =====')
+    console.log('优惠券完整数据:', coupon)
+    console.log('id类型:', typeof coupon.id, '值:', coupon.id)
+    console.log(
+        'couponTemplateId类型:',
+        typeof coupon.couponTemplateId,
+        '值:',
+        coupon.couponTemplateId
+    )
+    console.log(
+        'coinsCost类型:',
+        typeof coupon.coinsCost,
+        '值:',
+        coupon.coinsCost
+    )
+
+    // 1. 检查熊猫币是否足够
     if (userData.pandaCoins < coupon.coinsCost) {
         uni.showToast({
             title: '熊猫币不足',
             icon: 'none'
         })
+        isExchanging.value = false
         return
     }
 
-    // 减少熊猫币
-    const newCoins = userData.pandaCoins - coupon.coinsCost
+    // 显示处理中
+    uni.showLoading({
+        title: '兑换中...'
+    })
 
-    // 创建新的优惠券实例或增加点亮星
-    let newCoupon
-    const now = Date.now()
-    const endTime = now + 30 * 24 * 60 * 60 * 1000 // 默认30天后过期
-
-    // 处理点亮星特殊情况
-    if (coupon.category === 'lightStar') {
-        // 更新用户的点亮星数量
-        const currentStars = userData.lightningStars || 0
-        const updatedUserInfo = {
-            pandaCoins: newCoins,
-            lightningStars: currentStars + coupon.value
-        }
-
-        // 更新本地用户信息
-        userData.pandaCoins = newCoins
-        userData.lightningStars = currentStars + coupon.value
-
-        // 同步更新到全局状态
-        const success = updateUserState(updatedUserInfo)
-
-        if (success) {
-            // 创建交易记录
-            createTransaction(coupon, null, 'lightstar', coupon.value)
-
-            // 显示成功提示
-            uni.showToast({
-                title: `获得${coupon.value}个点亮星`,
-                icon: 'success'
-            })
-            // 显示成功弹窗
-            showSuccessPopup.value = true
-            // 创建虚拟兑换记录对象用于显示
-            exchangedCoupon.value = {
-                title: coupon.title,
-                description: coupon.description,
-                value: coupon.value,
-                category: 'lightStar'
-            }
-        }
-        return
-    }
-
-    // 其他类型优惠券的处理逻辑保持不变
-    switch (coupon.type) {
-        case COUPON_TYPES.DISCOUNT:
-            newCoupon = createDiscountCoupon(
-                coupon.value,
-                coupon.minOrderAmount,
-                {
-                    title: coupon.title,
-                    description: coupon.description,
-                    endTime:
-                        now + parseInt(coupon.validity) * 24 * 60 * 60 * 1000
-                }
-            )
-            break
-        case COUPON_TYPES.CASH:
-            newCoupon = createCashCoupon(coupon.value, coupon.minOrderAmount, {
-                title: coupon.title,
-                description: coupon.description,
-                endTime: now + parseInt(coupon.validity) * 24 * 60 * 60 * 1000
-            })
-            break
-        case COUPON_TYPES.FREE:
-            newCoupon = createFreeCoupon(coupon.value, {
-                title: coupon.title,
-                description: coupon.description,
-                endTime: now + parseInt(coupon.validity) * 24 * 60 * 60 * 1000
-            })
-            break
-        default:
-            // 其他类型直接复用模板创建
-            newCoupon = {
-                id: `coupon_${now}_${Math.floor(Math.random() * 1000000)}`,
-                title: coupon.title,
-                type: coupon.type,
-                value: coupon.value,
-                minOrderAmount: coupon.minOrderAmount,
-                scope: 'all',
-                scopeIds: [],
-                startTime: now,
-                endTime: now + parseInt(coupon.validity) * 24 * 60 * 60 * 1000,
-                status: COUPON_STATUS.VALID,
-                description: coupon.description,
-                imageUrl: '/static/images/coupon1.png',
-                isDeleted: false,
-                createTime: now,
-                usedTime: null,
-                source: 'pandaStore'
-            }
-    }
-
-    // 更新本地用户信息
-    userData.pandaCoins = newCoins
-    if (!userData.coupons) {
-        userData.coupons = []
-    }
-    userData.coupons.push(newCoupon)
-
-    // 同步更新到全局状态
-    const updatedUserInfo = {
-        pandaCoins: newCoins,
-        coupons: [...(userData.coupons || []), newCoupon]
-    }
-    updateUserState(updatedUserInfo)
-
-    // 创建交易记录
-    createTransaction(coupon, newCoupon, 'coupon', 1)
-
-    // 记录兑换的优惠券
-    exchangedCoupon.value = newCoupon
-
-    // 显示成功弹窗
-    showSuccessPopup.value = true
-}
-
-// 创建交易记录
-const createTransaction = (coupon, newCoupon, transactionType, amount) => {
-    // 交易数据
-    const transactionData = {
+    // 准备购买数据
+    const purchaseData = {
         userId: userData.userId,
         productId: coupon.id,
-        transactionType: transactionType,
-        coinsSpent: coupon.coinsCost,
-        quantity: 1,
-        couponId: newCoupon ? newCoupon.id : null,
-        lightstarAmount: transactionType === 'lightstar' ? amount : null
+        couponTemplateId: Number(coupon.couponTemplateId), // 确保是数字类型
+        coinsSpent: coupon.coinsCost
     }
 
-    // 调用后端API创建交易记录
-    post('/api/transactions', transactionData, {
-        showError: false
-    }).catch((err) => {
-        console.error('创建交易记录失败:', err)
-        // 交易记录失败不影响前端兑换流程，只记录日志
+    console.log('准备发送的购买数据:', purchaseData)
+    console.log('JSON数据:', JSON.stringify(purchaseData))
+
+    // 直接调用购买接口
+    post('/api/transactions/coupon', purchaseData, {
+        showError: false,
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
+        .then((res) => {
+            console.log('购买响应:', res)
+
+            if (res.data && res.data.success) {
+                // 更新用户熊猫币
+                userData.pandaCoins -= coupon.coinsCost
+
+                // 保存用户数据更新
+                updateUserState({
+                    pandaCoins: userData.pandaCoins
+                })
+
+                // 设置成功弹窗数据
+                exchangedCoupon.value = coupon
+                showSuccessPopup.value = true
+
+                // 显示成功消息
+                uni.hideLoading()
+                uni.showToast({
+                    title: '兑换成功！',
+                    icon: 'success'
+                })
+            } else {
+                // 处理业务逻辑失败
+                uni.hideLoading()
+                uni.showToast({
+                    title: res.data?.message || '兑换失败',
+                    icon: 'none'
+                })
+            }
+        })
+        .catch((err) => {
+            console.error('优惠券购买异常:', err)
+            console.log(
+                '错误详情:',
+                err.response ? err.response.data : '无响应数据'
+            )
+
+            uni.hideLoading()
+            uni.showToast({
+                title: err?.message || '兑换失败',
+                icon: 'none'
+            })
+        })
+        .finally(() => {
+            isExchanging.value = false
+        })
 }
 
 // 关闭成功弹窗
@@ -1129,3 +1108,5 @@ const goBack = () => {
     display: none;
 }
 </style>
+
+

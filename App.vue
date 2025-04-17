@@ -1,6 +1,4 @@
 <script>
-import { getUserInfo } from './utils/userStorage'
-import { createDefaultUserInfo } from './utils/userModel'
 import { initUserState, userState } from './utils/userState'
 import { loginUser } from './utils/userService'
 import { initUserData } from './utils/userData'

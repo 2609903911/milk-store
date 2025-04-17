@@ -2,7 +2,7 @@
  * 用户服务模块
  * 提供用户登录、注册、信息管理等业务功能
  */
-import { saveUserInfo, getUserInfo, updateUserInfo, clearUserInfo } from './userStorage';
+import { saveUserToStorage, getUserFromStorage, clearUserStorage } from './api/authApi';
 import { createDefaultUserInfo, validateUserInfo, mergeWithDefaultUserInfo } from './userModel';
 import { userState, updateUserState, resetUserState } from './userState';
 
@@ -35,10 +35,10 @@ export const registerUser = (userInfo = {}) => {
       lastLoginTime: Date.now()
     });
     
-    // 保存用户信息
-    const saved = saveUserInfo(newUser);
+    // 只保存用户ID到本地
+    const saved = saveUserToStorage({ userId: newUser.userId }, '');
     if (!saved) {
-      return { success: false, message: '用户信息保存失败' };
+      return { success: false, message: '用户ID保存失败' };
     }
     
     // 更新全局用户状态
@@ -70,23 +70,18 @@ export const loginUser = (phone, code = '000000') => {
     }
     
     // 获取已存储的用户信息
-    let userInfo = getUserInfo();
+    let userInfo = getUserFromStorage();
     
     // 如果用户不存在，创建新用户
-    if (!userInfo) {
+    if (!userInfo || !userInfo.userId) {
       return registerUser({ phone });
     }
     
-    // 更新登录时间
-    userInfo.lastLoginTime = Date.now();
-    const updated = updateUserInfo(userInfo);
+    // 登录成功，使用后台获取的用户信息
+    // 这里应该调用后端API获取完整用户信息
     
-    if (!updated) {
-      return { success: false, message: '更新登录信息失败' };
-    }
-    
-    // 更新全局用户状态
-    updateUserState(userInfo);
+    // 更新全局用户状态 - 只更新用户ID
+    updateUserState({ userId: userInfo.userId });
     
     return { success: true, userInfo };
   } catch (error) {
@@ -100,7 +95,7 @@ export const loginUser = (phone, code = '000000') => {
  * @returns {Boolean} 是否成功登出
  */
 export const logoutUser = () => {
-  const cleared = clearUserInfo();
+  const cleared = clearUserStorage();
   
   // 重置全局用户状态
   if (cleared) {
@@ -122,8 +117,8 @@ export const updateUserProfile = (profileInfo) => {
     }
     
     // 获取当前用户信息
-    const currentUser = getUserInfo();
-    if (!currentUser) {
+    const currentUser = getUserFromStorage();
+    if (!currentUser || !currentUser.userId) {
       return { success: false, message: '用户未登录' };
     }
     
@@ -137,18 +132,13 @@ export const updateUserProfile = (profileInfo) => {
       }
     });
     
-    // 保存更新后的用户信息
-    const updated = updateUserInfo(updateFields);
-    if (!updated) {
-      return { success: false, message: '更新个人资料失败' };
-    }
+    // 这里应该调用后端API更新用户信息
+    // ...
     
     // 更新全局用户状态
     updateUserState(updateFields);
     
-    // 获取更新后的用户信息
-    const updatedUser = getUserInfo();
-    return { success: true, userInfo: updatedUser };
+    return { success: true, userInfo: { ...currentUser, ...updateFields } };
   } catch (error) {
     console.error('更新个人资料失败', error);
     return { success: false, message: '更新过程中发生错误' };
@@ -167,26 +157,27 @@ export const addPandaCoins = (amount) => {
     }
     
     // 获取当前用户信息
-    const currentUser = getUserInfo();
-    if (!currentUser) {
+    const currentUser = getUserFromStorage();
+    if (!currentUser || !currentUser.userId) {
       return { success: false, message: '用户未登录' };
     }
     
-    // 计算新的熊猫币数量
-    const newCoins = (currentUser.pandaCoins || 0) + amount;
+    // 这里应该调用后端API更新熊猫币
+    // ...
     
-    // 更新熊猫币
-    const updated = updateUserInfo({ pandaCoins: newCoins });
-    if (!updated) {
-      return { success: false, message: '更新熊猫币失败' };
-    }
+    // 计算新的熊猫币数量
+    const newCoins = (userState.pandaCoins || 0) + amount;
     
     // 更新全局用户状态
     updateUserState({ pandaCoins: newCoins });
     
-    // 获取更新后的用户信息
-    const updatedUser = getUserInfo();
-    return { success: true, userInfo: updatedUser };
+    return { 
+      success: true, 
+      userInfo: { 
+        ...currentUser, 
+        pandaCoins: newCoins 
+      } 
+    };
   } catch (error) {
     console.error('添加熊猫币失败', error);
     return { success: false, message: '操作过程中发生错误' };

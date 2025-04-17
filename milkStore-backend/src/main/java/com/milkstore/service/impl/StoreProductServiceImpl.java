@@ -32,6 +32,21 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
+    public Long getCouponTemplateIdByProductId(String productId) {
+        return storeProductMapper.findCouponTemplateIdByProductId(productId);
+    }
+
+    @Override
+    public boolean updateCouponTemplateId(String productId, Long couponTemplateId) {
+        try {
+            return storeProductMapper.updateCouponTemplateId(productId, couponTemplateId) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
     public boolean addProduct(StoreProduct storeProduct) {
         try {
             // 设置ID

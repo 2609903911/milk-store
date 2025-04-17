@@ -9,8 +9,8 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/login/login",
-          "pathName": "pages/login/login",
+          "name": "pages/panda-store/panda-store",
+          "pathName": "pages/panda-store/panda-store",
           "query": "",
           "launchMode": "default",
           "scene": null

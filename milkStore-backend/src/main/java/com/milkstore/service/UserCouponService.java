@@ -2,6 +2,7 @@ package com.milkstore.service;
 
 import com.milkstore.entity.UserCoupon;
 import java.util.List;
+import java.util.Map;
 
 public interface UserCouponService {
     
@@ -34,4 +35,34 @@ public interface UserCouponService {
      * @return 用户优惠券列表（包含模板信息）
      */
     List<UserCoupon> findByUserIdAndStatusWithTemplate(String userId, String status);
+    
+    /**
+     * 创建用户优惠券
+     * @param userCoupon 用户优惠券对象
+     * @return 创建结果，包含新创建的优惠券ID
+     */
+    Map<String, Object> createUserCoupon(UserCoupon userCoupon);
+    
+    /**
+     * 根据ID查询优惠券
+     * @param id 优惠券ID
+     * @return 优惠券对象
+     */
+    UserCoupon findById(Long id);
+    
+    /**
+     * 更新优惠券状态
+     * @param id 优惠券ID
+     * @param status 新状态
+     * @return 是否更新成功
+     */
+    boolean updateStatus(Long id, String status);
+    
+    /**
+     * 使用优惠券
+     * @param id 优惠券ID
+     * @param orderId 订单ID
+     * @return 是否使用成功
+     */
+    boolean useCoupon(Long id, String orderId);
 } 

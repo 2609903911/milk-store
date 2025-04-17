@@ -3,15 +3,17 @@ package com.finalproject.milkstorebackend;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {"com.finalproject.milkstorebackend", "com.milkstore"})
-@MapperScan(basePackages = {"com.finalproject.milkstorebackend.repository", "com.milkstore.mapper"})
+/**
+ * 牛奶商城后端应用入口类
+ */
+@SpringBootApplication(scanBasePackages = {"com.finalproject.milkstorebackend", "com.milkstore"})
+@MapperScan({"com.finalproject.milkstorebackend.mapper", "com.milkstore.mapper"})
+@EnableTransactionManagement
 public class MilkStoreBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MilkStoreBackendApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(MilkStoreBackendApplication.class, args);
+    }
 }

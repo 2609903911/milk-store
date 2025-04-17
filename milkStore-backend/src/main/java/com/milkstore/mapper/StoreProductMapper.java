@@ -32,6 +32,13 @@ public interface StoreProductMapper {
     StoreProduct findById(@Param("id") String id);
     
     /**
+     * 根据产品ID获取对应的优惠券模板ID
+     * 注意：此方法需要先添加coupon_template_id字段到panda_store_products表
+     */
+    @Select("SELECT coupon_template_id FROM panda_store_products WHERE id = #{productId}")
+    Long findCouponTemplateIdByProductId(@Param("productId") String productId);
+    
+    /**
      * 新增商城商品
      */
     @Insert("INSERT INTO panda_store_products(id, title, type, value, min_order_amount, description, validity, " +
@@ -49,6 +56,12 @@ public interface StoreProductMapper {
             "is_active = #{isActive} " +
             "WHERE id = #{id}")
     int update(StoreProduct storeProduct);
+    
+    /**
+     * 更新商品关联的优惠券模板ID
+     */
+    @Update("UPDATE panda_store_products SET coupon_template_id = #{couponTemplateId} WHERE id = #{productId}")
+    int updateCouponTemplateId(@Param("productId") String productId, @Param("couponTemplateId") Long couponTemplateId);
     
     /**
      * 删除商城商品

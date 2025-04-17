@@ -24,6 +24,21 @@ public interface StoreProductService {
     StoreProduct findProductById(String id);
     
     /**
+     * 获取商品关联的优惠券模板ID
+     * @param productId 商品ID
+     * @return 关联的优惠券模板ID，如果没有关联则返回null
+     */
+    Long getCouponTemplateIdByProductId(String productId);
+    
+    /**
+     * 更新商品关联的优惠券模板ID
+     * @param productId 商品ID
+     * @param couponTemplateId 优惠券模板ID
+     * @return 是否更新成功
+     */
+    boolean updateCouponTemplateId(String productId, Long couponTemplateId);
+    
+    /**
      * 新增商城商品
      */
     boolean addProduct(StoreProduct storeProduct);

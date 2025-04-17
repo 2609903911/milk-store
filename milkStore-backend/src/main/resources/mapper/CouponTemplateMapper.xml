@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.milkstore.mapper.UserCouponMapper">
+<mapper namespace="com.milkstore.mapper.CouponTemplateMapper">
     <!-- 
         此文件为空XML映射文件，所有SQL操作在Java代码中通过注解实现 
         在保留此文件的同时，不影响注解方式的使用
     -->
     
-    <resultMap id="UserCouponResultMap" type="com.milkstore.entity.UserCoupon">
+    <resultMap id="CouponTemplateResultMap" type="com.milkstore.entity.CouponTemplate">
         <id property="id" column="id"/>
         <!-- 其他字段可以根据需要添加 -->
     </resultMap>

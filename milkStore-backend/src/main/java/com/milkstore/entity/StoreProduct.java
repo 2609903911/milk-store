@@ -20,4 +20,5 @@ public class StoreProduct {
     private String imageUrl;        // 商品图片URL
     private Boolean isActive;       // 是否激活
     private Long createTime;        // 创建时间（毫秒时间戳）
+    private Long couponTemplateId;  // 关联的优惠券模板ID
 } 
