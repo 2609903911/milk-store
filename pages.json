@@ -110,6 +110,20 @@
                 "navigationBarTitleText" : "隐私政策",
                 "navigationStyle" : "custom"
             }
+        },
+        {
+            "path" : "pages/address/address",
+            "style" : {
+                "navigationBarTitleText" : "收货地址",
+                "navigationStyle" : "custom"
+            }
+        },
+        {
+            "path" : "pages/address/edit-address",
+            "style" : {
+                "navigationBarTitleText" : "编辑地址",
+                "navigationStyle" : "custom"
+            }
         }
     ],
     "globalStyle" : {

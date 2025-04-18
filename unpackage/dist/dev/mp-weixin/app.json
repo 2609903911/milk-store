@@ -16,7 +16,9 @@
     "pages/search/search",
     "pages/ai-chat/index",
     "pages/agreement/user-agreement",
-    "pages/agreement/privacy-policy"
+    "pages/agreement/privacy-policy",
+    "pages/address/address",
+    "pages/address/edit-address"
   ],
   "window": {
     "navigationBarTextStyle": "black",

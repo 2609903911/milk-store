@@ -22,6 +22,8 @@ if (!Math) {
   "./pages/ai-chat/index.js";
   "./pages/agreement/user-agreement.js";
   "./pages/agreement/privacy-policy.js";
+  "./pages/address/address.js";
+  "./pages/address/edit-address.js";
 }
 const _sfc_main = {
   onLaunch: function() {
