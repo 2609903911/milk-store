@@ -9,20 +9,6 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/personal-data/personal-data",
-          "pathName": "pages/personal-data/personal-data",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/personal-data/personal-data",
-          "pathName": "pages/personal-data/personal-data",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "pages/home/home",
           "pathName": "pages/home/home",
           "query": "",

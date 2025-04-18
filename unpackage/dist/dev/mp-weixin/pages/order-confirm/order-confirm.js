@@ -25,6 +25,14 @@ const _sfc_main = {
       phone: "13027261672"
     });
     const deliveryType = common_vendor.ref("self");
+    const orderUserAddress = common_vendor.ref("");
+    const contactName = common_vendor.ref("");
+    const contactPhone = common_vendor.ref("");
+    const gender = common_vendor.ref("");
+    const userInfo = common_vendor.ref({
+      nickname: "",
+      phone: ""
+    });
     const showCouponSelect = common_vendor.ref(false);
     const selectedCoupon = common_vendor.ref(null);
     const totalAmount = common_vendor.ref(0);
@@ -42,11 +50,9 @@ const _sfc_main = {
     const discountAmount = common_vendor.ref("0.00");
     const originalPrice = common_vendor.ref("0.00");
     common_vendor.onMounted(() => {
-      utils_userData.initUserData();
       try {
         const orderData = common_vendor.index.getStorageSync("orderConfirmData");
         if (orderData) {
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:210", "从本地存储获取订单数据:", orderData);
           orderItems.value = orderData.items || [];
           totalPrice.value = orderData.totalPrice || "0.00";
           originalPrice.value = orderData.totalPrice || "0.00";
@@ -57,9 +63,27 @@ const _sfc_main = {
           if (orderData.deliveryType) {
             deliveryType.value = orderData.deliveryType;
           }
+          if (orderData.userAddress) {
+            orderUserAddress.value = orderData.userAddress;
+          }
+          if (orderData.contactName) {
+            contactName.value = orderData.contactName;
+          }
+          if (orderData.contactPhone) {
+            contactPhone.value = orderData.contactPhone;
+          }
+          if (orderData.gender) {
+            gender.value = orderData.gender;
+          }
+          const localUserInfo = common_vendor.index.getStorageSync("userInfo");
+          if (localUserInfo) {
+            userInfo.value = {
+              nickname: localUserInfo.nickname || "匿名用户",
+              phone: localUserInfo.phone || "未设置手机号"
+            };
+          }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:230", "获取订单数据失败", error);
         common_vendor.index.showToast({
           title: "获取订单数据失败",
           icon: "none"
@@ -107,33 +131,14 @@ const _sfc_main = {
       };
       try {
         const newOrder = await utils_api_orderApi.createOrder(orderData);
-        common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:296", "订单创建成功:", newOrder);
         if (selectedCoupon.value) {
           const stateIndex = utils_userState.userState.coupons.findIndex(
             (c) => c.id === selectedCoupon.value.id
           );
           if (stateIndex !== -1) {
-            common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:305", "更新userState中的优惠券状态");
             utils_userState.userState.coupons[stateIndex].status = "used";
             utils_userState.userState.coupons[stateIndex].usedTime = Date.now();
             utils_userState.updateUserState({ coupons: utils_userState.userState.coupons });
-          }
-          const dataIndex = utils_userData.userData.coupons.findIndex(
-            (c) => c.id === selectedCoupon.value.id
-          );
-          if (dataIndex !== -1) {
-            common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:317", "更新userData中的优惠券状态");
-            utils_userData.userData.coupons[dataIndex].status = "used";
-            utils_userData.userData.coupons[dataIndex].usedTime = Date.now();
-            common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:320", "优惠券状态:", utils_userData.userData.coupons[dataIndex].status);
-            common_vendor.index.__f__(
-              "log",
-              "at pages/order-confirm/order-confirm.vue:321",
-              "优惠券使用时间:",
-              new Date(
-                utils_userData.userData.coupons[dataIndex].usedTime
-              ).toLocaleString()
-            );
           }
         }
         common_vendor.index.showToast({
@@ -148,7 +153,6 @@ const _sfc_main = {
           }
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order-confirm/order-confirm.vue:344", "创建订单失败:", error);
         common_vendor.index.showToast({
           title: "订单创建失败",
           icon: "none"
@@ -171,7 +175,6 @@ const _sfc_main = {
       showCouponSelect.value = true;
     };
     const handleCouponSelect = (coupon) => {
-      common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:375", "优惠券选择:", coupon);
       totalPrice.value = originalPrice.value;
       let finalPrice = parseFloat(totalPrice.value);
       let discount = 0;
@@ -179,7 +182,6 @@ const _sfc_main = {
         selectedCoupon.value = coupon;
         if (coupon.type === "cash") {
           discount = coupon.value;
-          common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:387", "减去的价格：", discount);
           finalPrice = Math.max(0, finalPrice - discount);
         } else if (coupon.type === "discount") {
           const originalAmount = parseFloat(originalPrice.value);
@@ -203,12 +205,6 @@ const _sfc_main = {
         }
         discountAmount.value = discount.toFixed(2);
         totalPrice.value = finalPrice.toFixed(2);
-        common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:423", "应用优惠券后:", {
-          优惠券: coupon.title,
-          原价: originalPrice.value,
-          折扣: discountAmount.value,
-          最终价格: totalPrice.value
-        });
       } else {
         selectedCoupon.value = null;
         discountAmount.value = "0.00";
@@ -217,12 +213,29 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.t(deliveryType.value === "self" ? "自取" : "外卖"),
+        a: deliveryType.value === "self"
+      }, deliveryType.value === "self" ? {
         b: common_vendor.t(storeInfo.value.name),
-        c: common_vendor.t(storeInfo.value.distance),
-        d: common_vendor.t(storeInfo.value.address),
-        e: common_vendor.o(copyPhoneNumber),
-        f: common_vendor.f(orderItems.value, (item, index, i0) => {
+        c: common_vendor.p({
+          type: "arrowright",
+          size: "16",
+          color: "black"
+        }),
+        d: common_vendor.t(storeInfo.value.distance),
+        e: common_vendor.t(storeInfo.value.address),
+        f: common_vendor.t(storeInfo.value.phone || "13027261672"),
+        g: common_vendor.o(copyPhoneNumber)
+      } : {
+        h: common_vendor.p({
+          type: "arrowright",
+          size: "16",
+          color: "black"
+        }),
+        i: common_vendor.t(orderUserAddress.value || "未设置收货地址"),
+        j: common_vendor.t((contactName.value || userInfo.value.nickname || "匿名用户") + (gender.value === "male" ? "(先生)" : gender.value === "female" ? "(女士)" : "")),
+        k: common_vendor.t(contactPhone.value || userInfo.value.phone || "未设置手机号")
+      }, {
+        l: common_vendor.f(orderItems.value, (item, index, i0) => {
           return {
             a: item.image,
             b: common_vendor.t(item.name),
@@ -232,32 +245,31 @@ const _sfc_main = {
             f: index
           };
         }),
-        g: common_assets._imports_0$5,
-        h: selectedCoupon.value
+        m: common_assets._imports_0$5,
+        n: selectedCoupon.value
       }, selectedCoupon.value ? {
-        i: common_vendor.t(selectedCoupon.value.title),
-        j: common_vendor.t(discountAmount.value)
+        o: common_vendor.t(selectedCoupon.value.title),
+        p: common_vendor.t(discountAmount.value)
       } : {
-        k: common_vendor.t(availableCoupons.value.length > 0 ? `${availableCoupons.value.length}张优惠券可用` : "暂无可用优惠券")
+        q: common_vendor.t(availableCoupons.value.length > 0 ? `${availableCoupons.value.length}张优惠券可用` : "暂无可用优惠券")
       }, {
-        l: availableCoupons.value.length > 0 ? "#006de7" : "#999",
-        m: common_vendor.p({
+        r: availableCoupons.value.length > 0 ? "#006de7" : "#999",
+        s: common_vendor.p({
           type: "right",
           size: "16"
         }),
-        n: common_vendor.o(openCouponSelect),
-        o: common_vendor.o(($event) => showCouponSelect.value = $event),
-        p: common_vendor.o(handleCouponSelect),
-        q: common_vendor.p({
+        t: common_vendor.o(openCouponSelect),
+        v: common_vendor.o(($event) => showCouponSelect.value = $event),
+        w: common_vendor.o(handleCouponSelect),
+        x: common_vendor.p({
           show: showCouponSelect.value,
           ["order-amount"]: totalAmount.value,
           ["order-items"]: orderItems.value
         }),
-        r: common_vendor.t(totalPrice.value),
-        s: common_vendor.t(orderItems.value.length),
-        t: common_assets._imports_1$2,
-        v: common_vendor.t(totalPrice.value),
-        w: common_vendor.o(handlePayment)
+        y: common_vendor.t(totalPrice.value),
+        z: common_assets._imports_1$2,
+        A: common_vendor.t(totalPrice.value),
+        B: common_vendor.o(handlePayment)
       });
     };
   }

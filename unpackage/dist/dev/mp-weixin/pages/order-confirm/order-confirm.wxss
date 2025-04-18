@@ -59,6 +59,20 @@
     color: #999;
 }
 
+/* 收件人信息 */
+.recipient-info.data-v-e7689724 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 28rpx;
+    color: #666;
+    margin-top: 15rpx;
+}
+.recipient-info .phone-number.data-v-e7689724 {
+    color: #333;
+    margin-left: 20rpx;
+}
+
 /* 订单商品列表 */
 .order-items.data-v-e7689724 {
     background-color: #fff;

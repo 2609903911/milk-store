@@ -36,8 +36,8 @@
 
         <!-- 店铺信息和配送方式 -->
         <view class="shop-info">
-            <view class="shop-location" @click="navigateToMap">
-                <view class="shop-name"
+            <view class="shop-location">
+                <view class="shop-name" @click="navigateToMap"
                     >{{ shopName }}
                     <uni-icons type="right" size="16" color="#333"></uni-icons>
                 </view>
@@ -50,8 +50,13 @@
                     v-if="deliveryType === 'delivery'"
                     class="user-address"
                     @click="openAddressSelection"
-                    >{{ userAddress }}</view
-                >
+                    >{{ userAddress }}
+                    <uni-icons
+                        type="arrowright"
+                        size="16"
+                        color="#333"
+                    ></uni-icons>
+                </view>
                 <view v-if="deliveryType === 'delivery'" class="shop-distance"
                     >距离您{{ shopDistance }}</view
                 >
@@ -937,13 +942,14 @@ input {
 .shop-name {
     font-size: 30rpx;
     font-weight: 500;
-    color: #333;
+    font-weight: bold;
+    color: #1a1a1a;
     margin-bottom: 6rpx;
 }
 
 .shop-distance {
     font-size: 24rpx;
-    color: #999;
+    color: #666666;
 }
 
 .shop-address {
@@ -966,7 +972,6 @@ input {
 }
 
 .user-address::after {
-    content: '>';
     font-size: 20rpx;
     color: #999;
     margin-left: 6rpx;
@@ -1008,8 +1013,7 @@ input {
     display: flex;
     align-items: center;
     padding: 16rpx 30rpx;
-    background-color: #f5f5f5;
-    border-bottom: 1rpx solid #f0f0f0;
+    background-color: #fff;
     margin-top: 0;
 }
 
@@ -1219,8 +1223,8 @@ input {
 }
 
 .product-name {
-    font-size: 28rpx;
-    font-weight: bold;
+    font-size: 30rpx;
+    font-weight: 600;
     color: #333;
     margin-bottom: 6rpx;
 }
@@ -1432,4 +1436,4 @@ input {
     border-radius: 10rpx;
     background-color: #ff5f16;
 }
-</style> 
+</style>

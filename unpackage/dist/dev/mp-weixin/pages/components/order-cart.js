@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const utils_api_config = require("../../utils/api/config.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -247,6 +248,76 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         phone: "13027261672"
       };
       const deliveryType = common_vendor.index.getStorageSync("deliveryType") || "self";
+      if (deliveryType === "delivery") {
+        const userInfo = common_vendor.index.getStorageSync("userInfo");
+        const userId = userInfo == null ? void 0 : userInfo.userId;
+        if (!userId) {
+          common_vendor.index.showToast({
+            title: "请先登录并设置收货地址",
+            icon: "none"
+          });
+          return;
+        }
+        common_vendor.index.showLoading({
+          title: "获取地址信息..."
+        });
+        const requestUrl = `${utils_api_config.BASE_URL}${utils_api_config.API_PATHS.USER_DEFAULT_ADDRESS}?userId=${userId}`;
+        let finalRequestUrl = requestUrl;
+        common_vendor.index.request({
+          url: finalRequestUrl,
+          method: "GET",
+          success: (res) => {
+            common_vendor.index.hideLoading();
+            let userAddress = "未设置收货地址";
+            let contactName = "";
+            let contactPhone = "";
+            let gender = "";
+            if (res.data && res.data.code === 200 && res.data.data && res.data.data.address) {
+              const addressData = res.data.data.address;
+              userAddress = addressData.address;
+              contactName = addressData.contact_name || addressData.contactName || addressData.name || addressData.userName || "";
+              contactPhone = addressData.phone || addressData.contactPhone || "";
+              gender = addressData.gender || "";
+              proceedToCheckout(
+                selectedCartItems,
+                totalPrice2,
+                storeInfo,
+                deliveryType,
+                userAddress,
+                contactName,
+                contactPhone,
+                gender
+              );
+            } else {
+              common_vendor.index.showToast({
+                title: "请设置默认收货地址",
+                icon: "none"
+              });
+            }
+          },
+          fail: (err) => {
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: "获取地址失败，请重试",
+              icon: "none"
+            });
+          }
+        });
+      } else {
+        proceedToCheckout(
+          selectedCartItems,
+          totalPrice2,
+          storeInfo,
+          deliveryType,
+          "",
+          "",
+          "",
+          ""
+        );
+      }
+    };
+    const proceedToCheckout = (selectedCartItems, totalPrice2, storeInfo, deliveryType, userAddress, contactName, contactPhone, gender) => {
+      const userInfo = common_vendor.index.getStorageSync("userInfo") || {};
       const orderDetailData = {
         id: "ORD" + Date.now().toString().slice(-8),
         // 生成订单编号
@@ -260,14 +331,36 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         // 初始状态为进行中
         time: Date.now(),
         // 下单时间戳
-        remark: common_vendor.index.getStorageSync("orderRemark") || ""
+        remark: common_vendor.index.getStorageSync("orderRemark") || "",
         // 订单备注
+        userAddress,
+        // 用户收货地址
+        userName: userInfo.nickname || "匿名用户",
+        userPhone: userInfo.phone || "",
+        contactName,
+        // 收件人姓名
+        contactPhone,
+        // 收件人电话
+        gender
+        // 性别信息
       };
       common_vendor.index.setStorageSync("orderConfirmData", {
         items: selectedCartItems,
         totalPrice: totalPrice2,
         store: storeInfo,
-        deliveryType
+        deliveryType,
+        userAddress,
+        // 用户收货地址
+        contactName,
+        // 收件人姓名
+        contactPhone,
+        // 收件人电话
+        gender,
+        // 性别信息
+        userInfo: {
+          nickname: userInfo.nickname || "匿名用户",
+          phone: userInfo.phone || ""
+        }
       });
       common_vendor.index.setStorageSync("currentOrderDetail", orderDetailData);
       common_vendor.index.navigateTo({

@@ -50,21 +50,52 @@ export const fetchUserDataFromServer = async () => {
             // 将API返回的用户数据更新到响应式对象
             const serverUserData = result.data;
             
+            // 打印服务器返回的完整用户数据
+            
+            // 如果有地址数据，单独打印出来
+            if (serverUserData.addresses && serverUserData.addresses.length > 0) {
+            }
+            
+            // 如果有默认地址，单独打印出来
+            if (serverUserData.defaultAddress) {
+            }
+            
+            // 更新基本用户信息
             Object.keys(userData).forEach(key => {
-                // 跳过userId、token和isLoading属性
-                if (key !== 'userId' && key !== 'token' && key !== 'isLoading') {
+                // 跳过userId、token、coupons、medals和isLoading属性
+                if (key !== 'userId' && key !== 'token' && key !== 'isLoading' && 
+                    key !== 'coupons' && key !== 'medals') {
                     userData[key] = serverUserData[key] || userData[key];
                 }
             });
             
-            console.log('已从服务器获取最新用户数据');
+            // 获取用户勋章数据
+            try {
+                const medalsResult = await get(`${API_PATHS.USER_MEDALS}/${userData.userId}`);
+                
+                if (medalsResult.code === 200 && medalsResult.data) {
+                    userData.medals = medalsResult.data;
+                } else {
+                }
+            } catch (medalsError) {
+            }
+            
+            // 获取用户优惠券数据
+            try {
+                const couponsResult = await get(`${API_PATHS.USER_COUPONS}/${userData.userId}/with-template`);
+                
+                if (couponsResult.code === 200 && couponsResult.data) {
+                    userData.coupons = couponsResult.data;
+                } else {
+                }
+            } catch (couponsError) {
+            }
+            
             return true;
         } else {
-            console.error('获取用户数据失败:', result.message);
             return false;
         }
     } catch (error) {
-        console.error('获取用户数据失败:', error);
         return false;
     } finally {
         userData.isLoading = false;

@@ -127,6 +127,7 @@ export default {
 // 引入 uni-icons 组件
 import { ref, computed, onMounted, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { BASE_URL, API_PATHS } from '../../utils/api/config'
 
 // 状态
 const showDetail = ref(false)
@@ -474,6 +475,120 @@ const goCheckout = () => {
     // 获取配送方式（默认为自取）
     const deliveryType = uni.getStorageSync('deliveryType') || 'self'
 
+    // 如果是外卖模式，则通过API获取用户地址后再跳转
+    if (deliveryType === 'delivery') {
+        // 获取用户ID
+        const userInfo = uni.getStorageSync('userInfo')
+        const userId = userInfo?.userId
+
+        if (!userId) {
+            uni.showToast({
+                title: '请先登录并设置收货地址',
+                icon: 'none'
+            })
+            return
+        }
+
+        // 显示加载中
+        uni.showLoading({
+            title: '获取地址信息...'
+        })
+
+        const requestUrl = `${BASE_URL}${API_PATHS.USER_DEFAULT_ADDRESS}?userId=${userId}`
+
+        // 检查是否存在API路径配置，如果不存在则使用硬编码的路径
+        let finalRequestUrl = requestUrl
+        if (!API_PATHS.USER_DEFAULT_ADDRESS) {
+            finalRequestUrl = `${BASE_URL}/api/user/default-address?userId=${userId}`
+        }
+
+        // 从API获取用户默认地址
+        uni.request({
+            url: finalRequestUrl,
+            method: 'GET',
+            success: (res) => {
+                uni.hideLoading()
+
+                let userAddress = '未设置收货地址'
+                let contactName = ''
+                let contactPhone = ''
+                let gender = '' // 性别信息：male或female
+
+                if (
+                    res.data &&
+                    res.data.code === 200 &&
+                    res.data.data &&
+                    res.data.data.address
+                ) {
+                    const addressData = res.data.data.address
+                    userAddress = addressData.address
+
+                    // 尝试多种可能的字段名
+                    contactName =
+                        addressData.contact_name ||
+                        addressData.contactName ||
+                        addressData.name ||
+                        addressData.userName ||
+                        ''
+
+                    contactPhone =
+                        addressData.phone || addressData.contactPhone || ''
+                    gender = addressData.gender || ''
+
+                    proceedToCheckout(
+                        selectedCartItems,
+                        totalPrice,
+                        storeInfo,
+                        deliveryType,
+                        userAddress,
+                        contactName,
+                        contactPhone,
+                        gender
+                    )
+                } else {
+                    uni.showToast({
+                        title: '请设置默认收货地址',
+                        icon: 'none'
+                    })
+                }
+            },
+            fail: (err) => {
+                uni.hideLoading()
+                uni.showToast({
+                    title: '获取地址失败，请重试',
+                    icon: 'none'
+                })
+            }
+        })
+    } else {
+        // 如果是自取模式，直接进行结算，不请求用户信息
+        proceedToCheckout(
+            selectedCartItems,
+            totalPrice,
+            storeInfo,
+            deliveryType,
+            '',
+            '',
+            '',
+            ''
+        )
+    }
+}
+
+// 进行结算的实际逻辑
+const proceedToCheckout = (
+    selectedCartItems,
+    totalPrice,
+    storeInfo,
+    deliveryType,
+    userAddress,
+    contactName,
+    contactPhone,
+    gender
+) => {
+    // 获取用户基本信息
+    const userInfo = uni.getStorageSync('userInfo') || {}
+
     // 创建完整的订单数据，准备传递给订单详情页
     const orderDetailData = {
         id: 'ORD' + Date.now().toString().slice(-8), // 生成订单编号
@@ -485,7 +600,13 @@ const goCheckout = () => {
         deliveryType: deliveryType,
         status: 'pending', // 初始状态为进行中
         time: Date.now(), // 下单时间戳
-        remark: uni.getStorageSync('orderRemark') || '' // 订单备注
+        remark: uni.getStorageSync('orderRemark') || '', // 订单备注
+        userAddress: userAddress, // 用户收货地址
+        userName: userInfo.nickname || '匿名用户',
+        userPhone: userInfo.phone || '',
+        contactName: contactName, // 收件人姓名
+        contactPhone: contactPhone, // 收件人电话
+        gender: gender // 性别信息
     }
 
     // 存储订单数据到本地
@@ -493,7 +614,15 @@ const goCheckout = () => {
         items: selectedCartItems,
         totalPrice: totalPrice,
         store: storeInfo,
-        deliveryType: deliveryType
+        deliveryType: deliveryType,
+        userAddress: userAddress, // 用户收货地址
+        contactName: contactName, // 收件人姓名
+        contactPhone: contactPhone, // 收件人电话
+        gender: gender, // 性别信息
+        userInfo: {
+            nickname: userInfo.nickname || '匿名用户',
+            phone: userInfo.phone || ''
+        }
     })
 
     // 同时存储订单详情数据

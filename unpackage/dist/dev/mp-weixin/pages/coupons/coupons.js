@@ -11,8 +11,8 @@ const _sfc_main = {
     const validCoupons = common_vendor.ref([]);
     const usedCoupons = common_vendor.ref([]);
     const expiredCoupons = common_vendor.ref([]);
-    const availableCoupons = common_vendor.ref([]);
-    const isCouponCenterVisible = common_vendor.ref(false);
+    common_vendor.ref([]);
+    common_vendor.ref(false);
     const formatDate = (timestamp) => {
       if (!timestamp)
         return "";
@@ -36,16 +36,13 @@ const _sfc_main = {
       expiredCoupons.value = userCoupons.filter(
         (coupon) => coupon.status === "expired" || coupon.endTime && new Date(coupon.endTime) < /* @__PURE__ */ new Date()
       );
-      common_vendor.index.__f__("log", "at pages/coupons/coupons.vue:558", "有效优惠券:", validCoupons.value);
+      common_vendor.index.__f__("log", "at pages/coupons/coupons.vue:451", "有效优惠券:", validCoupons.value);
     };
     const switchTab = (index) => {
       currentTab.value = index;
     };
     const swiperChange = (e) => {
       currentTab.value = e.detail.current;
-    };
-    const closeCouponCenter = () => {
-      isCouponCenterVisible.value = false;
     };
     const useCouponClick = (coupon) => {
       common_vendor.index.showModal({
@@ -190,39 +187,8 @@ const _sfc_main = {
         j: common_assets._imports_2$3
       } : {}, {
         k: currentTab.value,
-        l: common_vendor.o(swiperChange),
-        m: isCouponCenterVisible.value
-      }, isCouponCenterVisible.value ? {
-        n: common_vendor.o(closeCouponCenter),
-        o: common_vendor.f(availableCoupons.value, (coupon, index, i0) => {
-          var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q;
-          return common_vendor.e({
-            a: (((_a = coupon.couponTemplate) == null ? void 0 : _a.type) || coupon.type) === "discount"
-          }, (((_b = coupon.couponTemplate) == null ? void 0 : _b.type) || coupon.type) === "discount" ? {
-            b: common_vendor.t(((_c = coupon.couponTemplate) == null ? void 0 : _c.value) || coupon.value)
-          } : (((_d = coupon.couponTemplate) == null ? void 0 : _d.type) || coupon.type) === "cash" ? {
-            d: common_vendor.t(((_e = coupon.couponTemplate) == null ? void 0 : _e.value) || coupon.value)
-          } : (((_f = coupon.couponTemplate) == null ? void 0 : _f.type) || coupon.type) === "free" ? {} : (((_g = coupon.couponTemplate) == null ? void 0 : _g.type) || coupon.type) === "specialPrice" ? {
-            g: common_vendor.t(((_h = coupon.couponTemplate) == null ? void 0 : _h.value) || coupon.value)
-          } : (((_i = coupon.couponTemplate) == null ? void 0 : _i.type) || coupon.type) === "shipping" ? {} : {}, {
-            c: (((_j = coupon.couponTemplate) == null ? void 0 : _j.type) || coupon.type) === "cash",
-            e: (((_k = coupon.couponTemplate) == null ? void 0 : _k.type) || coupon.type) === "free",
-            f: (((_l = coupon.couponTemplate) == null ? void 0 : _l.type) || coupon.type) === "specialPrice",
-            h: (((_m = coupon.couponTemplate) == null ? void 0 : _m.type) || coupon.type) === "shipping",
-            i: (((_n = coupon.couponTemplate) == null ? void 0 : _n.minOrderAmount) || coupon.minOrderAmount) > 0
-          }, (((_o = coupon.couponTemplate) == null ? void 0 : _o.minOrderAmount) || coupon.minOrderAmount) > 0 ? {
-            j: common_vendor.t(((_p = coupon.couponTemplate) == null ? void 0 : _p.minOrderAmount) || coupon.minOrderAmount)
-          } : {}, {
-            k: common_vendor.t(((_q = coupon.couponTemplate) == null ? void 0 : _q.title) || coupon.title),
-            l: common_vendor.o(($event) => _ctx.claimCouponAction(coupon), index),
-            m: index,
-            n: common_vendor.n(getCouponColorClass(coupon))
-          });
-        }),
-        p: common_vendor.o(() => {
-        }),
-        q: common_vendor.o(closeCouponCenter)
-      } : {});
+        l: common_vendor.o(swiperChange)
+      });
     };
   }
 };

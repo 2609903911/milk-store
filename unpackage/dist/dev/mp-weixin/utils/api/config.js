@@ -46,8 +46,14 @@ const API_PATHS = {
   // 上传用户头像
   USER_UPDATE_PHONE: "/api/user/update-phone",
   // 更新用户手机号
-  USER_DEFAULT_ADDRESS: "/api/user/default-address"
+  USER_DEFAULT_ADDRESS: "/api/user/default-address",
   // 获取用户默认地址
+  USER_INFO: "/api/user/info",
+  // 获取用户基本信息
+  USER_MEDALS: "/api/medals/user",
+  // 获取用户勋章，需要拼接用户ID
+  USER_COUPONS: "/api/user-coupons/user"
+  // 获取用户优惠券基本路径，需要拼接userId和with-template
 };
 const REQUEST_METHODS = {
   GET: "GET",

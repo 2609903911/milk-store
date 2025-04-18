@@ -3,19 +3,72 @@
         <view class="order-confirm">
             <!-- 商店信息 -->
             <view class="shop-info">
-                <view class="shop-name-container">
-                    <view class="tag">{{
-                        deliveryType === 'self' ? '自取' : '外卖'
+                <!-- 自取模式：显示店铺信息 -->
+                <template v-if="deliveryType === 'self'">
+                    <view class="shop-name-container">
+                        <view class="tag">自取</view>
+                        <view class="shop-name"
+                            >{{ storeInfo.name }}
+                            <uni-icons
+                                type="arrowright"
+                                size="16"
+                                color="black"
+                            ></uni-icons>
+                        </view>
+                    </view>
+                    <view class="shop-distance"
+                        >距您 {{ storeInfo.distance }}</view
+                    >
+                    <view class="shop-address">{{ storeInfo.address }}</view>
+                    <view class="shop-phone">
+                        <text>客服电话</text>
+                        <text class="phone-number">{{
+                            storeInfo.phone || '13027261672'
+                        }}</text>
+                        <text class="copy-icon" @tap="copyPhoneNumber"
+                            >复制</text
+                        >
+                    </view>
+                </template>
+
+                <!-- 外卖模式：显示收货地址和收件人信息 -->
+                <template v-else>
+                    <view class="shop-name-container">
+                        <view class="tag">外卖</view>
+                        <view class="shop-name"
+                            >收货地址
+                            <uni-icons
+                                type="arrowright"
+                                size="16"
+                                color="black"
+                            ></uni-icons>
+                        </view>
+                    </view>
+                    <view class="shop-address">{{
+                        orderUserAddress || '未设置收货地址'
                     }}</view>
-                    <view class="shop-name">{{ storeInfo.name }} ></view>
-                </view>
-                <view class="shop-distance">距您 {{ storeInfo.distance }}</view>
-                <view class="shop-address">{{ storeInfo.address }}</view>
-                <view class="shop-phone">
-                    <text>联系电话</text>
-                    <text class="phone-number">13027261672</text>
-                    <text class="copy-icon" @tap="copyPhoneNumber">复制</text>
-                </view>
+                    <view class="recipient-info">
+                        <text
+                            >联系人
+                            {{
+                                (contactName ||
+                                    userInfo.nickname ||
+                                    '匿名用户') +
+                                (gender === 'male'
+                                    ? '(先生)'
+                                    : gender === 'female'
+                                    ? '(女士)'
+                                    : '')
+                            }}</text
+                        >
+                        <text class="phone-number"
+                            >联系电话
+                            {{
+                                contactPhone || userInfo.phone || '未设置手机号'
+                            }}</text
+                        >
+                    </view>
+                </template>
             </view>
 
             <!-- 订单商品列表 -->
@@ -109,17 +162,6 @@
                 </view>
             </view>
 
-            <!-- 集杯活动 -->
-            <view class="cup-collection">
-                <view class="collection-title">集杯活动</view>
-                <view class="collection-item">
-                    <text>喝茶集点兑竹蔗芒茶杯（第二波）</text>
-                    <text class="collection-count"
-                        >本单预计可+{{ orderItems.length }}</text
-                    >
-                </view>
-            </view>
-
             <!-- 支付方式 -->
             <view class="payment-method">
                 <view class="payment-title">支付方式</view>
@@ -165,6 +207,14 @@ const storeInfo = ref({
     phone: '13027261672'
 })
 const deliveryType = ref('self') // 'self'自取, 'delivery'外卖
+const orderUserAddress = ref('') // 用户收货地址
+const contactName = ref('') // 收件人姓名
+const contactPhone = ref('') // 收件人电话
+const gender = ref('') // 性别信息
+const userInfo = ref({
+    nickname: '',
+    phone: ''
+})
 
 // 优惠券选择相关
 const showCouponSelect = ref(false)
@@ -199,15 +249,11 @@ const originalPrice = ref('0.00')
 
 // 获取传递的数据
 onMounted(() => {
-    // 初始化用户数据，确保获取到最新的优惠券信息
-    initUserData()
-
     try {
         // 从本地存储中获取订单数据
         const orderData = uni.getStorageSync('orderConfirmData')
 
         if (orderData) {
-            console.log('从本地存储获取订单数据:', orderData)
             orderItems.value = orderData.items || []
             totalPrice.value = orderData.totalPrice || '0.00'
             originalPrice.value = orderData.totalPrice || '0.00'
@@ -223,11 +269,37 @@ onMounted(() => {
                 deliveryType.value = orderData.deliveryType
             }
 
+            if (orderData.userAddress) {
+                orderUserAddress.value = orderData.userAddress
+            }
+
+            // 获取联系人信息
+            if (orderData.contactName) {
+                contactName.value = orderData.contactName
+            }
+
+            if (orderData.contactPhone) {
+                contactPhone.value = orderData.contactPhone
+            }
+
+            // 获取性别信息
+            if (orderData.gender) {
+                gender.value = orderData.gender
+            }
+
+            // 获取用户基本信息
+            const localUserInfo = uni.getStorageSync('userInfo')
+            if (localUserInfo) {
+                userInfo.value = {
+                    nickname: localUserInfo.nickname || '匿名用户',
+                    phone: localUserInfo.phone || '未设置手机号'
+                }
+            }
+
             // 可以选择性地清除本地存储
             // uni.removeStorageSync('orderConfirmData')
         }
     } catch (error) {
-        console.error('获取订单数据失败', error)
         uni.showToast({
             title: '获取订单数据失败',
             icon: 'none'
@@ -293,7 +365,6 @@ const handlePayment = async () => {
     try {
         // 使用订单API创建订单
         const newOrder = await orderApi.createOrder(orderData)
-        console.log('订单创建成功:', newOrder)
 
         // 如果使用了优惠券，将其标记为已使用
         if (selectedCoupon.value) {
@@ -302,28 +373,10 @@ const handlePayment = async () => {
                 (c) => c.id === selectedCoupon.value.id
             )
             if (stateIndex !== -1) {
-                console.log('更新userState中的优惠券状态')
                 userState.coupons[stateIndex].status = 'used'
                 userState.coupons[stateIndex].usedTime = Date.now()
                 // 使用updateUserState保存完整的用户状态
                 updateUserState({ coupons: userState.coupons })
-            }
-
-            // 同时更新userData中的优惠券状态
-            const dataIndex = userData.coupons.findIndex(
-                (c) => c.id === selectedCoupon.value.id
-            )
-            if (dataIndex !== -1) {
-                console.log('更新userData中的优惠券状态')
-                userData.coupons[dataIndex].status = 'used'
-                userData.coupons[dataIndex].usedTime = Date.now()
-                console.log('优惠券状态:', userData.coupons[dataIndex].status)
-                console.log(
-                    '优惠券使用时间:',
-                    new Date(
-                        userData.coupons[dataIndex].usedTime
-                    ).toLocaleString()
-                )
             }
         }
 
@@ -341,7 +394,6 @@ const handlePayment = async () => {
             }
         })
     } catch (error) {
-        console.error('创建订单失败:', error)
         uni.showToast({
             title: '订单创建失败',
             icon: 'none'
@@ -372,7 +424,6 @@ const openCouponSelect = () => {
 
 // 处理优惠券选择
 const handleCouponSelect = (coupon) => {
-    console.log('优惠券选择:', coupon)
     // 重置价格为原始价格
     totalPrice.value = originalPrice.value
     let finalPrice = parseFloat(totalPrice.value)
@@ -384,7 +435,6 @@ const handleCouponSelect = (coupon) => {
         if (coupon.type === 'cash') {
             // 满减券：直接减去value值
             discount = coupon.value
-            console.log('减去的价格：', discount)
             finalPrice = Math.max(0, finalPrice - discount)
         } else if (coupon.type === 'discount') {
             // 折扣券：按折扣比例计算
@@ -419,13 +469,6 @@ const handleCouponSelect = (coupon) => {
         // 更新折扣金额和最终价格
         discountAmount.value = discount.toFixed(2)
         totalPrice.value = finalPrice.toFixed(2)
-
-        console.log('应用优惠券后:', {
-            优惠券: coupon.title,
-            原价: originalPrice.value,
-            折扣: discountAmount.value,
-            最终价格: totalPrice.value
-        })
     } else {
         // 如果取消选择优惠券，恢复原价
         selectedCoupon.value = null
@@ -503,6 +546,21 @@ const handleCouponSelect = (coupon) => {
 
 .copy-icon {
     color: #999;
+}
+
+/* 收件人信息 */
+.recipient-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 28rpx;
+    color: #666;
+    margin-top: 15rpx;
+}
+
+.recipient-info .phone-number {
+    color: #333;
+    margin-left: 20rpx;
 }
 
 /* 订单商品列表 */

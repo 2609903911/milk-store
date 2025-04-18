@@ -299,7 +299,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:769", "订单页面接收到的购物车项：", item);
+      common_vendor.index.__f__("log", "at pages/order/order.vue:774", "订单页面接收到的购物车项：", item);
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.loadCartItems();
@@ -369,46 +369,51 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
           size: "16",
           color: "#333"
         }),
-        d: deliveryType.value === "self"
+        d: common_vendor.o(navigateToMap),
+        e: deliveryType.value === "self"
       }, deliveryType.value === "self" ? {
-        e: common_vendor.t(shopDistance.value)
+        f: common_vendor.t(shopDistance.value)
       } : {}, {
-        f: deliveryType.value === "delivery"
+        g: deliveryType.value === "delivery"
       }, deliveryType.value === "delivery" ? {
-        g: common_vendor.t(userAddress.value),
-        h: common_vendor.o(openAddressSelection)
+        h: common_vendor.t(userAddress.value),
+        i: common_vendor.p({
+          type: "arrowright",
+          size: "16",
+          color: "#333"
+        }),
+        j: common_vendor.o(openAddressSelection)
       } : {}, {
-        i: deliveryType.value === "delivery"
+        k: deliveryType.value === "delivery"
       }, deliveryType.value === "delivery" ? {
-        j: common_vendor.t(shopDistance.value)
+        l: common_vendor.t(shopDistance.value)
       } : {}, {
-        k: common_vendor.o(navigateToMap),
-        l: deliveryType.value === "self" ? 1 : "",
-        m: common_vendor.o(($event) => deliveryType.value = "self"),
-        n: deliveryType.value === "delivery" ? 1 : "",
-        o: common_vendor.o(($event) => deliveryType.value = "delivery"),
-        p: common_vendor.f(noticeList.value, (item, index, i0) => {
+        m: deliveryType.value === "self" ? 1 : "",
+        n: common_vendor.o(($event) => deliveryType.value = "self"),
+        o: deliveryType.value === "delivery" ? 1 : "",
+        p: common_vendor.o(($event) => deliveryType.value = "delivery"),
+        q: common_vendor.f(noticeList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        q: common_vendor.f(promoList.value, (item, index, i0) => {
+        r: common_vendor.f(promoList.value, (item, index, i0) => {
           return {
             a: item.image,
             b: index,
             c: common_vendor.o(($event) => openPromoDetail(item), index)
           };
         }),
-        r: common_vendor.o(onScroll),
-        s: isPromoHidden.value ? 1 : "",
-        t: activeTab.value === "menu" ? 1 : "",
-        v: common_vendor.o(($event) => activeTab.value = "menu"),
-        w: activeTab.value === "coupon" ? 1 : "",
-        x: common_vendor.o(($event) => activeTab.value = "coupon"),
-        y: activeTab.value === "menu"
+        s: common_vendor.o(onScroll),
+        t: isPromoHidden.value ? 1 : "",
+        v: activeTab.value === "menu" ? 1 : "",
+        w: common_vendor.o(($event) => activeTab.value = "menu"),
+        x: activeTab.value === "coupon" ? 1 : "",
+        y: common_vendor.o(($event) => activeTab.value = "coupon"),
+        z: activeTab.value === "menu"
       }, activeTab.value === "menu" ? {
-        z: common_vendor.f(categories.value, (category, index, i0) => {
+        A: common_vendor.f(categories.value, (category, index, i0) => {
           return {
             a: common_vendor.t(category.name),
             b: activeCategoryIndex.value === index ? 1 : "",
@@ -417,8 +422,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             e: common_vendor.o(($event) => selectCategory(index), index)
           };
         }),
-        A: "cate-" + activeCategoryIndex.value,
-        B: common_vendor.f(categories.value, (category, index, i0) => {
+        B: "cate-" + activeCategoryIndex.value,
+        C: common_vendor.f(categories.value, (category, index, i0) => {
           return {
             a: common_vendor.t(category.name),
             b: common_vendor.f(category.products, (product, pIndex, i1) => {
@@ -435,10 +440,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             d: "product-" + index
           };
         }),
-        C: currentCategoryId.value,
-        D: common_vendor.o(onProductScroll)
+        D: currentCategoryId.value,
+        E: common_vendor.o(onProductScroll)
       } : {
-        E: common_vendor.f(coupons.value, (coupon, index, i0) => {
+        F: common_vendor.f(coupons.value, (coupon, index, i0) => {
           return {
             a: common_vendor.t(coupon.discount),
             b: common_vendor.t(coupon.unit),
@@ -454,17 +459,17 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
           };
         })
       }, {
-        F: isPromoHidden.value ? 1 : "",
-        G: productDetailVisible.value
+        G: isPromoHidden.value ? 1 : "",
+        H: productDetailVisible.value
       }, productDetailVisible.value ? {
-        H: common_vendor.o(updateDetailVisible),
-        I: common_vendor.o(handleAddToCart),
-        J: common_vendor.p({
+        I: common_vendor.o(updateDetailVisible),
+        J: common_vendor.o(handleAddToCart),
+        K: common_vendor.p({
           visible: productDetailVisible.value,
           product: selectedProduct.value
         })
       } : {}, {
-        K: common_vendor.sr(orderCartRef, "93207a4f-2", {
+        L: common_vendor.sr(orderCartRef, "93207a4f-3", {
           "k": "orderCartRef"
         })
       });
