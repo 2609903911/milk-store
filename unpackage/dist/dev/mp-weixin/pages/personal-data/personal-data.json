@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "个人资料",
   "usingComponents": {
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "phone-update": "../components/phone-update"
   }
 }

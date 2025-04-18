@@ -39,7 +39,7 @@ public class AuthController {
      * @param type 验证码类型
      * @return 发送结果
      */
-    @PostMapping("/auth/code/send")
+    @RequestMapping(value = "/auth/code/send", method = {RequestMethod.POST, RequestMethod.GET})
     public Result<Object> sendVerificationCode(
             @RequestParam("phone") String phone,
             @RequestParam(value = "type", defaultValue = "login") String type) {
@@ -279,5 +279,84 @@ public class AuthController {
         }
         
         return user;
+    }
+    
+    /**
+     * 更新用户手机号
+     * @param requestBody 请求参数，包含phone和code
+     * @return 更新结果
+     */
+    @PostMapping("/user/update-phone")
+    public Result<Object> updateUserPhone(@RequestBody Map<String, Object> requestBody) {
+        try {
+            // 1. 获取请求参数
+            String phone = (String) requestBody.get("phone");
+            String code = (String) requestBody.get("code");
+            
+            if (phone == null || phone.isEmpty() || code == null || code.isEmpty()) {
+                return Result.error(400, "手机号或验证码不能为空");
+            }
+            
+            // 2. 验证验证码
+            boolean isValid = verificationCodeService.verifyCode(phone, code, "update_phone");
+            
+            if (!isValid) {
+                return Result.error(400, "验证码错误或已过期");
+            }
+            
+            // 3. 获取当前登录用户信息
+            String userIdFromSession = ""; // 实际项目中从会话中获取当前登录用户ID
+            
+            // 这里为了演示，从请求中获取用户ID
+            // 注意：实际项目应该从安全会话中获取已登录用户的ID
+            Object userIdObj = requestBody.get("userId");
+            if (userIdObj != null) {
+                userIdFromSession = userIdObj.toString();
+            } else {
+                // 从请求头或cookie中获取用户ID
+                // userIdFromSession = ... 
+            }
+            
+            if (userIdFromSession.isEmpty()) {
+                return Result.error(401, "未登录或登录已过期");
+            }
+            
+            // 4. 检查新手机号是否已被注册
+            User existingUserWithPhone = userMapper.findByPhone(phone);
+            if (existingUserWithPhone != null && !existingUserWithPhone.getUserId().equals(userIdFromSession)) {
+                return Result.error(400, "该手机号已被其他账号使用");
+            }
+            
+            // 5. 更新用户手机号
+            User currentUser = userMapper.findById(userIdFromSession);
+            if (currentUser == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            // 保存旧手机号，用于日志记录
+            String oldPhone = currentUser.getPhone();
+            
+            // 更新手机号
+            currentUser.setPhone(phone);
+            int rows = userMapper.updateUserPhone(currentUser.getUserId(), phone);
+            
+            if (rows > 0) {
+                // 6. 构建用户数据响应
+                Map<String, Object> updatedUserData = new HashMap<>();
+                updatedUserData.put("userId", currentUser.getUserId());
+                updatedUserData.put("phone", phone);
+                
+                // 7. 记录手机号变更日志（可选）
+                // logService.recordPhoneChange(currentUser.getUserId(), oldPhone, phone);
+                
+                return Result.success("手机号更新成功", updatedUserData);
+            } else {
+                return Result.error(500, "手机号更新失败");
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "更新手机号失败: " + e.getMessage());
+        }
     }
 } 

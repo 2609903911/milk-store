@@ -12,16 +12,22 @@
 - [分类相关接口](#分类相关接口)
 - [轮播图相关接口](#轮播图相关接口)
 - [城市相关接口](#城市相关接口)
+- [地址相关接口](#地址相关接口)
+- [商城商品相关接口](#商城商品相关接口)
 
 ## 认证相关接口
 
 ### 发送验证码
 
 - **URL**: `/api/auth/code/send`
-- **方法**: POST
+- **方法**: GET, POST
 - **参数**:
   - `phone`: 手机号
   - `type`: 验证码类型，默认为 "login"
+- **说明**: 
+  - 手机号更新验证码可使用 type="update_phone"
+  - 登录验证码可使用 type="login"
+  - GET请求时直接通过URL参数传递：`/api/auth/code/send?phone=13812345678&type=login`
 
 ### 使用验证码登录
 
@@ -35,10 +41,59 @@
 
 ### 获取用户详细信息
 
-- **URL**: `/api/user/profile`
+- **URL**: `/api/user/profile-info`
 - **方法**: GET
 - **参数**:
   - `userId`: 用户ID
+
+### 更新用户信息
+
+- **URL**: `/api/user/update-info`
+- **方法**: POST
+- **请求体**:
+  ```json
+  {
+    "userId": "用户ID",
+    "nickname": "昵称",
+    "gender": "male/female",
+    "birthday": "YYYY-MM-DD格式日期",
+    "avatar": "头像路径"
+  }
+  ```
+
+### 更新用户手机号
+
+- **URL**: `/api/user/update-phone`
+- **方法**: POST
+- **请求体**:
+  ```json
+  {
+    "userId": "用户ID",
+    "phone": "新手机号",
+    "code": "验证码"
+  }
+  ```
+- **说明**: 需要先使用`/api/auth/code/send`发送验证码，type参数为"update_phone"
+
+### 获取用户默认地址
+
+- **URL**: `/api/user/default-address`
+- **方法**: GET
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **返回**:
+  ```json
+  {
+    "code": 200,
+    "message": "获取默认地址成功",
+    "data": {
+      "address": "详细地址",
+      "contactName": "联系人姓名",
+      "phone": "联系电话"
+    }
+  }
+  ```
+- **说明**: 该接口使用Authorization头部中的token识别用户身份，无需传递userId参数
 
 ## 优惠券相关接口
 
@@ -185,6 +240,126 @@
 - **参数**:
   - `letter`: 城市首字母（大写） 
 
+## 地址相关接口
+
+### 获取用户默认地址
+
+- **URL**: `/api/user/default-address`
+- **方法**: GET
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **返回**:
+  ```json
+  {
+    "code": 200,
+    "message": "获取默认地址成功",
+    "data": {
+      "address": "详细地址",
+      "contactName": "联系人姓名",
+      "phone": "联系电话"
+    }
+  }
+  ```
+- **说明**: 该接口通过Authorization头部中的token识别用户，无需传递userId参数
+
+### 获取用户所有地址
+
+- **URL**: `/api/user/addresses`
+- **方法**: GET
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **返回**:
+  ```json
+  {
+    "code": 200,
+    "message": "获取地址列表成功",
+    "data": [
+      {
+        "id": "地址ID",
+        "userId": "用户ID",
+        "contactName": "联系人姓名",
+        "gender": "性别",
+        "phone": "联系电话",
+        "address": "详细地址",
+        "isDefault": true, 
+        "createTime": "创建时间",
+        "updateTime": "更新时间"
+      }
+    ]
+  }
+  ```
+
+### 添加用户地址
+
+- **URL**: `/api/user/address`
+- **方法**: POST
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **请求体**:
+  ```json
+  {
+    "contactName": "联系人姓名",
+    "gender": "male/female",
+    "phone": "联系电话",
+    "address": "详细地址",
+    "isDefault": true/false
+  }
+  ```
+- **返回**:
+  ```json
+  {
+    "code": 200,
+    "message": "添加地址成功",
+    "data": {
+      "id": "新地址ID",
+      "userId": "用户ID",
+      "contactName": "联系人姓名",
+      "gender": "性别",
+      "phone": "联系电话",
+      "address": "详细地址",
+      "isDefault": true/false,
+      "createTime": "创建时间",
+      "updateTime": "更新时间"
+    }
+  }
+  ```
+
+### 更新用户地址
+
+- **URL**: `/api/user/address/{addressId}`
+- **方法**: PUT
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **参数**:
+  - `addressId`: 地址ID
+- **请求体**:
+  ```json
+  {
+    "contactName": "联系人姓名",
+    "gender": "male/female",
+    "phone": "联系电话",
+    "address": "详细地址",
+    "isDefault": true/false
+  }
+  ```
+
+### 设置默认地址
+
+- **URL**: `/api/user/address/{addressId}/default`
+- **方法**: PUT
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **参数**:
+  - `addressId`: 要设置为默认的地址ID
+
+### 删除用户地址
+
+- **URL**: `/api/user/address/{addressId}`
+- **方法**: DELETE
+- **头部**:
+  - `Authorization`: Bearer {token}
+- **参数**:
+  - `addressId`: 要删除的地址ID
   
 ## 商城商品相关接口
 

@@ -40,7 +40,10 @@ export const API_PATHS = {
   AUTH_STATUS: '/api/auth/status',
   
   // 用户相关
-  USER_PROFILE: '/api/user/profile-info' // 获取用户详细信息
+  USER_PROFILE: '/api/user/profile-info', // 获取用户详细信息
+  USER_UPDATE: '/api/user/update-info', // 更新用户信息
+  USER_UPDATE_PHONE: '/api/user/update-phone', // 更新用户手机号
+  USER_DEFAULT_ADDRESS: '/api/user/default-address' // 获取用户默认地址
 };
 
 // 请求方法

@@ -98,6 +98,21 @@ input.data-v-93207a4f {
   color: #999;
   margin-top: 4rpx;
 }
+.user-address.data-v-93207a4f {
+  font-size: 24rpx;
+  color: #333;
+  margin-top: 4rpx;
+  padding-left: 6rpx;
+  border-left: 3rpx solid #006de7;
+  display: flex;
+  align-items: center;
+}
+.user-address.data-v-93207a4f::after {
+  content: ">";
+  font-size: 20rpx;
+  color: #999;
+  margin-left: 6rpx;
+}
 .delivery-options.data-v-93207a4f {
   display: flex;
   overflow: hidden;
@@ -449,4 +464,5 @@ input.data-v-93207a4f {
   color: #fff;
   font-size: 26rpx;
   border-radius: 10rpx;
+  background-color: #ff5f16;
 }

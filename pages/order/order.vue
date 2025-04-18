@@ -41,8 +41,20 @@
                     >{{ shopName }}
                     <uni-icons type="right" size="16" color="#333"></uni-icons>
                 </view>
-                <view class="shop-address">{{ shopAddress }}</view>
-                <view class="shop-distance">距离您{{ shopDistance }}</view>
+                <!-- 自取模式下只显示距离 -->
+                <view v-if="deliveryType === 'self'" class="shop-distance"
+                    >距离您{{ shopDistance }}</view
+                >
+                <!-- 外卖模式下显示用户地址和门店距离 -->
+                <view
+                    v-if="deliveryType === 'delivery'"
+                    class="user-address"
+                    @click="openAddressSelection"
+                    >{{ userAddress }}</view
+                >
+                <view v-if="deliveryType === 'delivery'" class="shop-distance"
+                    >距离您{{ shopDistance }}</view
+                >
             </view>
             <view class="delivery-options">
                 <view
@@ -284,19 +296,12 @@
 </template>
 
 <script setup>
-import {
-    ref,
-    nextTick,
-    onMounted,
-    onUnmounted,
-    watch,
-    reactive,
-    computed
-} from 'vue'
+import { ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { getProductData, initProductData } from '../../utils/productData'
 // 使用easycom自动注册组件，不需要手动导入
 // 组件名称已在pages.json中注册
+import { BASE_URL, API_PATHS } from '../../utils/api/config'
 
 // 显式导入shop-detail组件以确保微信小程序能正确加载
 import OrderDetail from '../components/shop-detail.vue'
@@ -315,7 +320,9 @@ defineOptions({
 // 门店相关信息
 const shopName = ref('九江学院四食堂店')
 const shopDistance = ref('0.41km')
-const shopAddress = ref('九江市中心区繁华路88号')
+const shopAddress = ref('九江学院校内·四食堂')
+// 用户地址
+const userAddress = ref('请选择收货地址')
 
 // 配送方式
 const deliveryType = ref('self') // 'self' 自取, 'delivery' 外卖
@@ -324,8 +331,44 @@ const deliveryType = ref('self') // 'self' 自取, 'delivery' 外卖
 watch(deliveryType, (newValue) => {
     // 将配送方式保存到本地存储
     uni.setStorageSync('deliveryType', newValue)
-    console.log('配送方式已更新:', newValue)
+
+    // 在外卖模式下，获取用户默认地址
+    if (newValue === 'delivery') {
+        getUserDefaultAddress()
+    }
 })
+
+// 获取用户默认地址
+const getUserDefaultAddress = () => {
+    // 获取用户ID
+    const userInfo = uni.getStorageSync('userInfo')
+    const userId = userInfo.userId
+    if (!userId) {
+        userAddress.value = '请先登录并设置收货地址'
+        return
+    }
+
+    // 直接从后端获取用户默认地址
+    uni.request({
+        url: `${BASE_URL}${API_PATHS.USER_DEFAULT_ADDRESS}?userId=${userId}`,
+        method: 'GET',
+        success: (res) => {
+            if (
+                res.data &&
+                res.data.code === 200 &&
+                res.data.data &&
+                res.data.data.address
+            ) {
+                userAddress.value = res.data.data.address.address
+            } else {
+                userAddress.value = '请设置默认收货地址'
+            }
+        },
+        fail: (err) => {
+            userAddress.value = '获取地址失败，请重试'
+        }
+    })
+}
 
 // 页面加载时初始化数据
 onMounted(() => {
@@ -341,10 +384,17 @@ onMounted(() => {
     // 监听页面刷新事件
     uni.$on('refresh-order-page', refreshPage)
 
+    // 监听地址选择事件
+    uni.$on('address-selected', handleAddressSelected)
+
     // 尝试从本地存储中获取配送方式
     const savedDeliveryType = uni.getStorageSync('deliveryType')
     if (savedDeliveryType) {
         deliveryType.value = savedDeliveryType
+        // 如果是外卖模式，获取用户地址
+        if (savedDeliveryType === 'delivery') {
+            getUserDefaultAddress()
+        }
     }
 })
 
@@ -413,12 +463,10 @@ const loadProductData = async () => {
     try {
         const productData = await getProductData()
         categories.value = productData
-        console.log('产品数据加载成功')
 
         // 计算分类高度
         calculateHeights()
     } catch (error) {
-        console.error('加载产品数据失败:', error)
         uni.showToast({
             title: '加载产品失败，请重试',
             icon: 'none'
@@ -465,12 +513,11 @@ onShow(() => {
 onUnmounted(() => {
     uni.$off('store-selected', handleStoreSelected)
     uni.$off('refresh-order-page', refreshPage)
+    uni.$off('address-selected', handleAddressSelected)
 })
 
 // 处理门店选择事件
 const handleStoreSelected = (data) => {
-    console.log('收到门店选择事件:', data)
-    console.log(data)
     if (data) {
         if (data.name) {
             shopName.value = data.name
@@ -496,10 +543,8 @@ const handleStoreSelected = (data) => {
 
 // 提取更新门店信息的函数
 const updateStoreInfo = () => {
-    console.log('更新门店信息')
     const selectedStore = uni.getStorageSync('selectedStore')
     if (selectedStore) {
-        console.log('从存储中获取到的门店信息:', selectedStore)
         let updated = false
 
         if (selectedStore.name && selectedStore.name !== shopName.value) {
@@ -525,7 +570,7 @@ const updateStoreInfo = () => {
         if (updated) {
             // 使用nextTick确保数据更新后再触发UI更新
             nextTick(() => {
-                console.log('强制刷新UI')
+                // UI更新代码
             })
         }
     }
@@ -642,11 +687,8 @@ const loadUserCoupons = () => {
                 originalCoupon: coupon // 保存原始优惠券数据，便于后续使用
             }
         })
-
-        // 打印调试信息
-        console.log('已加载优惠券：', coupons.value.length, '张')
     } else {
-        console.warn('未找到用户优惠券数据')
+        // 未找到优惠券数据
     }
 }
 
@@ -697,7 +739,6 @@ const selectedProduct = ref({})
 
 // 打开商品详情弹框
 const openProductDetail = (category, product) => {
-    console.log('打开商品详情', category.name, product.name)
     selectedProduct.value = { ...product, category: category.name }
 
     // 延迟设置弹框显示，确保数据已更新
@@ -724,10 +765,8 @@ const orderCartRef = ref(null)
 
 // 处理添加到购物车
 const handleAddToCart = (item) => {
-    console.log('添加到购物车', item)
     // 确保item包含必要的属性
     if (!item) {
-        console.error('添加到购物车的商品数据为空')
         return
     }
 
@@ -737,18 +776,13 @@ const handleAddToCart = (item) => {
         if (orderCartRef.value) {
             orderCartRef.value.addToCart(item)
         } else {
-            console.warn('orderCartRef不存在，尝试其他方式获取组件')
             // 尝试从当前页面获取组件
             const pages = getCurrentPages()
             if (pages && pages.length > 0) {
                 const currentPage = pages[pages.length - 1]
                 if (currentPage.$refs && currentPage.$refs.orderCartRef) {
                     currentPage.$refs.orderCartRef.addToCart(item)
-                } else {
-                    console.error('无法获取购物车组件引用')
                 }
-            } else {
-                console.error('无法获取当前页面实例')
             }
         }
     })
@@ -762,7 +796,6 @@ const openPromoDetail = (item) => {
     // 根据促销图片的标题找到对应的商品
     const product = findProductByTitle(item.title)
     if (product) {
-        console.log('打开促销商品详情', item.title)
         selectedProduct.value = { ...product }
 
         // 延迟设置弹框显示，确保数据已更新
@@ -790,7 +823,6 @@ const navigateToMap = () => {
 
 // 刷新页面数据
 const refreshPage = () => {
-    console.log('执行页面刷新')
     updateStoreInfo()
     // 这里可以添加其他需要刷新的数据
 }
@@ -800,6 +832,34 @@ const goToSearch = () => {
     uni.navigateTo({
         url: '/pages/search/search'
     })
+}
+
+// 新增的打开地址选择界面的逻辑
+const openAddressSelection = () => {
+    // 打开地址选择界面
+    uni.navigateTo({
+        url: '/pages/address-selection/address-selection'
+    })
+}
+
+// 新增的地址选择事件处理逻辑
+const handleAddressSelected = (data) => {
+    if (data) {
+        if (data.address) {
+            userAddress.value = data.address
+            // 保存到本地存储
+            uni.setStorageSync('userDefaultAddress', data.address)
+        }
+        // 强制更新界面
+        nextTick(() => {
+            // 触发UI更新
+            const temp = userAddress.value
+            userAddress.value = temp + ' '
+            setTimeout(() => {
+                userAddress.value = temp
+            }, 10)
+        })
+    }
 }
 </script>
 
@@ -895,6 +955,26 @@ input {
     font-size: 24rpx;
     color: #999;
     margin-top: 4rpx;
+}
+
+.user-address {
+    font-size: 24rpx;
+    color: #333;
+    margin-top: 4rpx;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    // 控制一行
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-address::after {
+    content: '>';
+    font-size: 20rpx;
+    color: #999;
+    margin-left: 6rpx;
 }
 
 .delivery-options {
@@ -1355,5 +1435,6 @@ input {
     color: #fff;
     font-size: 26rpx;
     border-radius: 10rpx;
+    background-color: #ff5f16;
 }
 </style> 

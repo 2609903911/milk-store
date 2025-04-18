@@ -8,14 +8,12 @@ const fetchProductDataFromAPI = async () => {
     try {
         // 1. 获取所有分类
         const categories = await fetchCategories();
-        console.log('获取到的分类信息:', categories);
         
         // 2. 对每个分类获取对应的产品
         const result = await Promise.all(
             categories.map(async (category) => {
                 // 获取该分类下的产品
                 const products = await fetchProductsByCategory(category.id);
-                console.log(`分类${category.name}的产品:`, products);
                 
                 // 转换为前端需要的格式，确保字段映射正确
                 return {
@@ -39,12 +37,8 @@ const fetchProductDataFromAPI = async () => {
             })
         );
         
-        // 打印转换后的产品数据结构用于调试
-        console.log('转换后的产品数据结构:', JSON.stringify(result[0]?.products[0] || {}));
-        
         return result;
     } catch (error) {
-        console.error('从API获取产品数据失败:', error);
         throw error;
     }
 }
@@ -53,12 +47,9 @@ const fetchProductDataFromAPI = async () => {
 export const getProductData = async () => {
     try {
         // 直接从API获取
-        console.log('开始从API获取产品数据...');
         const apiData = await fetchProductDataFromAPI();
-        console.log('从API获取产品数据成功');
         return apiData;
     } catch (e) {
-        console.error('获取产品数据失败，使用默认数据：', e);
         // 如果API失败，返回默认数据
         return getDefaultProductData();
     }
@@ -69,10 +60,8 @@ export const refreshProductData = async () => {
     try {
         // 从API获取
         const apiData = await fetchProductDataFromAPI();
-        console.log('产品数据刷新成功');
         return apiData;
     } catch (e) {
-        console.error('刷新产品数据失败：', e);
         // 如果API获取失败，返回默认数据
         return getDefaultProductData();
     }
@@ -101,7 +90,6 @@ export const updateProduct = async (categoryIndex, productIndex, updatedProduct)
         }
         return false;
     } catch (e) {
-        console.error('更新产品失败：', e);
         return false;
     }
 }
@@ -122,7 +110,6 @@ export const addProduct = async (categoryIndex, newProduct) => {
         }
         return false;
     } catch (e) {
-        console.error('添加产品失败：', e);
         return false;
     }
 }
@@ -147,7 +134,6 @@ export const deleteProduct = async (categoryIndex, productIndex) => {
         }
         return false;
     } catch (e) {
-        console.error('删除产品失败：', e);
         return false;
     }
 }
@@ -167,7 +153,6 @@ export const addCategory = async (newCategory) => {
         
         return true;
     } catch (e) {
-        console.error('添加分类失败：', e);
         return false;
     }
 }
@@ -188,7 +173,6 @@ export const deleteCategory = async (categoryIndex) => {
         }
         return false;
     } catch (e) {
-        console.error('删除分类失败：', e);
         return false;
     }
 }
@@ -224,15 +208,8 @@ export const searchProducts = async (keyword) => {
             });
         });
         
-        // 打印匹配的结果和关键词用于调试
-        console.log(`搜索"${keyword}"找到${result.length}个结果:`);
-        result.forEach((item, index) => {
-            console.log(`结果${index + 1}: ${item.name}, 描述: ${item.description || item.desc || '无'}`);
-        });
-        
         return result;
     } catch (e) {
-        console.error('搜索产品失败：', e);
         return [];
     }
 }
@@ -306,7 +283,6 @@ export const advancedSearchProducts = async (options = {}) => {
         
         return result;
     } catch (e) {
-        console.error('高级搜索产品失败：', e);
         return [];
     }
 }
@@ -334,7 +310,6 @@ export const getHotProducts = async (limit = 6) => {
             .sort((a, b) => b.price - a.price)
             .slice(0, limit);
     } catch (e) {
-        console.error('获取热门产品失败：', e);
         return [];
     }
 }
@@ -388,7 +363,6 @@ export const getRecommendedProducts = async (categoryName, limit = 4) => {
         
         return recommendedProducts;
     } catch (e) {
-        console.error('获取推荐产品失败：', e);
         return [];
     }
 }
@@ -396,10 +370,8 @@ export const getRecommendedProducts = async (categoryName, limit = 4) => {
 // 初始化产品数据 - 用于应用启动时
 export const initProductData = async () => {
     try {
-        console.log('初始化产品数据...');
         return await refreshProductData();
     } catch (e) {
-        console.error('初始化产品数据失败：', e);
         return getDefaultProductData();
     }
 }
@@ -432,7 +404,6 @@ export const getCategoryProducts = async (categoryId) => {
       }))
     };
   } catch (error) {
-    console.error(`获取分类${categoryId}的产品失败:`, error);
     throw error;
   }
 };
@@ -489,7 +460,6 @@ export const getProductsWithPagination = async (options = {}) => {
             }
         };
     } catch (e) {
-        console.error('分页获取产品失败：', e);
         return {
             data: [],
             pagination: {
@@ -543,7 +513,6 @@ export const getCategoriesStats = async () => {
             };
         });
     } catch (e) {
-        console.error('获取分类统计数据失败：', e);
         return [];
     }
 };

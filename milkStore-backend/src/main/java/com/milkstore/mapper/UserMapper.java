@@ -41,4 +41,13 @@ public interface UserMapper {
     
     @Update("UPDATE users SET panda_coins = #{pandaCoins}, lightning_stars = #{lightningStars} WHERE user_id = #{userId}")
     int updateCoinsAndStars(@Param("userId") String userId, @Param("pandaCoins") int pandaCoins, @Param("lightningStars") int lightningStars);
+    
+    /**
+     * 更新用户手机号
+     * @param userId 用户ID
+     * @param phone 新手机号
+     * @return 影响行数
+     */
+    @Update("UPDATE users SET phone = #{phone} WHERE user_id = #{userId}")
+    int updateUserPhone(@Param("userId") String userId, @Param("phone") String phone);
 } 

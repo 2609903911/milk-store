@@ -164,12 +164,22 @@
                 </picker-view>
             </view>
         </view>
+
+        <!-- 手机号更新弹窗 -->
+        <PhoneUpdate
+            :visible="isPhoneUpdateVisible"
+            @update:visible="isPhoneUpdateVisible = $event"
+            :currentPhone="userInfo.phone"
+            @success="handlePhoneUpdateSuccess"
+        />
     </view>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { get, post } from '../../utils/request'
+import PhoneUpdate from '../components/phone-update.vue'
+import { API_PATHS } from '../../utils/api/config'
 
 // 加载状态
 const loading = ref(true)
@@ -226,6 +236,9 @@ const defaultDatePickerValue = [
 ]
 const datePickerValue = ref(defaultDatePickerValue)
 
+// 手机号码修改弹窗
+const isPhoneUpdateVisible = ref(false)
+
 // 从API获取用户信息
 const fetchUserProfile = async () => {
     loading.value = true
@@ -248,7 +261,7 @@ const fetchUserProfile = async () => {
 
         const userId = userInfoStorage.userId
         const response = await get(
-            `/api/user/profile-info?userId=${userId}`,
+            `${API_PATHS.USER_PROFILE}?userId=${userId}`,
             {},
             {
                 showError: true
@@ -351,7 +364,7 @@ const updateUserProfile = async () => {
         }
 
         // 发送更新请求
-        const response = await post('/api/user/update-info', updateData, {
+        const response = await post(API_PATHS.USER_UPDATE, updateData, {
             showError: true
         })
 
@@ -457,9 +470,16 @@ const confirmDateSelection = () => {
 
 // 绑定手机号
 const bindPhone = () => {
+    isPhoneUpdateVisible.value = true
+}
+
+// 手机号更新成功
+const handlePhoneUpdateSuccess = (newPhone) => {
+    // 更新用户手机号
+    userInfo.value.phone = newPhone
     uni.showToast({
-        title: '更换手机号功能即将上线',
-        icon: 'none'
+        title: '手机号更新成功',
+        icon: 'success'
     })
 }
 

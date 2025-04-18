@@ -2,14 +2,16 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
+const utils_api_config = require("../../utils/api/config.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + PhoneUpdate)();
 }
+const PhoneUpdate = () => "../components/phone-update.js";
 const _sfc_main = {
   __name: "personal-data",
   setup(__props) {
@@ -50,6 +52,7 @@ const _sfc_main = {
       todayDay - 1
     ];
     const datePickerValue = common_vendor.ref(defaultDatePickerValue);
+    const isPhoneUpdateVisible = common_vendor.ref(false);
     const fetchUserProfile = async () => {
       loading.value = true;
       try {
@@ -67,7 +70,7 @@ const _sfc_main = {
         }
         const userId = userInfoStorage.userId;
         const response = await utils_request.get(
-          `/api/user/profile-info?userId=${userId}`,
+          `${utils_api_config.API_PATHS.USER_PROFILE}?userId=${userId}`,
           {},
           {
             showError: true
@@ -139,7 +142,7 @@ const _sfc_main = {
           // 已格式化为YYYY-MM-DD
           avatar: userInfo.value.avatar
         };
-        const response = await utils_request.post("/api/user/update-info", updateData, {
+        const response = await utils_request.post(utils_api_config.API_PATHS.USER_UPDATE, updateData, {
           showError: true
         });
         if (response && (response.code === 200 || response.data && response.data.code === 200)) {
@@ -212,9 +215,13 @@ const _sfc_main = {
       hideDatePicker();
     };
     const bindPhone = () => {
+      isPhoneUpdateVisible.value = true;
+    };
+    const handlePhoneUpdateSuccess = (newPhone) => {
+      userInfo.value.phone = newPhone;
       common_vendor.index.showToast({
-        title: "更换手机号功能即将上线",
-        icon: "none"
+        title: "手机号更新成功",
+        icon: "success"
       });
     };
     const goToAddressManage = () => {
@@ -322,7 +329,14 @@ const _sfc_main = {
         E: common_vendor.o(() => {
         }),
         F: common_vendor.o(hideDatePicker)
-      } : {});
+      } : {}, {
+        G: common_vendor.o(($event) => isPhoneUpdateVisible.value = $event),
+        H: common_vendor.o(handlePhoneUpdateSuccess),
+        I: common_vendor.p({
+          visible: isPhoneUpdateVisible.value,
+          currentPhone: userInfo.value.phone
+        })
+      });
     };
   }
 };
