@@ -246,32 +246,77 @@ const _sfc_main = {
         // 从相册选择或使用相机拍摄
         success: function(res) {
           const tempFilePath = res.tempFilePaths[0];
-          common_vendor.index.navigateTo({
-            url: `/pages/image-cropper/image-cropper?src=${encodeURIComponent(
-              tempFilePath
-            )}&type=avatar`,
-            events: {
-              // 接收裁剪后的图片
-              cropImage: function(data) {
-                if (data.path) {
-                  userInfo.value.avatar = data.path;
+          common_vendor.index.showLoading({
+            title: "上传头像中..."
+          });
+          const fullUploadUrl = utils_api_config.getFullUrl(utils_api_config.API_PATHS.USER_AVATAR_UPLOAD);
+          common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:521", "上传URL:", fullUploadUrl);
+          common_vendor.index.uploadFile({
+            url: fullUploadUrl,
+            // 使用完整URL
+            filePath: tempFilePath,
+            name: "avatarFile",
+            formData: {
+              userId: userInfo.value.userId
+            },
+            success: (uploadRes) => {
+              var _a;
+              try {
+                common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:533", "上传结果:", uploadRes.data);
+                const result = JSON.parse(uploadRes.data);
+                if (result.code === 200 && ((_a = result.data) == null ? void 0 : _a.avatarUrl)) {
+                  let serverAvatarUrl = result.data.avatarUrl;
+                  common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:538", "服务器返回的头像URL:", serverAvatarUrl);
+                  if (serverAvatarUrl.startsWith("/")) {
+                    serverAvatarUrl = utils_api_config.getFullUrl(serverAvatarUrl);
+                  }
+                  userInfo.value.avatar = serverAvatarUrl;
+                  const userData = common_vendor.index.getStorageSync("userInfo");
+                  if (userData) {
+                    userData.avatar = serverAvatarUrl;
+                    common_vendor.index.setStorageSync("userInfo", userData);
+                  }
+                  common_vendor.index.showToast({
+                    title: "头像更新成功",
+                    icon: "success"
+                  });
+                } else {
+                  common_vendor.index.showToast({
+                    title: result.message || "头像保存失败",
+                    icon: "none"
+                  });
                 }
+              } catch (e) {
+                common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:567", "解析上传结果失败:", e, uploadRes.data);
+                common_vendor.index.showToast({
+                  title: "服务器返回数据格式错误",
+                  icon: "none"
+                });
               }
             },
-            fail: () => {
-              userInfo.value.avatar = tempFilePath;
+            fail: (err) => {
+              common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:575", "上传失败:", err);
+              common_vendor.index.showToast({
+                title: "上传失败，请稍后再试",
+                icon: "none"
+              });
+            },
+            complete: () => {
+              common_vendor.index.hideLoading();
             }
           });
         }
       });
     };
     const handleAvatarError = () => {
+      common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:591", "头像加载失败:", userInfo.value.avatar);
+      userInfo.value.avatar = "/static/images/avatar.png";
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: loading.value
       }, loading.value ? {} : {
-        b: userInfo.value.avatar || "/static/images/avatar.png",
+        b: userInfo.value.avatar.startsWith("http") ? userInfo.value.avatar : common_vendor.unref(utils_api_config.getFullUrl)(userInfo.value.avatar) || "/static/images/avatar.png",
         c: common_vendor.o(handleAvatarError),
         d: common_vendor.o(chooseAvatar),
         e: common_assets._imports_0$9,

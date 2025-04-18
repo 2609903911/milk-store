@@ -6,6 +6,15 @@ export const BASE_URL = 'http://localhost:8082';
 // 通用请求超时时间（毫秒）
 export const TIMEOUT = 10000;
 
+/**
+ * 获取完整的API URL
+ * @param {String} path - API路径
+ * @returns {String} 完整URL
+ */
+export const getFullUrl = (path) => {
+    return `${BASE_URL}${path}`;
+};
+
 // API路径
 export const API_PATHS = {
   // 轮播图相关
@@ -42,6 +51,7 @@ export const API_PATHS = {
   // 用户相关
   USER_PROFILE: '/api/user/profile-info', // 获取用户详细信息
   USER_UPDATE: '/api/user/update-info', // 更新用户信息
+  USER_AVATAR_UPLOAD: '/api/user/upload-avatar', // 上传用户头像
   USER_UPDATE_PHONE: '/api/user/update-phone', // 更新用户手机号
   USER_DEFAULT_ADDRESS: '/api/user/default-address' // 获取用户默认地址
 };

@@ -8,8 +8,23 @@ import com.milkstore.service.MedalService;
 import com.milkstore.service.UserCouponService;
 import com.milkstore.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +47,9 @@ public class AuthController {
     
     @Autowired
     private UserCouponService userCouponService;
+    
+    @Value("${file.upload.path:/upload/images}")
+    private String fileUploadPath;
     
     /**
      * 发送验证码
@@ -357,6 +375,174 @@ public class AuthController {
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error(500, "更新手机号失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 上传用户头像
+     * @param avatarFile 头像文件
+     * @param userId 用户ID
+     * @return 上传结果
+     */
+    @PostMapping("/user/upload-avatar")
+    public Result<Object> uploadAvatar(
+            @RequestParam("avatarFile") MultipartFile avatarFile,
+            @RequestParam("userId") String userId) {
+        try {
+            System.out.println("开始处理头像上传: 用户ID=" + userId);
+            
+            if (avatarFile == null || avatarFile.isEmpty()) {
+                System.out.println("上传失败: 头像文件为空");
+                return Result.error(400, "头像文件不能为空");
+            }
+            
+            // 查询用户是否存在
+            User existingUser = userMapper.findById(userId);
+            if (existingUser == null) {
+                System.out.println("上传失败: 用户不存在，ID=" + userId);
+                return Result.error(404, "用户不存在");
+            }
+            
+            String fileName = avatarFile.getOriginalFilename();
+            System.out.println("原始文件名: " + fileName);
+            
+            // 获取文件扩展名
+            String fileExtension = "";
+            if (fileName != null && fileName.contains(".")) {
+                fileExtension = fileName.substring(fileName.lastIndexOf("."));
+            } else {
+                // 如果没有扩展名，默认使用.jpg
+                fileExtension = ".jpg";
+            }
+            
+            // 创建上传目录 (添加avatar子目录)
+            String avatarUploadPath = fileUploadPath + "/avatar";
+            File uploadDir = new File(avatarUploadPath);
+            if (!uploadDir.exists()) {
+                System.out.println("创建目录: " + avatarUploadPath);
+                boolean dirCreated = uploadDir.mkdirs();
+                if (!dirCreated) {
+                    System.out.println("目录创建失败: " + avatarUploadPath);
+                    return Result.error(500, "无法创建上传目录");
+                }
+            }
+            
+            // 生成唯一文件名
+            String newFileName = "avatar_" + userId + "_" + System.currentTimeMillis() + fileExtension;
+            File targetFile = new File(uploadDir, newFileName);
+            System.out.println("保存文件到: " + targetFile.getAbsolutePath());
+            
+            // 保存文件
+            try {
+                // 使用文件流直接保存
+                avatarFile.transferTo(targetFile);
+            } catch (IOException e) {
+                System.out.println("文件保存失败: " + e.getMessage());
+                e.printStackTrace();
+                return Result.error(500, "文件保存失败: " + e.getMessage());
+            }
+            
+            // 检查文件是否成功保存
+            if (!targetFile.exists()) {
+                System.out.println("文件保存后检查失败，文件不存在");
+                return Result.error(500, "文件保存失败");
+            }
+            
+            System.out.println("文件保存成功，大小: " + targetFile.length() + " 字节");
+            
+            // 构建正确的访问URL (不含api前缀)
+            String avatarUrl = "/uploads/avatar/" + newFileName;
+            System.out.println("头像URL: " + avatarUrl);
+            
+            // 更新用户头像URL
+            existingUser.setAvatar(avatarUrl);
+            int rows = userMapper.updateUser(existingUser);
+            
+            if (rows > 0) {
+                // 返回头像URL
+                Map<String, Object> resultData = new HashMap<>();
+                resultData.put("avatarUrl", avatarUrl);
+                
+                System.out.println("头像上传成功");
+                return Result.success("头像上传成功", resultData);
+            } else {
+                System.out.println("用户信息更新失败");
+                return Result.error(500, "用户信息更新失败");
+            }
+        } catch (Exception e) {
+            System.out.println("上传过程中发生异常: " + e.getMessage());
+            e.printStackTrace();
+            return Result.error(500, "头像上传失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 访问上传的图片
+     * @param filename 文件名
+     * @return 图片资源
+     */
+    @GetMapping("/uploads/avatar/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveAvatarFile(@PathVariable String filename) {
+        try {
+            System.out.println("请求访问头像文件: " + filename);
+            
+            // 拼接完整的文件路径 (添加avatar子目录)
+            String avatarPath = fileUploadPath + "/avatar";
+            File file = new File(avatarPath, filename);
+            System.out.println("完整文件路径: " + file.getAbsolutePath());
+            
+            if (!file.exists()) {
+                System.out.println("文件不存在: " + file.getAbsolutePath());
+                return ResponseEntity.notFound().build();
+            }
+            
+            // 将文件转换为资源
+            Resource resource = new FileSystemResource(file);
+            
+            if (resource.exists() && resource.isReadable()) {
+                // 确定内容类型
+                String contentType = determineContentType(filename);
+                System.out.println("文件存在，返回内容类型: " + contentType);
+                
+                // 不设置Content-Disposition头，以允许浏览器直接显示图片
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+            } else {
+                System.out.println("文件不可读: " + file.getAbsolutePath());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (Exception e) {
+            System.out.println("访问文件时发生异常: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * 根据文件名确定内容类型
+     * @param filename 文件名
+     * @return 内容类型
+     */
+    private String determineContentType(String filename) {
+        if (filename == null) {
+            return "application/octet-stream";
+        }
+        
+        filename = filename.toLowerCase();
+        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (filename.endsWith(".png")) {
+            return "image/png";
+        } else if (filename.endsWith(".gif")) {
+            return "image/gif";
+        } else if (filename.endsWith(".webp")) {
+            return "image/webp";
+        } else if (filename.endsWith(".bmp")) {
+            return "image/bmp";
+        } else {
+            return "application/octet-stream";
         }
     }
 } 

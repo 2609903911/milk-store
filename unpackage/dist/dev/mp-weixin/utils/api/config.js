@@ -1,6 +1,9 @@
 "use strict";
 const BASE_URL = "http://localhost:8082";
 const TIMEOUT = 1e4;
+const getFullUrl = (path) => {
+  return `${BASE_URL}${path}`;
+};
 const API_PATHS = {
   // 轮播图相关
   BANNERS: "/api/banners",
@@ -39,6 +42,8 @@ const API_PATHS = {
   // 获取用户详细信息
   USER_UPDATE: "/api/user/update-info",
   // 更新用户信息
+  USER_AVATAR_UPLOAD: "/api/user/upload-avatar",
+  // 上传用户头像
   USER_UPDATE_PHONE: "/api/user/update-phone",
   // 更新用户手机号
   USER_DEFAULT_ADDRESS: "/api/user/default-address"
@@ -54,4 +59,5 @@ exports.API_PATHS = API_PATHS;
 exports.BASE_URL = BASE_URL;
 exports.REQUEST_METHODS = REQUEST_METHODS;
 exports.TIMEOUT = TIMEOUT;
+exports.getFullUrl = getFullUrl;
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/utils/api/config.js.map

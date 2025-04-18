@@ -282,17 +282,108 @@ const totalPrice = computed(() => {
 
 // 添加到购物车
 const addToCart = () => {
+    // 确保quantity值正确
+    const itemQuantity = quantity.value || 1
+
+    // 计算加料总价
+    let toppingTotalPrice = 0
+    selectedToppings.value.forEach((selected) => {
+        const topping = toppings.value.find((t) => t.name === selected)
+        if (topping) {
+            toppingTotalPrice += topping.price
+        }
+    })
+
+    // 计算杯型附加价格
+    const cupExtraPrice =
+        cupTypes.value.find((c) => c.type === selectedCup.value)?.price || 0
+
+    // 单件商品价格（含加料和杯型）
+    const singleItemPrice =
+        props.product.price + toppingTotalPrice + cupExtraPrice
+
+    // 创建商品信息对象
     const orderItem = {
-        product: props.product,
-        quantity: quantity.value,
+        product: {
+            ...props.product,
+            // 确保原始商品信息中包含价格相关数据
+            price: props.product.price
+        },
+        quantity: itemQuantity,
         temperature: selectedTemp.value,
         sugar: selectedSugar.value,
         toppings: selectedToppings.value,
         cupType: selectedCup.value,
-        totalPrice: parseFloat(totalPrice.value)
+        // 单件商品总价（含加料和杯型）
+        price: singleItemPrice,
+        // 总价 = 单件商品总价 × 数量
+        totalPrice: singleItemPrice * itemQuantity
     }
 
+    // 在购物车项添加直接属性，使其与商品数据结构一致
+    orderItem.id = props.product.id
+    orderItem.name = props.product.name
+    orderItem.image = props.product.image
+    orderItem.desc = props.product.desc || props.product.description
+
+    // 直接保存到本地存储，不通过父组件传递
+    const cartItems = uni.getStorageSync('cartItems') || []
+
+    // 查找是否有完全相同的商品（基于商品ID、规格和加料）
+    const existingItemIndex = cartItems.findIndex((item) => {
+        // 基本信息匹配
+        const basicMatch =
+            item.id === orderItem.id &&
+            item.cupType === orderItem.cupType &&
+            item.sugar === orderItem.sugar &&
+            item.temperature === orderItem.temperature
+
+        // 加料匹配
+        let toppingsMatch = true
+        if (
+            (item.toppings || []).length !== (orderItem.toppings || []).length
+        ) {
+            toppingsMatch = false
+        } else {
+            const sortedCartToppings = [...(item.toppings || [])].sort()
+            const sortedNewToppings = [...(orderItem.toppings || [])].sort()
+            for (let i = 0; i < sortedCartToppings.length; i++) {
+                if (sortedCartToppings[i] !== sortedNewToppings[i]) {
+                    toppingsMatch = false
+                    break
+                }
+            }
+        }
+
+        return basicMatch && toppingsMatch
+    })
+
+    if (existingItemIndex !== -1) {
+        // 如果存在相同商品，增加数量
+        cartItems[existingItemIndex].quantity += itemQuantity
+        // 更新总价
+        cartItems[existingItemIndex].totalPrice =
+            cartItems[existingItemIndex].price *
+            cartItems[existingItemIndex].quantity
+    } else {
+        // 添加新商品
+        cartItems.push(orderItem)
+    }
+
+    // 保存到本地存储
+    uni.setStorageSync('cartItems', cartItems)
+
+    // 提示用户
+    uni.showToast({
+        title: '已加入购物车',
+        icon: 'success',
+        duration: 1500
+    })
+
+    // 向父组件发送事件（传递完整的商品数据，而不是null）
     emit('add-to-cart', orderItem)
+
+    // 关闭弹窗
     closePopup()
 }
 

@@ -77,10 +77,55 @@ const _sfc_main = {
       productDetailVisible.value = visible;
     };
     const handleAddToCart = (orderItem) => {
-      common_vendor.index.__f__("log", "at pages/search/search.vue:199", "添加到购物车:", orderItem);
-      const cartItems = common_vendor.index.getStorageSync("cartItems") || [];
-      cartItems.push(orderItem);
-      common_vendor.index.setStorageSync("cartItems", cartItems);
+      if (!orderItem) {
+        common_vendor.index.__f__(
+          "log",
+          "at pages/search/search.vue:201",
+          "接收到空订单项，将使用selectedProduct创建购物车项",
+          selectedProduct.value
+        );
+        const standardizedItem = {
+          id: selectedProduct.value.id,
+          name: selectedProduct.value.name || "",
+          price: Number(selectedProduct.value.price) || 0,
+          image: selectedProduct.value.image || "/static/images/hot01.png",
+          desc: selectedProduct.value.desc || "",
+          // 添加规格信息（使用默认值）
+          cupType: "中杯",
+          sugar: "全糖",
+          temperature: "正常冰",
+          toppings: [],
+          // 设置数量和计算总价
+          quantity: 1
+        };
+        standardizedItem.totalPrice = standardizedItem.price * standardizedItem.quantity;
+        standardizedItem.product = {
+          id: standardizedItem.id,
+          name: standardizedItem.name,
+          desc: standardizedItem.desc,
+          price: standardizedItem.price,
+          image: standardizedItem.image
+        };
+        const cartItems = common_vendor.index.getStorageSync("cartItems") || [];
+        const existingItemIndex = cartItems.findIndex((item) => {
+          if (!item)
+            return false;
+          return item.id === standardizedItem.id && item.cupType === standardizedItem.cupType && item.sugar === standardizedItem.sugar && item.temperature === standardizedItem.temperature;
+        });
+        if (existingItemIndex !== -1) {
+          cartItems[existingItemIndex].quantity += standardizedItem.quantity;
+          cartItems[existingItemIndex].totalPrice = cartItems[existingItemIndex].price * cartItems[existingItemIndex].quantity;
+        } else {
+          cartItems.push(standardizedItem);
+        }
+        common_vendor.index.setStorageSync("cartItems", cartItems);
+        common_vendor.index.showToast({
+          title: "已加入购物车",
+          icon: "success"
+        });
+        return;
+      }
+      common_vendor.index.__f__("log", "at pages/search/search.vue:276", "接收到完整的orderItem:", orderItem);
       common_vendor.index.showToast({
         title: "已加入购物车",
         icon: "success"

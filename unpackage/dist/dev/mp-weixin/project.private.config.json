@@ -9,29 +9,22 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/profile/profile",
-          "pathName": "pages/profile/profile",
+          "name": "pages/personal-data/personal-data",
+          "pathName": "pages/personal-data/personal-data",
           "query": "",
           "launchMode": "default",
           "scene": null
         },
         {
-          "name": "pages/order/order",
-          "pathName": "pages/order/order",
+          "name": "pages/personal-data/personal-data",
+          "pathName": "pages/personal-data/personal-data",
           "query": "",
           "launchMode": "default",
           "scene": null
         },
         {
-          "name": "pages/profile/profile",
-          "pathName": "pages/profile/profile",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/login/login",
-          "pathName": "pages/login/login",
+          "name": "pages/home/home",
+          "pathName": "pages/home/home",
           "query": "",
           "launchMode": "default",
           "scene": null

@@ -87,15 +87,67 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       return price.toFixed(2);
     });
     const addToCart = () => {
+      var _a;
+      const itemQuantity = quantity.value || 1;
+      let toppingTotalPrice = 0;
+      selectedToppings.value.forEach((selected) => {
+        const topping = toppings.value.find((t) => t.name === selected);
+        if (topping) {
+          toppingTotalPrice += topping.price;
+        }
+      });
+      const cupExtraPrice = ((_a = cupTypes.value.find((c) => c.type === selectedCup.value)) == null ? void 0 : _a.price) || 0;
+      const singleItemPrice = props.product.price + toppingTotalPrice + cupExtraPrice;
       const orderItem = {
-        product: props.product,
-        quantity: quantity.value,
+        product: {
+          ...props.product,
+          // 确保原始商品信息中包含价格相关数据
+          price: props.product.price
+        },
+        quantity: itemQuantity,
         temperature: selectedTemp.value,
         sugar: selectedSugar.value,
         toppings: selectedToppings.value,
         cupType: selectedCup.value,
-        totalPrice: parseFloat(totalPrice.value)
+        // 单件商品总价（含加料和杯型）
+        price: singleItemPrice,
+        // 总价 = 单件商品总价 × 数量
+        totalPrice: singleItemPrice * itemQuantity
       };
+      orderItem.id = props.product.id;
+      orderItem.name = props.product.name;
+      orderItem.image = props.product.image;
+      orderItem.desc = props.product.desc || props.product.description;
+      const cartItems = common_vendor.index.getStorageSync("cartItems") || [];
+      const existingItemIndex = cartItems.findIndex((item) => {
+        const basicMatch = item.id === orderItem.id && item.cupType === orderItem.cupType && item.sugar === orderItem.sugar && item.temperature === orderItem.temperature;
+        let toppingsMatch = true;
+        if ((item.toppings || []).length !== (orderItem.toppings || []).length) {
+          toppingsMatch = false;
+        } else {
+          const sortedCartToppings = [...item.toppings || []].sort();
+          const sortedNewToppings = [...orderItem.toppings || []].sort();
+          for (let i = 0; i < sortedCartToppings.length; i++) {
+            if (sortedCartToppings[i] !== sortedNewToppings[i]) {
+              toppingsMatch = false;
+              break;
+            }
+          }
+        }
+        return basicMatch && toppingsMatch;
+      });
+      if (existingItemIndex !== -1) {
+        cartItems[existingItemIndex].quantity += itemQuantity;
+        cartItems[existingItemIndex].totalPrice = cartItems[existingItemIndex].price * cartItems[existingItemIndex].quantity;
+      } else {
+        cartItems.push(orderItem);
+      }
+      common_vendor.index.setStorageSync("cartItems", cartItems);
+      common_vendor.index.showToast({
+        title: "已加入购物车",
+        icon: "success",
+        duration: 1500
+      });
       emit("add-to-cart", orderItem);
       closePopup();
     };
@@ -117,7 +169,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       { immediate: true }
     );
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/components/shop-detail.vue:355", "微信小程序组件挂载完成");
+      common_vendor.index.__f__("log", "at pages/components/shop-detail.vue:446", "微信小程序组件挂载完成");
     });
     return (_ctx, _cache) => {
       return {

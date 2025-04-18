@@ -136,43 +136,75 @@ const selectedItems = ref(new Set())
 // 检查购物车数据，确保符合规范格式
 const validateCartItems = () => {
     const items = uni.getStorageSync('cartItems') || []
-    const validatedItems = items.map((item) => {
-        // 确保所有必须的属性存在
-        const validItem = {
-            id: item.id || (item.product ? item.product.id : Date.now()),
-            cupType: item.cupType || '中杯',
-            name: item.name || (item.product ? item.product.name : ''),
-            price: item.price || (item.product ? item.product.price : 0),
-            quantity: item.quantity || 1,
-            sugar: item.sugar || '全糖',
-            temperature: item.temperature || '正常冰',
-            toppings: item.toppings || [],
-            image: item.image || (item.product ? item.product.image : ''),
-            desc:
-                item.desc ||
-                (item.product
-                    ? item.product.desc || item.product.description || ''
-                    : ''),
-            totalPrice:
-                item.totalPrice ||
-                item.price * item.quantity ||
-                (item.product ? item.product.price : 0) * item.quantity
-        }
+    // 过滤掉无效的项目
+    const filteredItems = items.filter(
+        (item) => item !== null && item !== undefined
+    )
 
-        // 确保product对象存在
-        if (!item.product) {
-            validItem.product = {
-                id: item.id,
-                name: item.name,
-                desc: item.desc || '',
-                price: item.price,
-                image: item.image
+    const validatedItems = filteredItems.map((item) => {
+        try {
+            // 确保所有必须的属性存在
+            const validItem = {
+                id: item.id || (item.product ? item.product.id : Date.now()),
+                cupType: item.cupType || '中杯',
+                name: item.name || (item.product ? item.product.name : ''),
+                price:
+                    Number(item.price) ||
+                    (item.product ? Number(item.product.price) : 0),
+                quantity: Number(item.quantity) || 1,
+                sugar: item.sugar || '全糖',
+                temperature: item.temperature || '正常冰',
+                toppings: Array.isArray(item.toppings) ? item.toppings : [],
+                image: item.image || (item.product ? item.product.image : ''),
+                desc:
+                    item.desc ||
+                    (item.product
+                        ? item.product.desc || item.product.description || ''
+                        : '')
             }
-        } else {
-            validItem.product = { ...item.product }
-        }
 
-        return validItem
+            // 计算总价
+            const itemPrice = Number(validItem.price) || 0
+            const itemQuantity = Number(validItem.quantity) || 1
+            validItem.totalPrice = item.totalPrice || itemPrice * itemQuantity
+
+            // 确保product对象存在
+            if (!item.product) {
+                validItem.product = {
+                    id: validItem.id,
+                    name: validItem.name,
+                    desc: validItem.desc || '',
+                    price: validItem.price,
+                    image: validItem.image
+                }
+            } else {
+                validItem.product = { ...item.product }
+            }
+
+            return validItem
+        } catch (error) {
+            // 如果处理某个项目时出错，返回一个有效的默认项目
+            return {
+                id: Date.now() + Math.random(),
+                cupType: '中杯',
+                name: '商品数据错误',
+                price: 0,
+                quantity: 1,
+                sugar: '全糖',
+                temperature: '正常冰',
+                toppings: [],
+                image: '/static/images/hot01.png',
+                desc: '',
+                totalPrice: 0,
+                product: {
+                    id: Date.now() + Math.random(),
+                    name: '商品数据错误',
+                    desc: '',
+                    price: 0,
+                    image: '/static/images/hot01.png'
+                }
+            }
+        }
     })
 
     return validatedItems

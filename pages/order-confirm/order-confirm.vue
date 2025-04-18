@@ -153,6 +153,7 @@ import CouponSelect from '../components/coupon-select.vue'
 import { userState } from '../../utils/userState'
 import { updateUserState } from '../../utils/userState'
 import { orderApi } from '../../utils/api'
+import { userData, initUserData } from '../../utils/userData'
 
 // 定义数据
 const orderItems = ref([])
@@ -170,9 +171,15 @@ const showCouponSelect = ref(false)
 const selectedCoupon = ref(null)
 const totalAmount = ref(0)
 
-// 可用优惠券列表
+// 可用优惠券列表 - 从userData中获取
 const availableCoupons = computed(() => {
-    return (userState.coupons || []).filter((coupon) => {
+    // 优先从userData中获取优惠券，如果没有再从userState获取
+    const userCoupons =
+        userData.coupons && userData.coupons.length > 0
+            ? userData.coupons
+            : userState.coupons || []
+
+    return userCoupons.filter((coupon) => {
         // 检查优惠券是否可用
         const now = Date.now()
         const isExpired = now > coupon.endTime
@@ -192,6 +199,9 @@ const originalPrice = ref('0.00')
 
 // 获取传递的数据
 onMounted(() => {
+    // 初始化用户数据，确保获取到最新的优惠券信息
+    initUserData()
+
     try {
         // 从本地存储中获取订单数据
         const orderData = uni.getStorageSync('orderConfirmData')
@@ -287,21 +297,33 @@ const handlePayment = async () => {
 
         // 如果使用了优惠券，将其标记为已使用
         if (selectedCoupon.value) {
-            const index = userState.coupons.findIndex(
+            // 更新userState中的优惠券状态
+            const stateIndex = userState.coupons.findIndex(
                 (c) => c.id === selectedCoupon.value.id
             )
-            if (index !== -1) {
-                console.log('优惠券已使用')
-                userState.coupons[index].status = 'used'
-                // 记录优惠券使用时间
-                userState.coupons[index].usedTime = Date.now()
-                console.log('优惠券状态:', userState.coupons[index].status)
-                console.log(
-                    '优惠券使用时间:',
-                    new Date(userState.coupons[index].usedTime).toLocaleString()
-                )
+            if (stateIndex !== -1) {
+                console.log('更新userState中的优惠券状态')
+                userState.coupons[stateIndex].status = 'used'
+                userState.coupons[stateIndex].usedTime = Date.now()
                 // 使用updateUserState保存完整的用户状态
                 updateUserState({ coupons: userState.coupons })
+            }
+
+            // 同时更新userData中的优惠券状态
+            const dataIndex = userData.coupons.findIndex(
+                (c) => c.id === selectedCoupon.value.id
+            )
+            if (dataIndex !== -1) {
+                console.log('更新userData中的优惠券状态')
+                userData.coupons[dataIndex].status = 'used'
+                userData.coupons[dataIndex].usedTime = Date.now()
+                console.log('优惠券状态:', userData.coupons[dataIndex].status)
+                console.log(
+                    '优惠券使用时间:',
+                    new Date(
+                        userData.coupons[dataIndex].usedTime
+                    ).toLocaleString()
+                )
             }
         }
 

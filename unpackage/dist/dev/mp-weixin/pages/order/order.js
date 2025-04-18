@@ -30,43 +30,28 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const deliveryType = common_vendor.ref("self");
     common_vendor.watch(deliveryType, (newValue) => {
       common_vendor.index.setStorageSync("deliveryType", newValue);
-      common_vendor.index.__f__("log", "at pages/order/order.vue:342", "配送方式已更新:", newValue);
       if (newValue === "delivery") {
         getUserDefaultAddress();
       }
     });
     const getUserDefaultAddress = () => {
-      const savedAddress = common_vendor.index.getStorageSync("userDefaultAddress");
-      if (savedAddress) {
-        userAddress.value = savedAddress;
-        common_vendor.index.__f__("log", "at pages/order/order.vue:356", "从本地存储获取到用户地址:", savedAddress);
-        return;
-      }
-      const token = common_vendor.index.getStorageSync("token");
-      if (!token) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:363", "用户未登录，无法获取地址");
+      const userInfo = common_vendor.index.getStorageSync("userInfo");
+      const userId = userInfo.userId;
+      if (!userId) {
         userAddress.value = "请先登录并设置收货地址";
         return;
       }
       common_vendor.index.request({
-        url: utils_api_config.BASE_URL + utils_api_config.API_PATHS.USER_DEFAULT_ADDRESS,
-        // 使用config.js中定义的路径
+        url: `${utils_api_config.BASE_URL}${utils_api_config.API_PATHS.USER_DEFAULT_ADDRESS}?userId=${userId}`,
         method: "GET",
-        header: {
-          Authorization: `Bearer ${token}`
-        },
         success: (res) => {
-          if (res.data && res.data.data && res.data.data.address) {
-            userAddress.value = res.data.data.address;
-            common_vendor.index.setStorageSync("userDefaultAddress", res.data.data.address);
-            common_vendor.index.__f__("log", "at pages/order/order.vue:380", "获取到用户默认地址:", res.data.data.address);
+          if (res.data && res.data.code === 200 && res.data.data && res.data.data.address) {
+            userAddress.value = res.data.data.address.address;
           } else {
             userAddress.value = "请设置默认收货地址";
-            common_vendor.index.__f__("log", "at pages/order/order.vue:383", "用户没有设置默认地址");
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/order/order.vue:387", "获取用户地址失败:", err);
           userAddress.value = "获取地址失败，请重试";
         }
       });
@@ -131,10 +116,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       try {
         const productData = await utils_productData.getProductData();
         categories.value = productData;
-        common_vendor.index.__f__("log", "at pages/order/order.vue:486", "产品数据加载成功");
         calculateHeights();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:491", "加载产品数据失败:", error);
         common_vendor.index.showToast({
           title: "加载产品失败，请重试",
           icon: "none"
@@ -168,8 +151,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       common_vendor.index.$off("address-selected", handleAddressSelected);
     });
     const handleStoreSelected = (data) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:543", "收到门店选择事件:", data);
-      common_vendor.index.__f__("log", "at pages/order/order.vue:544", data);
       if (data) {
         if (data.name) {
           shopName.value = data.name;
@@ -190,10 +171,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       }
     };
     const updateStoreInfo = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:570", "更新门店信息");
       const selectedStore = common_vendor.index.getStorageSync("selectedStore");
       if (selectedStore) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:573", "从存储中获取到的门店信息:", selectedStore);
         let updated = false;
         if (selectedStore.name && selectedStore.name !== shopName.value) {
           shopName.value = selectedStore.name;
@@ -209,7 +188,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
         }
         if (updated) {
           common_vendor.nextTick$1(() => {
-            common_vendor.index.__f__("log", "at pages/order/order.vue:599", "强制刷新UI");
           });
         }
       }
@@ -291,9 +269,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             // 保存原始优惠券数据，便于后续使用
           };
         });
-        common_vendor.index.__f__("log", "at pages/order/order.vue:718", "已加载优惠券：", coupons.value.length, "张");
-      } else {
-        common_vendor.index.__f__("warn", "at pages/order/order.vue:720", "未找到用户优惠券数据");
       }
     };
     const useCoupon = (coupon) => {
@@ -308,7 +283,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     const productDetailVisible = common_vendor.ref(false);
     const selectedProduct = common_vendor.ref({});
     const openProductDetail = (category, product) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:771", "打开商品详情", category.name, product.name);
       selectedProduct.value = { ...product, category: category.name };
       setTimeout(() => {
         productDetailVisible.value = true;
@@ -325,34 +299,20 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:798", "添加到购物车", item);
-      if (!item) {
-        common_vendor.index.__f__("error", "at pages/order/order.vue:801", "添加到购物车的商品数据为空");
-        return;
-      }
+      common_vendor.index.__f__("log", "at pages/order/order.vue:769", "订单页面接收到的购物车项：", item);
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
-          orderCartRef.value.addToCart(item);
-        } else {
-          common_vendor.index.__f__("warn", "at pages/order/order.vue:811", "orderCartRef不存在，尝试其他方式获取组件");
-          const pages = getCurrentPages();
-          if (pages && pages.length > 0) {
-            const currentPage = pages[pages.length - 1];
-            if (currentPage.$refs && currentPage.$refs.orderCartRef) {
-              currentPage.$refs.orderCartRef.addToCart(item);
-            } else {
-              common_vendor.index.__f__("error", "at pages/order/order.vue:819", "无法获取购物车组件引用");
-            }
-          } else {
-            common_vendor.index.__f__("error", "at pages/order/order.vue:822", "无法获取当前页面实例");
-          }
+          orderCartRef.value.loadCartItems();
         }
+      });
+      common_vendor.index.showToast({
+        title: "已加入购物车",
+        icon: "success"
       });
     };
     const openPromoDetail = (item) => {
       const product = findProductByTitle(item.title);
       if (product) {
-        common_vendor.index.__f__("log", "at pages/order/order.vue:836", "打开促销商品详情", item.title);
         selectedProduct.value = { ...product };
         setTimeout(() => {
           productDetailVisible.value = true;
@@ -373,7 +333,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
     };
     const refreshPage = () => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:864", "执行页面刷新");
       updateStoreInfo();
     };
     const goToSearch = () => {
@@ -387,7 +346,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       });
     };
     const handleAddressSelected = (data) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:886", "收到地址选择事件:", data);
       if (data) {
         if (data.address) {
           userAddress.value = data.address;

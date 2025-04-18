@@ -765,29 +765,21 @@ const orderCartRef = ref(null)
 
 // 处理添加到购物车
 const handleAddToCart = (item) => {
-    // 确保item包含必要的属性
-    if (!item) {
-        return
-    }
+    // 添加调试日志
+    console.log('订单页面接收到的购物车项：', item)
 
-    // 获取当前购物车
-    const cartItems = uni.getStorageSync('cartItems') || []
-    // 添加新商品
-    cartItems.push(item)
-    // 保存回本地存储
-    uni.setStorageSync('cartItems', cartItems)
+    // 由于shop-detail组件已经将商品添加到了本地存储
+    // 我们只需要刷新购物车组件显示
+    nextTick(() => {
+        if (orderCartRef.value) {
+            orderCartRef.value.loadCartItems()
+        }
+    })
 
-    // 提示用户
+    // 提示用户（虽然shop-detail组件已经显示了提示，但这里可以再次确认）
     uni.showToast({
         title: '已加入购物车',
         icon: 'success'
-    })
-
-    // 同时更新购物车组件
-    nextTick(() => {
-        if (orderCartRef.value) {
-            orderCartRef.value.addToCart(item)
-        }
     })
 }
 

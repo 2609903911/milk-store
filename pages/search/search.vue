@@ -196,15 +196,87 @@ const updateDetailVisible = (visible) => {
 
 // 处理添加到购物车
 const handleAddToCart = (orderItem) => {
-    console.log('添加到购物车:', orderItem)
-    // 获取当前购物车
-    const cartItems = uni.getStorageSync('cartItems') || []
-    // 添加新商品
-    cartItems.push(orderItem)
-    // 保存回本地存储
-    uni.setStorageSync('cartItems', cartItems)
+    // 如果orderItem为null或未定义，可能是旧版本组件发送的事件
+    if (!orderItem) {
+        console.log(
+            '接收到空订单项，将使用selectedProduct创建购物车项',
+            selectedProduct.value
+        )
 
-    // 提示用户
+        // 创建标准化的商品对象
+        const standardizedItem = {
+            id: selectedProduct.value.id,
+            name: selectedProduct.value.name || '',
+            price: Number(selectedProduct.value.price) || 0,
+            image: selectedProduct.value.image || '/static/images/hot01.png',
+            desc: selectedProduct.value.desc || '',
+
+            // 添加规格信息（使用默认值）
+            cupType: '中杯',
+            sugar: '全糖',
+            temperature: '正常冰',
+            toppings: [],
+
+            // 设置数量和计算总价
+            quantity: 1
+        }
+
+        // 计算总价
+        standardizedItem.totalPrice =
+            standardizedItem.price * standardizedItem.quantity
+
+        // 添加product对象，与shop-detail页面保持一致
+        standardizedItem.product = {
+            id: standardizedItem.id,
+            name: standardizedItem.name,
+            desc: standardizedItem.desc,
+            price: standardizedItem.price,
+            image: standardizedItem.image
+        }
+
+        // 获取当前购物车
+        const cartItems = uni.getStorageSync('cartItems') || []
+
+        // 查找购物车中是否已有相同商品
+        const existingItemIndex = cartItems.findIndex((item) => {
+            if (!item) return false
+            return (
+                item.id === standardizedItem.id &&
+                item.cupType === standardizedItem.cupType &&
+                item.sugar === standardizedItem.sugar &&
+                item.temperature === standardizedItem.temperature
+            )
+        })
+
+        if (existingItemIndex !== -1) {
+            // 如果存在相同商品，增加数量
+            cartItems[existingItemIndex].quantity += standardizedItem.quantity
+            // 更新总价
+            cartItems[existingItemIndex].totalPrice =
+                cartItems[existingItemIndex].price *
+                cartItems[existingItemIndex].quantity
+        } else {
+            // 添加新商品
+            cartItems.push(standardizedItem)
+        }
+
+        // 保存回本地存储
+        uni.setStorageSync('cartItems', cartItems)
+
+        // 提示用户
+        uni.showToast({
+            title: '已加入购物车',
+            icon: 'success'
+        })
+
+        return
+    }
+
+    // 处理来自shop-detail组件的orderItem对象
+    console.log('接收到完整的orderItem:', orderItem)
+
+    // 购物车项已经在shop-detail组件中处理，不需要再次处理
+    // 但仍然显示成功提示
     uni.showToast({
         title: '已加入购物车',
         icon: 'success'

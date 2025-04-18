@@ -17,8 +17,10 @@
                             <image
                                 class="avatar"
                                 :src="
-                                    userInfo.avatar ||
-                                    '/static/images/avatar.png'
+                                    userInfo.avatar.startsWith('http')
+                                        ? userInfo.avatar
+                                        : getFullUrl(userInfo.avatar) ||
+                                          '/static/images/avatar.png'
                                 "
                                 mode="aspectFill"
                                 @error="handleAvatarError"
@@ -179,7 +181,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { get, post } from '../../utils/request'
 import PhoneUpdate from '../components/phone-update.vue'
-import { API_PATHS } from '../../utils/api/config'
+import { API_PATHS, getFullUrl } from '../../utils/api/config'
 
 // 加载状态
 const loading = ref(true)
@@ -509,23 +511,75 @@ const chooseAvatar = () => {
             // 获取选择的图片临时路径
             const tempFilePath = res.tempFilePaths[0]
 
-            // 预览裁剪
-            uni.navigateTo({
-                url: `/pages/image-cropper/image-cropper?src=${encodeURIComponent(
-                    tempFilePath
-                )}&type=avatar`,
-                events: {
-                    // 接收裁剪后的图片
-                    cropImage: function (data) {
-                        if (data.path) {
-                            // 更新头像
-                            userInfo.value.avatar = data.path
+            // 直接上传图片到服务器
+            uni.showLoading({
+                title: '上传头像中...'
+            })
+
+            // 构建完整的URL
+            const fullUploadUrl = getFullUrl(API_PATHS.USER_AVATAR_UPLOAD)
+            console.log('上传URL:', fullUploadUrl)
+
+            // 上传图片到服务器
+            uni.uploadFile({
+                url: fullUploadUrl, // 使用完整URL
+                filePath: tempFilePath,
+                name: 'avatarFile',
+                formData: {
+                    userId: userInfo.value.userId
+                },
+                success: (uploadRes) => {
+                    try {
+                        console.log('上传结果:', uploadRes.data)
+                        const result = JSON.parse(uploadRes.data)
+                        if (result.code === 200 && result.data?.avatarUrl) {
+                            // 使用服务器返回的永久URL更新头像
+                            let serverAvatarUrl = result.data.avatarUrl
+                            console.log('服务器返回的头像URL:', serverAvatarUrl)
+
+                            // 如果是相对URL，添加baseURL
+                            if (serverAvatarUrl.startsWith('/')) {
+                                serverAvatarUrl = getFullUrl(serverAvatarUrl)
+                            }
+
+                            // 更新用户头像URL
+                            userInfo.value.avatar = serverAvatarUrl
+
+                            // 更新本地存储中的用户信息
+                            const userData = uni.getStorageSync('userInfo')
+                            if (userData) {
+                                userData.avatar = serverAvatarUrl
+                                uni.setStorageSync('userInfo', userData)
+                            }
+
+                            uni.showToast({
+                                title: '头像更新成功',
+                                icon: 'success'
+                            })
+                        } else {
+                            // 上传失败
+                            uni.showToast({
+                                title: result.message || '头像保存失败',
+                                icon: 'none'
+                            })
                         }
+                    } catch (e) {
+                        console.error('解析上传结果失败:', e, uploadRes.data)
+                        uni.showToast({
+                            title: '服务器返回数据格式错误',
+                            icon: 'none'
+                        })
                     }
                 },
-                fail: () => {
-                    // 如果没有裁剪页面，直接使用选择的图片
-                    userInfo.value.avatar = tempFilePath
+                fail: (err) => {
+                    console.error('上传失败:', err)
+                    uni.showToast({
+                        title: '上传失败，请稍后再试',
+                        icon: 'none'
+                    })
+                },
+                complete: () => {
+                    uni.hideLoading()
                 }
             })
         }
@@ -534,7 +588,9 @@ const chooseAvatar = () => {
 
 // 处理头像加载错误
 const handleAvatarError = () => {
-    // 当头像加载失败时，将使用默认的 src 属性值（已在模板中设置）
+    console.error('头像加载失败:', userInfo.value.avatar)
+    // 当头像加载失败时，将使用默认头像
+    userInfo.value.avatar = '/static/images/avatar.png'
 }
 </script>
 

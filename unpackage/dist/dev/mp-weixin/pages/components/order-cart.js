@@ -20,15 +20,101 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
     const showDetail = common_vendor.ref(false);
     const cartItems = common_vendor.ref([]);
     const selectedItems = common_vendor.ref(/* @__PURE__ */ new Set());
+    const validateCartItems = () => {
+      const items = common_vendor.index.getStorageSync("cartItems") || [];
+      const filteredItems = items.filter(
+        (item) => item !== null && item !== void 0
+      );
+      const validatedItems = filteredItems.map((item) => {
+        try {
+          const validItem = {
+            id: item.id || (item.product ? item.product.id : Date.now()),
+            cupType: item.cupType || "中杯",
+            name: item.name || (item.product ? item.product.name : ""),
+            price: Number(item.price) || (item.product ? Number(item.product.price) : 0),
+            quantity: Number(item.quantity) || 1,
+            sugar: item.sugar || "全糖",
+            temperature: item.temperature || "正常冰",
+            toppings: Array.isArray(item.toppings) ? item.toppings : [],
+            image: item.image || (item.product ? item.product.image : ""),
+            desc: item.desc || (item.product ? item.product.desc || item.product.description || "" : "")
+          };
+          const itemPrice = Number(validItem.price) || 0;
+          const itemQuantity = Number(validItem.quantity) || 1;
+          validItem.totalPrice = item.totalPrice || itemPrice * itemQuantity;
+          if (!item.product) {
+            validItem.product = {
+              id: validItem.id,
+              name: validItem.name,
+              desc: validItem.desc || "",
+              price: validItem.price,
+              image: validItem.image
+            };
+          } else {
+            validItem.product = { ...item.product };
+          }
+          return validItem;
+        } catch (error) {
+          return {
+            id: Date.now() + Math.random(),
+            cupType: "中杯",
+            name: "商品数据错误",
+            price: 0,
+            quantity: 1,
+            sugar: "全糖",
+            temperature: "正常冰",
+            toppings: [],
+            image: "/static/images/hot01.png",
+            desc: "",
+            totalPrice: 0,
+            product: {
+              id: Date.now() + Math.random(),
+              name: "商品数据错误",
+              desc: "",
+              price: 0,
+              image: "/static/images/hot01.png"
+            }
+          };
+        }
+      });
+      return validatedItems;
+    };
+    const loadCartItems = () => {
+      const validatedItems = validateCartItems();
+      cartItems.value = validatedItems;
+      selectedItems.value.clear();
+      cartItems.value.forEach((item) => {
+        if (item.id) {
+          selectedItems.value.add(item.id);
+        }
+      });
+      saveCartItems();
+    };
+    const saveCartItems = () => {
+      common_vendor.index.setStorageSync("cartItems", cartItems.value);
+    };
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:145", "当前运行在微信小程序环境中");
+      loadCartItems();
     });
+    common_vendor.onShow(() => {
+      loadCartItems();
+    });
+    common_vendor.watch(
+      cartItems,
+      () => {
+        saveCartItems();
+      },
+      { deep: true }
+    );
     const totalCount = common_vendor.computed(() => {
-      return cartItems.value.reduce((total, item) => total + item.count, 0);
+      return cartItems.value.reduce(
+        (total, item) => total + (item.quantity || 1),
+        0
+      );
     });
     const totalPrice = common_vendor.computed(() => {
       return cartItems.value.reduce((total, item) => {
-        return total + (selectedItems.value.has(item.id) ? item.price * item.count : 0);
+        return total + (selectedItems.value.has(item.id) ? item.totalPrice : 0);
       }, 0).toFixed(2);
     });
     const isAllSelected = common_vendor.computed(() => {
@@ -43,130 +129,100 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       showDetail.value = false;
     };
     const addToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:184", "购物车组件收到商品:", item);
       if (!item) {
-        common_vendor.index.__f__("error", "at pages/components/order-cart.vue:188", "商品数据为空");
         return;
       }
       let productData = {
-        name: "",
-        price: 0,
-        count: 1
+        id: item.id || (item.product ? item.product.id : Date.now()),
+        cupType: item.cupType || "中杯",
+        name: item.name || (item.product ? item.product.name : ""),
+        price: item.price || (item.product ? item.product.price : 0),
+        quantity: item.quantity || 1,
+        sugar: item.sugar || "全糖",
+        temperature: item.temperature || "正常冰",
+        toppings: item.toppings || [],
+        image: item.image || (item.product ? item.product.image : ""),
+        desc: item.desc || (item.product ? item.product.desc || item.product.description || "" : ""),
+        totalPrice: item.totalPrice || item.price * (item.quantity || 1) || (item.product ? item.product.price : 0) * (item.quantity || 1)
       };
-      if (item.product) {
-        const itemPrice = item.totalPrice !== void 0 ? item.totalPrice / item.quantity : item.product.price;
-        productData = {
-          id: item.product.id || Date.now().toString(),
-          name: item.product.name,
-          // 使用每件商品的单价，而不是原始价格
-          price: itemPrice,
-          size: item.cupType || "中杯",
-          sugar: item.sugar || "无糖",
-          ice: item.temperature || "正常冰",
-          image: item.product.image,
-          category: item.product.category,
-          count: item.quantity || 1,
-          toppings: item.toppings || [],
-          // 存储原始商品信息，方便后续使用
-          originalProduct: item.product
+      if (!item.product) {
+        productData.product = {
+          id: productData.id,
+          name: productData.name,
+          desc: productData.desc,
+          price: productData.price,
+          image: productData.image
         };
       } else {
-        productData = {
-          id: item.id || Date.now().toString(),
-          name: item.name,
-          price: item.price,
-          size: item.size || "中杯",
-          sugar: item.sugar || "无糖",
-          ice: item.ice || "正常冰",
-          image: item.image,
-          count: item.count || 1,
-          toppings: item.toppings || []
-        };
+        productData.product = { ...item.product };
       }
-      if (!productData.name || !productData.price) {
-        common_vendor.index.__f__("error", "at pages/components/order-cart.vue:239", "处理后的商品数据不完整:", productData);
-        return;
-      }
-      const areArraysEqual = (arr1 = [], arr2 = []) => {
-        if (arr1.length !== arr2.length)
-          return false;
-        const sorted1 = [...arr1].sort((a, b) => {
-          const aValue = typeof a === "string" ? a : a.id || a.name || "";
-          const bValue = typeof b === "string" ? b : b.id || b.name || "";
-          return aValue.localeCompare(bValue);
-        });
-        const sorted2 = [...arr2].sort((a, b) => {
-          const aValue = typeof a === "string" ? a : a.id || a.name || "";
-          const bValue = typeof b === "string" ? b : b.id || b.name || "";
-          return aValue.localeCompare(bValue);
-        });
-        for (let i = 0; i < sorted1.length; i++) {
-          const item1 = sorted1[i];
-          const item2 = sorted2[i];
-          if (typeof item1 === "string" && typeof item2 === "string") {
-            if (item1 !== item2)
-              return false;
-            continue;
-          }
-          const id1 = typeof item1 === "string" ? item1 : item1.id || item1.name;
-          const id2 = typeof item2 === "string" ? item2 : item2.id || item2.name;
-          const count1 = typeof item1 === "string" ? 1 : item1.count || 1;
-          const count2 = typeof item2 === "string" ? 1 : item2.count || 1;
-          if (id1 !== id2 || count1 !== count2) {
-            return false;
+      const currentCartItems = validateCartItems();
+      const existingItemIndex = currentCartItems.findIndex((cartItem) => {
+        const basicMatch = cartItem.id === productData.id && cartItem.cupType === productData.cupType && cartItem.sugar === productData.sugar && cartItem.temperature === productData.temperature;
+        let toppingsMatch = true;
+        if (cartItem.toppings.length !== productData.toppings.length) {
+          toppingsMatch = false;
+        } else {
+          const sortedCartToppings = [...cartItem.toppings].sort();
+          const sortedNewToppings = [...productData.toppings].sort();
+          for (let i = 0; i < sortedCartToppings.length; i++) {
+            if (sortedCartToppings[i] !== sortedNewToppings[i]) {
+              toppingsMatch = false;
+              break;
+            }
           }
         }
-        return true;
-      };
-      const existingItemIndex = cartItems.value.findIndex((cartItem) => {
-        const basicMatch = cartItem.name === productData.name && cartItem.size === productData.size && cartItem.sugar === productData.sugar && cartItem.ice === productData.ice;
-        const toppingsMatch = areArraysEqual(
-          cartItem.toppings,
-          productData.toppings
-        );
         return basicMatch && toppingsMatch;
       });
-      common_vendor.index.__f__(
-        "log",
-        "at pages/components/order-cart.vue:307",
-        "查找结果:",
-        existingItemIndex,
-        existingItemIndex !== -1 ? "找到相同商品" : "未找到相同商品"
-      );
       if (existingItemIndex !== -1) {
-        cartItems.value[existingItemIndex].count += productData.count;
-        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:316", "更新后的商品:", cartItems.value[existingItemIndex]);
+        currentCartItems[existingItemIndex].quantity += productData.quantity;
+        currentCartItems[existingItemIndex].totalPrice = currentCartItems[existingItemIndex].price * currentCartItems[existingItemIndex].quantity;
       } else {
-        cartItems.value.push(productData);
-        selectedItems.value.add(productData.id);
-        common_vendor.index.__f__("log", "at pages/components/order-cart.vue:322", "添加新商品:", productData);
+        currentCartItems.push(productData);
       }
-      common_vendor.index.__f__("log", "at pages/components/order-cart.vue:325", "当前购物车商品:", cartItems.value);
+      cartItems.value = currentCartItems;
+      if (existingItemIndex === -1) {
+        selectedItems.value.add(productData.id);
+      }
+      saveCartItems();
+      common_vendor.index.showToast({
+        title: "已加入购物车",
+        icon: "success",
+        duration: 1500
+      });
     };
     const increaseItem = (index) => {
-      cartItems.value[index].count += 1;
+      cartItems.value[index].quantity += 1;
+      updateItemTotalPrice(index);
+      saveCartItems();
     };
     const decreaseItem = (index) => {
-      if (cartItems.value[index].count > 1) {
-        cartItems.value[index].count -= 1;
+      if (cartItems.value[index].quantity > 1) {
+        cartItems.value[index].quantity -= 1;
+        updateItemTotalPrice(index);
       } else {
         cartItems.value.splice(index, 1);
         if (cartItems.value.length === 0) {
           hideCartDetail();
         }
       }
+      saveCartItems();
+    };
+    const updateItemTotalPrice = (index) => {
+      const item = cartItems.value[index];
+      item.totalPrice = item.price * item.quantity;
     };
     const clearCart = () => {
       cartItems.value = [];
+      common_vendor.index.setStorageSync("cartItems", []);
       hideCartDetail();
     };
     const goCheckout = () => {
       const selectedCartItems = cartItems.value.filter((item) => selectedItems.value.has(item.id)).map((item) => {
         return {
           ...item,
-          quantity: item.count,
-          specs: `${item.size}, ${item.sugar}, ${item.ice}`
-          // 添加规格信息，方便在订单详情页显示
+          // 订单确认页面需要的额外字段
+          specs: `${item.cupType}, ${item.sugar}, ${item.temperature}`
         };
       });
       if (selectedCartItems.length === 0) {
@@ -176,10 +232,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
         });
         return;
       }
-      const totalPrice2 = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+      const totalPrice2 = selectedCartItems.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2);
       if (parseFloat(totalPrice2) == 0) {
         common_vendor.index.showToast({
-          title: "=请选择商品",
+          title: "请选择商品",
           icon: "none"
         });
         return;
@@ -239,7 +295,8 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       clearCart,
       goCheckout,
       toggleItemSelection,
-      toggleSelectAll
+      toggleSelectAll,
+      loadCartItems
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -269,11 +326,11 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
             c: item.image,
             d: common_vendor.t(item.name),
             e: common_vendor.t(item.price),
-            f: common_vendor.t(item.size),
+            f: common_vendor.t(item.cupType),
             g: common_vendor.t(item.sugar),
-            h: common_vendor.t(item.ice),
+            h: common_vendor.t(item.temperature),
             i: common_vendor.o(($event) => decreaseItem(index), index),
-            j: common_vendor.t(item.count),
+            j: common_vendor.t(item.quantity),
             k: common_vendor.o(($event) => increaseItem(index), index),
             l: index
           };
