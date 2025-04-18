@@ -770,20 +770,23 @@ const handleAddToCart = (item) => {
         return
     }
 
-    // 使用nextTick确保DOM更新完成
+    // 获取当前购物车
+    const cartItems = uni.getStorageSync('cartItems') || []
+    // 添加新商品
+    cartItems.push(item)
+    // 保存回本地存储
+    uni.setStorageSync('cartItems', cartItems)
+
+    // 提示用户
+    uni.showToast({
+        title: '已加入购物车',
+        icon: 'success'
+    })
+
+    // 同时更新购物车组件
     nextTick(() => {
-        // 首先尝试使用ref
         if (orderCartRef.value) {
             orderCartRef.value.addToCart(item)
-        } else {
-            // 尝试从当前页面获取组件
-            const pages = getCurrentPages()
-            if (pages && pages.length > 0) {
-                const currentPage = pages[pages.length - 1]
-                if (currentPage.$refs && currentPage.$refs.orderCartRef) {
-                    currentPage.$refs.orderCartRef.addToCart(item)
-                }
-            }
         }
     })
 }

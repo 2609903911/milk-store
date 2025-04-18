@@ -74,8 +74,8 @@
                             </view>
                             <view class="item-bottom">
                                 <text class="item-spec"
-                                    >{{ item.size }}, {{ item.sugar }},
-                                    {{ item.ice }}</text
+                                    >{{ item.cupType }}, {{ item.sugar }},
+                                    {{ item.temperature }}</text
                                 >
                                 <view class="item-counter">
                                     <view
@@ -84,7 +84,7 @@
                                         >-</view
                                     >
                                     <text class="counter-num">{{
-                                        item.count
+                                        item.quantity
                                     }}</text>
                                     <view
                                         class="counter-btn plus"
@@ -125,38 +125,112 @@ export default {
 
 <script setup>
 // 引入 uni-icons 组件
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 
 // 状态
 const showDetail = ref(false)
 const cartItems = ref([])
 const selectedItems = ref(new Set())
 
-// 检测平台并适当调整
-onMounted(() => {
-    // 检查是否是H5环境
-    // #ifdef H5
-    console.log('当前运行在H5环境中')
-    // 在H5环境下可能需要额外调整
-    // #endif
+// 检查购物车数据，确保符合规范格式
+const validateCartItems = () => {
+    const items = uni.getStorageSync('cartItems') || []
+    const validatedItems = items.map((item) => {
+        // 确保所有必须的属性存在
+        const validItem = {
+            id: item.id || (item.product ? item.product.id : Date.now()),
+            cupType: item.cupType || '中杯',
+            name: item.name || (item.product ? item.product.name : ''),
+            price: item.price || (item.product ? item.product.price : 0),
+            quantity: item.quantity || 1,
+            sugar: item.sugar || '全糖',
+            temperature: item.temperature || '正常冰',
+            toppings: item.toppings || [],
+            image: item.image || (item.product ? item.product.image : ''),
+            desc:
+                item.desc ||
+                (item.product
+                    ? item.product.desc || item.product.description || ''
+                    : ''),
+            totalPrice:
+                item.totalPrice ||
+                item.price * item.quantity ||
+                (item.product ? item.product.price : 0) * item.quantity
+        }
 
-    // 检查是否是微信小程序环境
-    // #ifdef MP-WEIXIN
-    console.log('当前运行在微信小程序环境中')
-    // #endif
+        // 确保product对象存在
+        if (!item.product) {
+            validItem.product = {
+                id: item.id,
+                name: item.name,
+                desc: item.desc || '',
+                price: item.price,
+                image: item.image
+            }
+        } else {
+            validItem.product = { ...item.product }
+        }
+
+        return validItem
+    })
+
+    return validatedItems
+}
+
+// 从本地存储加载购物车数据
+const loadCartItems = () => {
+    const validatedItems = validateCartItems()
+    cartItems.value = validatedItems
+
+    // 默认选中所有商品
+    selectedItems.value.clear()
+    cartItems.value.forEach((item) => {
+        if (item.id) {
+            selectedItems.value.add(item.id)
+        }
+    })
+
+    // 保存回本地存储以确保格式统一
+    saveCartItems()
+}
+
+// 保存购物车数据到本地存储
+const saveCartItems = () => {
+    uni.setStorageSync('cartItems', cartItems.value)
+}
+
+// 在组件挂载和显示时加载购物车数据
+onMounted(() => {
+    loadCartItems()
 })
+
+onShow(() => {
+    loadCartItems()
+})
+
+// 监听购物车数据变化，保存到本地存储
+watch(
+    cartItems,
+    () => {
+        saveCartItems()
+    },
+    { deep: true }
+)
 
 // 计算属性
 const totalCount = computed(() => {
-    return cartItems.value.reduce((total, item) => total + item.count, 0)
+    return cartItems.value.reduce(
+        (total, item) => total + (item.quantity || 1),
+        0
+    )
 })
 
 const totalPrice = computed(() => {
     return cartItems.value
         .reduce((total, item) => {
             return (
-                total +
-                (selectedItems.value.has(item.id) ? item.price * item.count : 0)
+                total + (selectedItems.value.has(item.id) ? item.totalPrice : 0)
             )
         }, 0)
         .toFixed(2)
@@ -181,167 +255,143 @@ const hideCartDetail = () => {
 }
 
 const addToCart = (item) => {
-    console.log('购物车组件收到商品:', item)
-
     // 确保item有基本属性
     if (!item) {
-        console.error('商品数据为空')
         return
     }
 
-    // 从不同的数据结构中提取商品信息
+    // 标准化商品数据格式
     let productData = {
-        name: '',
-        price: 0,
-        count: 1
+        id: item.id || (item.product ? item.product.id : Date.now()),
+        cupType: item.cupType || '中杯',
+        name: item.name || (item.product ? item.product.name : ''),
+        price: item.price || (item.product ? item.product.price : 0),
+        quantity: item.quantity || 1,
+        sugar: item.sugar || '全糖',
+        temperature: item.temperature || '正常冰',
+        toppings: item.toppings || [],
+        image: item.image || (item.product ? item.product.image : ''),
+        desc:
+            item.desc ||
+            (item.product
+                ? item.product.desc || item.product.description || ''
+                : ''),
+        totalPrice:
+            item.totalPrice ||
+            item.price * (item.quantity || 1) ||
+            (item.product ? item.product.price : 0) * (item.quantity || 1)
     }
 
-    // 如果是从shop-detail传来的数据
-    if (item.product) {
-        // 使用从shop-detail传递过来的totalPrice作为商品价格
-        const itemPrice =
-            item.totalPrice !== undefined
-                ? item.totalPrice / item.quantity
-                : item.product.price
-
-        productData = {
-            id: item.product.id || Date.now().toString(),
-            name: item.product.name,
-            // 使用每件商品的单价，而不是原始价格
-            price: itemPrice,
-            size: item.cupType || '中杯',
-            sugar: item.sugar || '无糖',
-            ice: item.temperature || '正常冰',
-            image: item.product.image,
-            category: item.product.category,
-            count: item.quantity || 1,
-            toppings: item.toppings || [],
-            // 存储原始商品信息，方便后续使用
-            originalProduct: item.product
+    // 确保product对象存在
+    if (!item.product) {
+        productData.product = {
+            id: productData.id,
+            name: productData.name,
+            desc: productData.desc,
+            price: productData.price,
+            image: productData.image
         }
     } else {
-        // 直接传入的商品数据
-        productData = {
-            id: item.id || Date.now().toString(),
-            name: item.name,
-            price: item.price,
-            size: item.size || '中杯',
-            sugar: item.sugar || '无糖',
-            ice: item.ice || '正常冰',
-            image: item.image,
-            count: item.count || 1,
-            toppings: item.toppings || []
-        }
+        productData.product = { ...item.product }
     }
 
-    // 检查处理后的数据是否合法
-    if (!productData.name || !productData.price) {
-        console.error('处理后的商品数据不完整:', productData)
-        return
-    }
+    // 加载当前购物车
+    const currentCartItems = validateCartItems()
 
-    // 定义一个深度比较函数用于比较加料数组
-    const areArraysEqual = (arr1 = [], arr2 = []) => {
-        if (arr1.length !== arr2.length) return false
-
-        // 对加料数组进行排序以确保比较一致性
-        const sorted1 = [...arr1].sort((a, b) => {
-            // 处理不同类型的加料数据结构
-            const aValue = typeof a === 'string' ? a : a.id || a.name || ''
-            const bValue = typeof b === 'string' ? b : b.id || b.name || ''
-            return aValue.localeCompare(bValue)
-        })
-        const sorted2 = [...arr2].sort((a, b) => {
-            // 处理不同类型的加料数据结构
-            const aValue = typeof a === 'string' ? a : a.id || a.name || ''
-            const bValue = typeof b === 'string' ? b : b.id || b.name || ''
-            return aValue.localeCompare(bValue)
-        })
-
-        // 比较每个加料项
-        for (let i = 0; i < sorted1.length; i++) {
-            const item1 = sorted1[i]
-            const item2 = sorted2[i]
-
-            // 如果是字符串，直接比较
-            if (typeof item1 === 'string' && typeof item2 === 'string') {
-                if (item1 !== item2) return false
-                continue
-            }
-
-            // 如果是对象，比较重要属性
-            const id1 =
-                typeof item1 === 'string' ? item1 : item1.id || item1.name
-            const id2 =
-                typeof item2 === 'string' ? item2 : item2.id || item2.name
-            const count1 = typeof item1 === 'string' ? 1 : item1.count || 1
-            const count2 = typeof item2 === 'string' ? 1 : item2.count || 1
-
-            if (id1 !== id2 || count1 !== count2) {
-                return false
-            }
-        }
-
-        return true
-    }
-
-    // 查找购物车中是否已有完全相同的商品
-    const existingItemIndex = cartItems.value.findIndex((cartItem) => {
-        // 首先比较基本属性
+    // 查找购物车中是否已有相同商品
+    const existingItemIndex = currentCartItems.findIndex((cartItem) => {
+        // 基本信息匹配：商品ID、规格相同
         const basicMatch =
-            cartItem.name === productData.name &&
-            cartItem.size === productData.size &&
+            cartItem.id === productData.id &&
+            cartItem.cupType === productData.cupType &&
             cartItem.sugar === productData.sugar &&
-            cartItem.ice === productData.ice
+            cartItem.temperature === productData.temperature
 
-        // 然后比较加料
-        const toppingsMatch = areArraysEqual(
-            cartItem.toppings,
-            productData.toppings
-        )
+        // 加料匹配
+        let toppingsMatch = true
+        if (cartItem.toppings.length !== productData.toppings.length) {
+            toppingsMatch = false
+        } else {
+            const sortedCartToppings = [...cartItem.toppings].sort()
+            const sortedNewToppings = [...productData.toppings].sort()
+            for (let i = 0; i < sortedCartToppings.length; i++) {
+                if (sortedCartToppings[i] !== sortedNewToppings[i]) {
+                    toppingsMatch = false
+                    break
+                }
+            }
+        }
 
-        // 商品属性和加料都必须匹配
         return basicMatch && toppingsMatch
     })
 
-    console.log(
-        '查找结果:',
-        existingItemIndex,
-        existingItemIndex !== -1 ? '找到相同商品' : '未找到相同商品'
-    )
-
     if (existingItemIndex !== -1) {
-        // 如果商品完全一致，增加数量
-        cartItems.value[existingItemIndex].count += productData.count
-        console.log('更新后的商品:', cartItems.value[existingItemIndex])
+        // 更新已有商品的数量和总价
+        currentCartItems[existingItemIndex].quantity += productData.quantity
+        // 重新计算总价
+        currentCartItems[existingItemIndex].totalPrice =
+            currentCartItems[existingItemIndex].price *
+            currentCartItems[existingItemIndex].quantity
     } else {
-        // 否则添加新商品
-        cartItems.value.push(productData)
-        // 默认选中新添加的商品
-        selectedItems.value.add(productData.id)
-        console.log('添加新商品:', productData)
+        // 添加新商品
+        currentCartItems.push(productData)
     }
 
-    console.log('当前购物车商品:', cartItems.value)
+    // 更新本地数据和状态
+    cartItems.value = currentCartItems
+
+    // 确保新商品被选中
+    if (existingItemIndex === -1) {
+        selectedItems.value.add(productData.id)
+    }
+
+    // 保存到本地存储
+    saveCartItems()
+
+    // 提示用户
+    uni.showToast({
+        title: '已加入购物车',
+        icon: 'success',
+        duration: 1500
+    })
 }
 
 const increaseItem = (index) => {
-    cartItems.value[index].count += 1
+    // 增加商品数量
+    cartItems.value[index].quantity += 1
+    // 重新计算总价
+    updateItemTotalPrice(index)
+    // 保存到本地存储
+    saveCartItems()
 }
 
 const decreaseItem = (index) => {
-    if (cartItems.value[index].count > 1) {
-        cartItems.value[index].count -= 1
+    if (cartItems.value[index].quantity > 1) {
+        // 减少商品数量
+        cartItems.value[index].quantity -= 1
+        // 重新计算总价
+        updateItemTotalPrice(index)
     } else {
+        // 移除商品
         cartItems.value.splice(index, 1)
+        // 如果购物车为空，隐藏详情弹窗
         if (cartItems.value.length === 0) {
             hideCartDetail()
         }
     }
+    // 保存到本地存储
+    saveCartItems()
+}
+
+// 更新商品总价
+const updateItemTotalPrice = (index) => {
+    const item = cartItems.value[index]
+    item.totalPrice = item.price * item.quantity
 }
 
 const clearCart = () => {
     cartItems.value = []
+    uni.setStorageSync('cartItems', [])
     hideCartDetail()
 }
 
@@ -351,11 +401,11 @@ const goCheckout = () => {
     const selectedCartItems = cartItems.value
         .filter((item) => selectedItems.value.has(item.id))
         .map((item) => {
-            // 确保属性名称一致，将count转换为quantity
+            // 确保返回适配后的数据结构
             return {
                 ...item,
-                quantity: item.count,
-                specs: `${item.size}, ${item.sugar}, ${item.ice}` // 添加规格信息，方便在订单详情页显示
+                // 订单确认页面需要的额外字段
+                specs: `${item.cupType}, ${item.sugar}, ${item.temperature}`
             }
         })
 
@@ -369,13 +419,13 @@ const goCheckout = () => {
 
     // 计算总价
     const totalPrice = selectedCartItems
-        .reduce((sum, item) => sum + item.price * item.quantity, 0)
+        .reduce((sum, item) => sum + item.totalPrice, 0)
         .toFixed(2)
 
     // 判断总价是否为0
     if (parseFloat(totalPrice) == 0) {
         uni.showToast({
-            title: '=请选择商品',
+            title: '请选择商品',
             icon: 'none'
         })
         return
@@ -451,7 +501,8 @@ defineExpose({
     clearCart,
     goCheckout,
     toggleItemSelection,
-    toggleSelectAll
+    toggleSelectAll,
+    loadCartItems
 })
 </script>
 
