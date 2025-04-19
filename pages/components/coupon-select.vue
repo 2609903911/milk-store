@@ -17,7 +17,7 @@
                         :key="index"
                         class="coupon-item"
                         :class="[
-                            getCouponColorClass(coupon.type),
+                            getCouponColorClass(coupon.couponTemplate.type),
                             { selected: selectedCoupon?.id === coupon.id }
                         ]"
                         @click="selectCoupon(coupon)"
@@ -26,44 +26,50 @@
                         <view class="coupon-left">
                             <view class="coupon-value">
                                 <template
-                                    v-if="coupon.type === COUPON_TYPES.DISCOUNT"
+                                    v-if="
+                                        coupon.couponTemplate.type ===
+                                        COUPON_TYPES.DISCOUNT
+                                    "
                                 >
                                     <text class="value">{{
-                                        coupon.value
+                                        coupon.couponTemplate.value
                                     }}</text>
                                     <text class="unit">折</text>
                                 </template>
                                 <template
                                     v-else-if="
-                                        coupon.type === COUPON_TYPES.CASH
+                                        coupon.couponTemplate.type ===
+                                        COUPON_TYPES.CASH
                                     "
                                 >
                                     <text class="symbol">¥</text>
                                     <text class="value">{{
-                                        coupon.value
+                                        coupon.couponTemplate.value
                                     }}</text>
                                 </template>
                                 <template
                                     v-else-if="
-                                        coupon.type === COUPON_TYPES.FREE
+                                        coupon.couponTemplate.type ===
+                                        COUPON_TYPES.FREE
                                     "
                                 >
                                     <text class="value">免单</text>
                                 </template>
                                 <template
                                     v-else-if="
-                                        coupon.type ===
+                                        coupon.couponTemplate.type ===
                                         COUPON_TYPES.SPECIAL_PRICE
                                     "
                                 >
                                     <text class="symbol">¥</text>
                                     <text class="value">{{
-                                        coupon.value
+                                        coupon.couponTemplate.value
                                     }}</text>
                                 </template>
                                 <template
                                     v-else-if="
-                                        coupon.type === COUPON_TYPES.SHIPPING
+                                        coupon.couponTemplate.type ===
+                                        COUPON_TYPES.SHIPPING
                                     "
                                 >
                                     <text class="value">免运费</text>
@@ -71,9 +77,11 @@
                             </view>
                             <view
                                 class="coupon-limit"
-                                v-if="coupon.minOrderAmount > 0"
+                                v-if="coupon.couponTemplate.minOrderAmount > 0"
                             >
-                                满{{ coupon.minOrderAmount }}元可用
+                                满{{
+                                    coupon.couponTemplate.minOrderAmount
+                                }}元可用
                             </view>
                         </view>
 
@@ -86,12 +94,15 @@
 
                         <!-- 优惠券右侧 -->
                         <view class="coupon-right">
-                            <view class="coupon-title">{{ coupon.title }}</view>
+                            <view class="coupon-title">{{
+                                coupon.couponTemplate.title
+                            }}</view>
                             <view class="coupon-desc">
-                                {{ coupon.description }}
+                                {{ coupon.couponTemplate.description }}
                             </view>
                             <view class="coupon-validity">
-                                有效期至: {{ formatDate(coupon.endTime) }}
+                                有效期至:
+                                {{ formatDate(coupon.couponTemplate.endTime) }}
                             </view>
                         </view>
 
@@ -138,8 +149,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { userState } from '../../utils/userState'
 import { COUPON_TYPES } from '../../utils/couponModel'
+import { userData } from '../../utils/userData'
 
 const props = defineProps({
     show: {
@@ -163,43 +174,41 @@ const selectedCoupon = ref(null)
 
 // 可用的优惠券列表
 const availableCoupons = computed(() => {
-    return userState.coupons.filter((coupon) => {
-        // 检查优惠券是否可用
+    console.log('原始优惠券数据:', JSON.stringify(userData.coupons, null, 2))
+
+    // 根据优惠券状态和条件过滤
+    return userData.coupons.filter((coupon) => {
+        // 检查优惠券是否有效
+        if (!coupon.couponTemplate) {
+            return false
+        }
+
+        // 检查优惠券状态
+        const isValid = coupon.status === 'valid' || coupon.status === 'unused'
+
+        // 检查是否已过期
         const now = Date.now()
-        const isExpired = now > coupon.endTime
-        const isUsed = coupon.status === 'used'
-        const isDeleted = coupon.isDeleted
+        const endTime = coupon.couponTemplate.endTime
+        const isNotExpired = endTime ? now < new Date(endTime).getTime() : true
 
         // 检查订单金额是否满足优惠券使用条件
-        const meetsAmount = props.orderAmount >= coupon.minOrderAmount
+        const minAmount = coupon.couponTemplate.minOrderAmount || 0
+        const meetsAmount = props.orderAmount >= minAmount
 
-        // 基本条件检查
-        const basicConditions =
-            !isExpired && !isUsed && !isDeleted && meetsAmount
-
-        // 如果不满足基本条件，直接返回false
-        if (!basicConditions) return false
-
-        // 免单券需要检查订单金额是否小于等于券的value值
-        if (coupon.type === 'free') {
-            return props.orderAmount <= coupon.value
-        }
-
-        // 特价券需要检查商品ID匹配
+        // 检查特价券对应的商品是否在订单中
+        let hasMatchingProduct = true
         if (
-            coupon.type === 'specialPrice' &&
-            coupon.scopeIds &&
-            coupon.scopeIds.length > 0
+            coupon.couponTemplate.type === 'specialPrice' &&
+            coupon.couponTemplate.scope === 'product' &&
+            coupon.couponTemplate.scopeIds &&
+            coupon.couponTemplate.scopeIds.length > 0
         ) {
-            // 检查订单中是否有匹配的商品
-            const hasMatchingProduct = props.orderItems.some((item) =>
-                coupon.scopeIds.includes(item.id)
+            hasMatchingProduct = props.orderItems.some((item) =>
+                coupon.couponTemplate.scopeIds.includes(item.id)
             )
-            return hasMatchingProduct
         }
 
-        // 其他类型的优惠券直接返回true
-        return true
+        return isValid && isNotExpired && meetsAmount && hasMatchingProduct
     })
 })
 
@@ -223,11 +232,26 @@ const getCouponColorClass = (type) => {
 
 // 格式化日期
 const formatDate = (timestamp) => {
-    const date = new Date(timestamp)
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-        2,
-        '0'
-    )}-${String(date.getDate()).padStart(2, '0')}`
+    console.log('格式化日期输入值:', timestamp, typeof timestamp)
+    if (!timestamp) return '未设置日期'
+
+    try {
+        const date = new Date(timestamp)
+
+        // 检查日期是否有效
+        if (isNaN(date.getTime())) {
+            console.log('无效日期:', timestamp)
+            return '无效日期'
+        }
+
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+            2,
+            '0'
+        )}-${String(date.getDate()).padStart(2, '0')}`
+    } catch (error) {
+        console.error('日期格式化错误:', error)
+        return '日期错误'
+    }
 }
 
 // 选择优惠券
@@ -238,7 +262,21 @@ const selectCoupon = (coupon) => {
 // 确认选择
 const confirmSelect = () => {
     if (selectedCoupon.value) {
-        emit('select', selectedCoupon.value)
+        // 从优惠券模板中提取需要的数据
+        const couponData = {
+            id: selectedCoupon.value.id,
+            title: selectedCoupon.value.couponTemplate.title,
+            type: selectedCoupon.value.couponTemplate.type,
+            value: selectedCoupon.value.couponTemplate.value,
+            minOrderAmount: selectedCoupon.value.couponTemplate.minOrderAmount,
+            scopeIds:
+                selectedCoupon.value.couponTemplate.scope === 'product'
+                    ? selectedCoupon.value.couponTemplate.scopeIds
+                    : null
+        }
+
+        // 发送优惠券数据到父组件
+        emit('select', couponData)
         close()
     }
 }

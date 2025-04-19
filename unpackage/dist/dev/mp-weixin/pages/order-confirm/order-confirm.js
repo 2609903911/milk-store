@@ -180,28 +180,34 @@ const _sfc_main = {
       let discount = 0;
       if (coupon) {
         selectedCoupon.value = coupon;
+        common_vendor.index.__f__("log", "at pages/order-confirm/order-confirm.vue:434", "选择的优惠券:", coupon);
         if (coupon.type === "cash") {
-          discount = coupon.value;
+          discount = parseFloat(coupon.value);
           finalPrice = Math.max(0, finalPrice - discount);
         } else if (coupon.type === "discount") {
           const originalAmount = parseFloat(originalPrice.value);
-          const discountedAmount = originalAmount * (coupon.value / 10);
+          const discountedAmount = originalAmount * (parseFloat(coupon.value) / 10);
           discount = originalAmount - discountedAmount;
           finalPrice = discountedAmount;
         } else if (coupon.type === "specialPrice") {
-          const matchingItem = orderItems.value.find(
+          const matchingItems = orderItems.value.filter(
             (item) => coupon.scopeIds && coupon.scopeIds.includes(item.id)
           );
-          if (matchingItem) {
-            const originalItemPrice = matchingItem.price;
-            const originalItemsTotal = originalItemPrice * matchingItem.quantity;
-            const specialItemsTotal = coupon.value * matchingItem.quantity;
-            discount = originalItemsTotal - specialItemsTotal;
+          if (matchingItems.length > 0) {
+            let discountTotal = 0;
+            matchingItems.forEach((item) => {
+              const originalItemPrice = item.price;
+              const originalItemsTotal = originalItemPrice * item.quantity;
+              const specialItemsTotal = parseFloat(coupon.value) * item.quantity;
+              discountTotal += originalItemsTotal - specialItemsTotal;
+            });
+            discount = discountTotal;
             finalPrice = Math.max(0, finalPrice - discount);
           }
         } else if (coupon.type === "free") {
-          discount = parseFloat(originalPrice.value);
-          finalPrice = 0;
+          const maxDiscount = parseFloat(coupon.value);
+          discount = Math.min(parseFloat(originalPrice.value), maxDiscount);
+          finalPrice = Math.max(0, parseFloat(originalPrice.value) - discount);
         }
         discountAmount.value = discount.toFixed(2);
         totalPrice.value = finalPrice.toFixed(2);
@@ -251,7 +257,7 @@ const _sfc_main = {
         o: common_vendor.t(selectedCoupon.value.title),
         p: common_vendor.t(discountAmount.value)
       } : {
-        q: common_vendor.t(availableCoupons.value.length > 0 ? `${availableCoupons.value.length}张优惠券可用` : "暂无可用优惠券")
+        q: common_vendor.t(availableCoupons.value.length > 0 ? `${availableCoupons.value.length}张优惠券可用` : "选择优惠券")
       }, {
         r: availableCoupons.value.length > 0 ? "#006de7" : "#999",
         s: common_vendor.p({

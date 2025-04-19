@@ -14,6 +14,7 @@
 - [城市相关接口](#城市相关接口)
 - [地址相关接口](#地址相关接口)
 - [商城商品相关接口](#商城商品相关接口)
+- [订单相关接口](#订单相关接口)
 
 ## 认证相关接口
 
@@ -405,3 +406,83 @@
 - **方法**: DELETE
 - **参数**:
   - `id`: 商品ID
+
+## 订单相关接口
+
+### 创建订单
+
+- **URL**: `/api/orders`
+- **方法**: POST
+- **请求体**:
+  ```json
+  {
+    "userId": "用户ID",
+    "totalAmount": "订单总金额",
+    "discountAmount": "优惠金额",
+    "actualAmount": "实付金额",
+    "couponId": "优惠券ID",
+    "deliveryType": "配送方式(self/delivery)",
+    "storeName": "店铺名称",
+    "storeAddress": "店铺地址",
+    "contactName": "联系人",
+    "contactPhone": "联系电话",
+    "deliveryAddress": "配送地址",
+    "orderItems": "订单商品JSON"
+  }
+  ```
+
+### 获取用户所有订单
+
+- **URL**: `/api/orders/user/{userId}`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+
+### 获取用户指定状态的订单
+
+- **URL**: `/api/orders/user/{userId}/status/{status}`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+  - `status`: 订单状态(pending/paid/completed/cancelled/refunded)
+
+### 获取订单详情
+
+- **URL**: `/api/orders/{orderId}`
+- **方法**: GET
+- **参数**:
+  - `orderId`: 订单ID
+
+### 取消订单
+
+- **URL**: `/api/orders/{orderId}/cancel`
+- **方法**: PUT
+- **参数**:
+  - `orderId`: 订单ID
+
+### 支付订单
+
+- **URL**: `/api/orders/{orderId}/pay`
+- **方法**: PUT
+- **参数**:
+  - `orderId`: 订单ID
+- **请求体**:
+  ```json
+  {
+    "paymentMethod": "支付方式"
+  }
+  ```
+
+### 完成订单
+
+- **URL**: `/api/orders/{orderId}/complete`
+- **方法**: PUT
+- **参数**:
+  - `orderId`: 订单ID
+
+### 删除订单
+
+- **URL**: `/api/orders/{orderId}`
+- **方法**: DELETE
+- **参数**:
+  - `orderId`: 订单ID

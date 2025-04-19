@@ -5,7 +5,7 @@ const fetchUserOrders = async (userId) => {
     const savedOrders = common_vendor.index.getStorageSync("savedOrders") || [];
     return savedOrders;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/orderApi.js:17", "获取用户订单失败:", error);
+    common_vendor.index.__f__("error", "at utils/api/orderApi.js:12", "获取用户订单失败:", error);
     throw error;
   }
 };
@@ -23,7 +23,7 @@ const createOrder = async (orderData) => {
     common_vendor.index.setStorageSync("savedOrders", savedOrders);
     return newOrder;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/orderApi.js:47", "创建订单失败:", error);
+    common_vendor.index.__f__("error", "at utils/api/orderApi.js:42", "创建订单失败:", error);
     throw error;
   }
 };
@@ -38,7 +38,7 @@ const updateOrderStatus = async (orderId, status) => {
     common_vendor.index.setStorageSync("savedOrders", savedOrders);
     return savedOrders[orderIndex];
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/orderApi.js:76", `更新订单${orderId}状态失败:`, error);
+    common_vendor.index.__f__("error", "at utils/api/orderApi.js:71", `更新订单${orderId}状态失败:`, error);
     throw error;
   }
 };
@@ -51,7 +51,7 @@ const fetchOrderById = async (orderId) => {
     }
     return order;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/orderApi.js:98", `获取订单${orderId}详情失败:`, error);
+    common_vendor.index.__f__("error", "at utils/api/orderApi.js:93", `获取订单${orderId}详情失败:`, error);
     throw error;
   }
 };

@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 @Data
 @TableName("user_address")
 public class UserAddress {
-    @TableId(type = IdType.ASSIGN_ID)
+    /**
+     * 使用字符串类型ID，避免JavaScript处理大数字时的精度丢失问题
+     */
+    @TableId(type = IdType.AUTO)
     private String id;
     private String userId;
     private String contactName;

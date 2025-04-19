@@ -172,9 +172,12 @@ const goBack = () => {
 
 // 编辑地址
 const editAddress = (item) => {
+    // 使用原始ID，不进行数字转换
+    const id = item.id
+
     // 使用页面事件通道传递数据，避免URL参数编码问题
     uni.navigateTo({
-        url: `/pages/address/edit-address?id=${item.id}`,
+        url: `/pages/address/edit-address?id=${id}`,
         events: {
             // 为目标页面定义事件，目标页面可以通过 eventChannel 触发
             addressData: function (data) {
@@ -184,7 +187,7 @@ const editAddress = (item) => {
         success: function (res) {
             // 通过eventChannel向目标页面传送数据
             res.eventChannel.emit('addressData', {
-                id: item.id,
+                id: id,
                 contactName: item.contactName,
                 phone: item.phone,
                 gender: item.gender || 'male',

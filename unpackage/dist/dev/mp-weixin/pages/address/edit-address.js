@@ -15,19 +15,20 @@ const _sfc_main = {
   props: {
     id: {
       type: String,
+      // 始终用字符串处理ID
       default: ""
     }
   },
   setup(__props) {
     const props = __props;
     const isEdit = common_vendor.computed(() => !!props.id);
+    const addressId = common_vendor.computed(() => props.id || "");
     const isLoading = common_vendor.ref(false);
     const formData = common_vendor.ref({
       contactName: "",
       phone: "",
       gender: "male",
       address: "",
-      addressDetail: "",
       isDefault: false
     });
     common_vendor.onUnmounted(() => {
@@ -67,8 +68,6 @@ const _sfc_main = {
                 phone: data.phone || "",
                 gender: data.gender || "male",
                 address: data.address || "",
-                addressDetail: "",
-                // 可能需要从API获取
                 isDefault: !!data.isDefault
               };
             } else {
@@ -89,25 +88,23 @@ const _sfc_main = {
     const fetchAddressDetail = async () => {
       try {
         safeShowLoading("加载中...");
-        const addressId = props.id;
-        if (!addressId) {
+        if (!addressId.value) {
           safeHideLoading();
           return common_vendor.index.showToast({
             title: "地址ID不能为空",
             icon: "none"
           });
         }
-        const result = await utils_api_request.get(`/api/user/address/${addressId}`, {
+        const result = await utils_api_request.get(`/api/user/address/${addressId.value}`, {
           userId: utils_userState.userState.userId
         });
-        common_vendor.index.__f__("log", "at pages/address/edit-address.vue:225", "获取到的地址详情:", result);
+        common_vendor.index.__f__("log", "at pages/address/edit-address.vue:214", "获取到的地址详情:", result);
         if (result.code === 200 && result.data) {
           formData.value = {
             contactName: result.data.contactName,
             phone: result.data.phone,
             gender: result.data.gender || "male",
-            address: result.data.address,
-            addressDetail: result.data.addressDetail || "",
+            address: result.data.address || "",
             isDefault: result.data.isDefault
           };
         } else {
@@ -117,7 +114,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/address/edit-address.vue:244", "获取地址详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/address/edit-address.vue:232", "获取地址详情失败:", error);
         common_vendor.index.showToast({
           title: "获取地址详情失败，请重试",
           icon: "none"
@@ -128,12 +125,6 @@ const _sfc_main = {
     };
     const goBack = () => {
       common_vendor.index.navigateBack();
-    };
-    const chooseLocation = () => {
-      common_vendor.index.showToast({
-        title: "选择位置功能待实现",
-        icon: "none"
-      });
     };
     const saveAddress = async () => {
       if (!formData.value.contactName) {
@@ -156,7 +147,7 @@ const _sfc_main = {
       }
       if (!formData.value.address) {
         return common_vendor.index.showToast({
-          title: "请选择收货地址",
+          title: "请输入收货地址",
           icon: "none"
         });
       }
@@ -168,16 +159,18 @@ const _sfc_main = {
           phone: formData.value.phone,
           gender: formData.value.gender,
           address: formData.value.address,
-          addressDetail: formData.value.addressDetail,
           isDefault: formData.value.isDefault
         };
         let result;
         if (isEdit.value) {
-          result = await utils_api_request.put(`/api/user/address/${props.id}`, submitData);
+          result = await utils_api_request.put(
+            `/api/user/address/${addressId.value}`,
+            submitData
+          );
         } else {
           result = await utils_api_request.post("/api/user/address", submitData);
         }
-        common_vendor.index.__f__("log", "at pages/address/edit-address.vue:329", "保存地址结果:", result);
+        common_vendor.index.__f__("log", "at pages/address/edit-address.vue:311", "保存地址结果:", result);
         safeHideLoading();
         if (result.code === 200) {
           common_vendor.index.showToast({
@@ -196,7 +189,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/address/edit-address.vue:351", "保存地址失败:", error);
+        common_vendor.index.__f__("error", "at pages/address/edit-address.vue:333", "保存地址失败:", error);
         safeHideLoading();
         common_vendor.index.showToast({
           title: "保存失败，请重试",
@@ -213,13 +206,10 @@ const _sfc_main = {
             try {
               safeShowLoading("删除中...");
               const result = await utils_api_request.request({
-                url: `/api/user/address/${props.id}`,
-                method: "DELETE",
-                data: {
-                  userId: utils_userState.userState.userId
-                }
+                url: `/api/user/address/${addressId.value}?userId=${utils_userState.userState.userId}`,
+                method: "DELETE"
               });
-              common_vendor.index.__f__("log", "at pages/address/edit-address.vue:380", "删除地址结果:", result);
+              common_vendor.index.__f__("log", "at pages/address/edit-address.vue:359", "删除地址结果:", result);
               safeHideLoading();
               if (result.code === 200) {
                 common_vendor.index.showToast({
@@ -238,7 +228,7 @@ const _sfc_main = {
                 });
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/address/edit-address.vue:402", "删除地址失败:", error);
+              common_vendor.index.__f__("error", "at pages/address/edit-address.vue:381", "删除地址失败:", error);
               safeHideLoading();
               common_vendor.index.showToast({
                 title: "删除失败，请重试",
@@ -265,24 +255,14 @@ const _sfc_main = {
         i: common_vendor.o(($event) => formData.value.gender = "male"),
         j: formData.value.gender === "female" ? 1 : "",
         k: common_vendor.o(($event) => formData.value.gender = "female"),
-        l: formData.value.address
-      }, formData.value.address ? {
-        m: common_vendor.t(formData.value.address)
-      } : {}, {
-        n: common_vendor.p({
-          type: "right",
-          size: "16",
-          color: "#999"
-        }),
-        o: common_vendor.o(chooseLocation),
-        p: formData.value.addressDetail,
-        q: common_vendor.o(($event) => formData.value.addressDetail = $event.detail.value),
-        r: formData.value.isDefault,
-        s: common_vendor.o(($event) => formData.value.isDefault = $event.detail.value),
-        t: common_vendor.o(saveAddress),
-        v: isEdit.value
+        l: formData.value.address,
+        m: common_vendor.o(($event) => formData.value.address = $event.detail.value),
+        n: formData.value.isDefault,
+        o: common_vendor.o(($event) => formData.value.isDefault = $event.detail.value),
+        p: common_vendor.o(saveAddress),
+        q: isEdit.value
       }, isEdit.value ? {
-        w: common_vendor.o(deleteAddress)
+        r: common_vendor.o(deleteAddress)
       } : {});
     };
   }

@@ -1,8 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
-const utils_userState = require("../../utils/userState.js");
 const utils_couponModel = require("../../utils/couponModel.js");
+const utils_userData = require("../../utils/userData.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -33,25 +33,24 @@ const _sfc_main = {
     const emit = __emit;
     const selectedCoupon = common_vendor.ref(null);
     const availableCoupons = common_vendor.computed(() => {
-      return utils_userState.userState.coupons.filter((coupon) => {
-        const now = Date.now();
-        const isExpired = now > coupon.endTime;
-        const isUsed = coupon.status === "used";
-        const isDeleted = coupon.isDeleted;
-        const meetsAmount = props.orderAmount >= coupon.minOrderAmount;
-        const basicConditions = !isExpired && !isUsed && !isDeleted && meetsAmount;
-        if (!basicConditions)
+      common_vendor.index.__f__("log", "at pages/components/coupon-select.vue:177", "原始优惠券数据:", JSON.stringify(utils_userData.userData.coupons, null, 2));
+      return utils_userData.userData.coupons.filter((coupon) => {
+        if (!coupon.couponTemplate) {
           return false;
-        if (coupon.type === "free") {
-          return props.orderAmount <= coupon.value;
         }
-        if (coupon.type === "specialPrice" && coupon.scopeIds && coupon.scopeIds.length > 0) {
-          const hasMatchingProduct = props.orderItems.some(
-            (item) => coupon.scopeIds.includes(item.id)
+        const isValid = coupon.status === "valid" || coupon.status === "unused";
+        const now = Date.now();
+        const endTime = coupon.couponTemplate.endTime;
+        const isNotExpired = endTime ? now < new Date(endTime).getTime() : true;
+        const minAmount = coupon.couponTemplate.minOrderAmount || 0;
+        const meetsAmount = props.orderAmount >= minAmount;
+        let hasMatchingProduct = true;
+        if (coupon.couponTemplate.type === "specialPrice" && coupon.couponTemplate.scope === "product" && coupon.couponTemplate.scopeIds && coupon.couponTemplate.scopeIds.length > 0) {
+          hasMatchingProduct = props.orderItems.some(
+            (item) => coupon.couponTemplate.scopeIds.includes(item.id)
           );
-          return hasMatchingProduct;
         }
-        return true;
+        return isValid && isNotExpired && meetsAmount && hasMatchingProduct;
       });
     });
     const getCouponColorClass = (type) => {
@@ -71,18 +70,38 @@ const _sfc_main = {
       }
     };
     const formatDate = (timestamp) => {
-      const date = new Date(timestamp);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}-${String(date.getDate()).padStart(2, "0")}`;
+      common_vendor.index.__f__("log", "at pages/components/coupon-select.vue:235", "格式化日期输入值:", timestamp, typeof timestamp);
+      if (!timestamp)
+        return "未设置日期";
+      try {
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) {
+          common_vendor.index.__f__("log", "at pages/components/coupon-select.vue:243", "无效日期:", timestamp);
+          return "无效日期";
+        }
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(date.getDate()).padStart(2, "0")}`;
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/components/coupon-select.vue:252", "日期格式化错误:", error);
+        return "日期错误";
+      }
     };
     const selectCoupon = (coupon) => {
       selectedCoupon.value = coupon;
     };
     const confirmSelect = () => {
       if (selectedCoupon.value) {
-        emit("select", selectedCoupon.value);
+        const couponData = {
+          id: selectedCoupon.value.id,
+          title: selectedCoupon.value.couponTemplate.title,
+          type: selectedCoupon.value.couponTemplate.type,
+          value: selectedCoupon.value.couponTemplate.value,
+          minOrderAmount: selectedCoupon.value.couponTemplate.minOrderAmount,
+          scopeIds: selectedCoupon.value.couponTemplate.scope === "product" ? selectedCoupon.value.couponTemplate.scopeIds : null
+        };
+        emit("select", couponData);
         close();
       }
     };
@@ -102,25 +121,25 @@ const _sfc_main = {
         d: common_vendor.f(availableCoupons.value, (coupon, index, i0) => {
           var _a, _b, _c;
           return common_vendor.e({
-            a: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT
-          }, coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT ? {
-            b: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
-            d: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
-            g: common_vendor.t(coupon.value)
-          } : coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
-            c: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
-            e: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
-            f: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
-            h: coupon.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
-            i: coupon.minOrderAmount > 0
-          }, coupon.minOrderAmount > 0 ? {
-            j: common_vendor.t(coupon.minOrderAmount)
+            a: coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT
+          }, coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).DISCOUNT ? {
+            b: common_vendor.t(coupon.couponTemplate.value)
+          } : coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH ? {
+            d: common_vendor.t(coupon.couponTemplate.value)
+          } : coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE ? {} : coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE ? {
+            g: common_vendor.t(coupon.couponTemplate.value)
+          } : coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING ? {} : {}, {
+            c: coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).CASH,
+            e: coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).FREE,
+            f: coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SPECIAL_PRICE,
+            h: coupon.couponTemplate.type === common_vendor.unref(utils_couponModel.COUPON_TYPES).SHIPPING,
+            i: coupon.couponTemplate.minOrderAmount > 0
+          }, coupon.couponTemplate.minOrderAmount > 0 ? {
+            j: common_vendor.t(coupon.couponTemplate.minOrderAmount)
           } : {}, {
-            k: common_vendor.t(coupon.title),
-            l: common_vendor.t(coupon.description),
-            m: common_vendor.t(formatDate(coupon.endTime)),
+            k: common_vendor.t(coupon.couponTemplate.title),
+            l: common_vendor.t(coupon.couponTemplate.description),
+            m: common_vendor.t(formatDate(coupon.couponTemplate.endTime)),
             n: ((_a = selectedCoupon.value) == null ? void 0 : _a.id) === coupon.id
           }, ((_b = selectedCoupon.value) == null ? void 0 : _b.id) === coupon.id ? {
             o: "e5e865b0-1-" + i0,
@@ -131,7 +150,7 @@ const _sfc_main = {
             })
           } : {}, {
             q: index,
-            r: common_vendor.n(getCouponColorClass(coupon.type)),
+            r: common_vendor.n(getCouponColorClass(coupon.couponTemplate.type)),
             s: common_vendor.n({
               selected: ((_c = selectedCoupon.value) == null ? void 0 : _c.id) === coupon.id
             }),

@@ -130,7 +130,7 @@
                             {{
                                 availableCoupons.length > 0
                                     ? `${availableCoupons.length}张优惠券可用`
-                                    : '暂无可用优惠券'
+                                    : '选择优惠券'
                             }}
                         </text>
                         <uni-icons
@@ -431,39 +431,50 @@ const handleCouponSelect = (coupon) => {
 
     if (coupon) {
         selectedCoupon.value = coupon
+        console.log('选择的优惠券:', coupon)
 
         if (coupon.type === 'cash') {
             // 满减券：直接减去value值
-            discount = coupon.value
+            discount = parseFloat(coupon.value)
             finalPrice = Math.max(0, finalPrice - discount)
         } else if (coupon.type === 'discount') {
             // 折扣券：按折扣比例计算
             const originalAmount = parseFloat(originalPrice.value)
-            const discountedAmount = originalAmount * (coupon.value / 10)
+            const discountedAmount =
+                originalAmount * (parseFloat(coupon.value) / 10)
             discount = originalAmount - discountedAmount
             finalPrice = discountedAmount
         } else if (coupon.type === 'specialPrice') {
             // 特价券：将原价替换为特价
-            const matchingItem = orderItems.value.find(
+            const matchingItems = orderItems.value.filter(
                 (item) => coupon.scopeIds && coupon.scopeIds.includes(item.id)
             )
-            if (matchingItem) {
-                // 记录原价
-                const originalItemPrice = matchingItem.price
-                // 计算所有符合条件商品的总原价
-                const originalItemsTotal =
-                    originalItemPrice * matchingItem.quantity
-                // 计算所有符合条件商品的总特价
-                const specialItemsTotal = coupon.value * matchingItem.quantity
+
+            if (matchingItems.length > 0) {
+                let discountTotal = 0
+
+                // 计算所有符合条件商品的折扣
+                matchingItems.forEach((item) => {
+                    // 原价总额
+                    const originalItemPrice = item.price
+                    const originalItemsTotal = originalItemPrice * item.quantity
+                    // 特价总额
+                    const specialItemsTotal =
+                        parseFloat(coupon.value) * item.quantity
+                    // 单品折扣
+                    discountTotal += originalItemsTotal - specialItemsTotal
+                })
+
                 // 计算折扣金额
-                discount = originalItemsTotal - specialItemsTotal
+                discount = discountTotal
                 // 从总价中减去折扣金额
                 finalPrice = Math.max(0, finalPrice - discount)
             }
         } else if (coupon.type === 'free') {
-            // 免单券：直接将总价设置为0
-            discount = parseFloat(originalPrice.value)
-            finalPrice = 0
+            // 免单券：直接将总价设置为0，但确保不超过券的value值
+            const maxDiscount = parseFloat(coupon.value)
+            discount = Math.min(parseFloat(originalPrice.value), maxDiscount)
+            finalPrice = Math.max(0, parseFloat(originalPrice.value) - discount)
         }
 
         // 更新折扣金额和最终价格

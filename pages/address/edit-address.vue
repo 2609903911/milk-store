@@ -55,23 +55,14 @@
                 </view>
             </view>
 
-            <!-- 收货地址 -->
+            <!-- 收货地址 - 改为输入框 -->
             <view class="form-item">
                 <view class="form-label">收货地址</view>
-                <view class="location-select" @click="chooseLocation">
-                    <text v-if="formData.address">{{ formData.address }}</text>
-                    <text v-else class="placeholder">点击选择收货地址</text>
-                    <uni-icons type="right" size="16" color="#999"></uni-icons>
-                </view>
-            </view>
-
-            <!-- 详细地址 -->
-            <view class="form-item">
-                <view class="form-label">详细地址</view>
-                <textarea
-                    class="form-textarea"
-                    v-model="formData.addressDetail"
-                    placeholder="请输入详细地址信息，如楼层、门牌号等"
+                <input
+                    class="form-input"
+                    type="text"
+                    v-model="formData.address"
+                    placeholder="请输入完整的收货地址"
                 />
             </view>
 
@@ -105,13 +96,15 @@ import { onBackPress } from '@dcloudio/uni-app'
 // 获取页面参数
 const props = defineProps({
     id: {
-        type: String,
+        type: String, // 始终用字符串处理ID
         default: ''
     }
 })
 
 // 判断是编辑还是新增
 const isEdit = computed(() => !!props.id)
+// addressId不再进行数字转换，直接使用字符串ID
+const addressId = computed(() => props.id || '')
 
 // loading状态跟踪
 const isLoading = ref(false)
@@ -122,7 +115,6 @@ const formData = ref({
     phone: '',
     gender: 'male',
     address: '',
-    addressDetail: '',
     isDefault: false
 })
 
@@ -177,7 +169,6 @@ onMounted(() => {
                         phone: data.phone || '',
                         gender: data.gender || 'male',
                         address: data.address || '',
-                        addressDetail: '', // 可能需要从API获取
                         isDefault: !!data.isDefault
                     }
                 } else {
@@ -206,10 +197,8 @@ const fetchAddressDetail = async () => {
         // 显示加载中
         safeShowLoading('加载中...')
 
-        // 从页面参数或路由参数中获取地址ID
-        const addressId = props.id
-
-        if (!addressId) {
+        // 使用字符串ID
+        if (!addressId.value) {
             safeHideLoading()
             return uni.showToast({
                 title: '地址ID不能为空',
@@ -218,7 +207,7 @@ const fetchAddressDetail = async () => {
         }
 
         // 请求API获取地址详情
-        const result = await get(`/api/user/address/${addressId}`, {
+        const result = await get(`/api/user/address/${addressId.value}`, {
             userId: userState.userId
         })
 
@@ -230,8 +219,7 @@ const fetchAddressDetail = async () => {
                 contactName: result.data.contactName,
                 phone: result.data.phone,
                 gender: result.data.gender || 'male',
-                address: result.data.address,
-                addressDetail: result.data.addressDetail || '',
+                address: result.data.address || '',
                 isDefault: result.data.isDefault
             }
         } else {
@@ -256,17 +244,9 @@ const goBack = () => {
     uni.navigateBack()
 }
 
-// 选择位置
+// 选择位置 - 已不需要，但保留函数避免错误
 const chooseLocation = () => {
-    uni.showToast({
-        title: '选择位置功能待实现',
-        icon: 'none'
-    })
-    // uni.chooseLocation({
-    //     success: (res) => {
-    //         formData.value.address = res.address
-    //     }
-    // })
+    // 空函数，已不再使用
 }
 
 // 保存地址
@@ -295,7 +275,7 @@ const saveAddress = async () => {
 
     if (!formData.value.address) {
         return uni.showToast({
-            title: '请选择收货地址',
+            title: '请输入收货地址',
             icon: 'none'
         })
     }
@@ -311,7 +291,6 @@ const saveAddress = async () => {
             phone: formData.value.phone,
             gender: formData.value.gender,
             address: formData.value.address,
-            addressDetail: formData.value.addressDetail,
             isDefault: formData.value.isDefault
         }
 
@@ -320,7 +299,10 @@ const saveAddress = async () => {
         // 根据是否编辑模式调用不同的API
         if (isEdit.value) {
             // 编辑地址
-            result = await put(`/api/user/address/${props.id}`, submitData)
+            result = await put(
+                `/api/user/address/${addressId.value}`,
+                submitData
+            )
         } else {
             // 新增地址
             result = await post('/api/user/address', submitData)
@@ -370,11 +352,8 @@ const deleteAddress = async () => {
 
                     // 调用删除API
                     const result = await request({
-                        url: `/api/user/address/${props.id}`,
-                        method: 'DELETE',
-                        data: {
-                            userId: userState.userId
-                        }
+                        url: `/api/user/address/${addressId.value}?userId=${userState.userId}`,
+                        method: 'DELETE'
                     })
 
                     console.log('删除地址结果:', result)

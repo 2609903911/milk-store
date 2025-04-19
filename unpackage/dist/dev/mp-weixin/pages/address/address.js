@@ -78,8 +78,9 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     };
     const editAddress = (item) => {
+      const id = item.id;
       common_vendor.index.navigateTo({
-        url: `/pages/address/edit-address?id=${item.id}`,
+        url: `/pages/address/edit-address?id=${id}`,
         events: {
           // 为目标页面定义事件，目标页面可以通过 eventChannel 触发
           addressData: function(data) {
@@ -87,7 +88,7 @@ const _sfc_main = {
         },
         success: function(res) {
           res.eventChannel.emit("addressData", {
-            id: item.id,
+            id,
             contactName: item.contactName,
             phone: item.phone,
             gender: item.gender || "male",

@@ -87,7 +87,7 @@ public class UserAddressController {
     public Result<Object> updateUserAddress(@PathVariable String addressId, 
                                    @RequestBody UserAddress address) {
         // 参数校验
-        if (address == null || !StringUtils.hasText(addressId) 
+        if (address == null || !StringUtils.hasText(addressId)
                 || !StringUtils.hasText(address.getUserId())) {
             return Result.error("参数不完整");
         }

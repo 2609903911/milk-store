@@ -838,7 +838,7 @@ const goToSearch = () => {
 const openAddressSelection = () => {
     // 打开地址选择界面
     uni.navigateTo({
-        url: '/pages/address-selection/address-selection'
+        url: '/pages/address/address'
     })
 }
 

@@ -342,7 +342,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const openAddressSelection = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/address-selection/address-selection"
+        url: "/pages/address/address"
       });
     };
     const handleAddressSelected = (data) => {

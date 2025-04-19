@@ -1,8 +1,3 @@
-// 订单API服务
-
-import { get, post, put } from './request';
-import { API_PATHS } from './config';
-
 /**
  * 获取用户所有订单
  * @param {String} userId 用户ID
