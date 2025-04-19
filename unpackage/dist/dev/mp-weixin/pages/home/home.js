@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_userData = require("../../utils/userData.js");
+require("../../utils/userState.js");
 const utils_api_bannerApi = require("../../utils/api/bannerApi.js");
 const _sfc_main = {
   __name: "home",

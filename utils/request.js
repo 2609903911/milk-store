@@ -3,8 +3,12 @@
  */
 
 // API基础URL配置
-const BASE_URL = 'http://localhost:8082'; // 开发环境
-// const BASE_URL = ''; // 生产环境，根据实际部署情况配置
+const BASE_URL = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:8080'  // 开发环境
+    : 'https://api.milkstore.com'  // 生产环境
+
+// 请求超时时间
+const TIMEOUT = 10000
 
 /**
  * 检查当前环境是否支持XMLHttpRequest
@@ -38,7 +42,7 @@ export const request = (options) => {
         // 构建完整URL
         const url = options.url.startsWith('http') 
             ? options.url 
-            : `${BASE_URL}${options.url}`;
+            : BASE_URL + options.url;
         
         // 显示加载中提示
         if (options.loading !== false) {
@@ -51,7 +55,8 @@ export const request = (options) => {
         // 准备请求头
         const header = {
             'Content-Type': 'application/json',
-            ...options.header // 合并自定义请求头
+            ...options.header, // 合并自定义请求头
+            ...(uni.getStorageSync('token') && { 'Authorization': `Bearer ${uni.getStorageSync('token')}` })
         };
         
         // 判断是否使用XMLHttpRequest
@@ -69,7 +74,7 @@ export const request = (options) => {
                 }
                 
                 // 设置超时时间
-                xhr.timeout = options.timeout || 60000;
+                xhr.timeout = options.timeout || TIMEOUT;
                 
                 // 处理响应
                 xhr.onload = function() {
@@ -143,6 +148,7 @@ export const request = (options) => {
             method: options.method || 'GET',
             data: options.data,
             header,
+            timeout: options.timeout || TIMEOUT,
             withCredentials: false, // 跨域请求不发送cookie
             success: (res) => {
                 // 请求成功，但需检查业务状态码
@@ -165,6 +171,42 @@ export const request = (options) => {
                         }
                         reject({ code: res.data?.code, message: errorMsg });
                     }
+                } else if (res.statusCode === 401) {
+                    uni.showToast({
+                        title: '登录已过期，请重新登录',
+                        icon: 'none'
+                    });
+                    
+                    // 清除token和用户信息
+                    uni.removeStorageSync('token');
+                    uni.removeStorageSync('userInfo');
+                    
+                    // 跳转到登录页
+                    setTimeout(() => {
+                        uni.navigateTo({
+                            url: '/pages/login/login'
+                        });
+                    }, 1500);
+                    
+                    reject(new Error('未授权，请登录'));
+                } else if (res.statusCode === 403) {
+                    uni.showToast({
+                        title: '没有权限访问',
+                        icon: 'none'
+                    });
+                    reject(new Error('没有权限'));
+                } else if (res.statusCode === 404) {
+                    uni.showToast({
+                        title: '请求的资源不存在',
+                        icon: 'none'
+                    });
+                    reject(new Error('资源不存在'));
+                } else if (res.statusCode >= 500) {
+                    uni.showToast({
+                        title: '服务器异常，请稍后重试',
+                        icon: 'none'
+                    });
+                    reject(new Error('服务器异常'));
                 } else {
                     // HTTP状态码错误处理
                     const errorMsg = `请求失败(${res.statusCode})`;
@@ -236,6 +278,38 @@ export const post = (url, data = {}, options = {}) => {
 };
 
 /**
+ * PUT请求
+ * @param {String} url - 请求URL
+ * @param {Object} data - 请求参数
+ * @param {Object} options - 其他选项
+ * @returns {Promise} 请求结果
+ */
+export const put = (url, data = {}, options = {}) => {
+    return request({
+        ...options,
+        url,
+        method: 'PUT',
+        data
+    });
+};
+
+/**
+ * DELETE请求
+ * @param {String} url - 请求URL
+ * @param {Object} data - 请求参数
+ * @param {Object} options - 其他选项
+ * @returns {Promise} 请求结果
+ */
+export const del = (url, data = {}, options = {}) => {
+    return request({
+        ...options,
+        url,
+        method: 'DELETE',
+        data
+    });
+};
+
+/**
  * 获取完整的API URL
  * @param {String} path - API路径
  * @returns {String} 完整URL
@@ -248,6 +322,8 @@ export default {
     request,
     get,
     post,
+    put,
+    del,
     getFullUrl,
     BASE_URL
 }; 

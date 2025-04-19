@@ -37,10 +37,13 @@ export const API_PATHS = {
   CATEGORY_BY_ID: '/api/categories', // 需要拼接ID
 
   // 订单相关
-  ORDERS: '/api/orders',
-  ORDERS_BY_USER: '/api/orders/user', // 需要拼接用户ID
-  ORDER_BY_ID: '/api/orders', // 需要拼接订单ID
-  ORDER_STATUS: '/api/orders/status', // 需要拼接订单ID
+  ORDERS: '/api/orders', // 创建订单/获取订单列表
+  ORDERS_BY_USER: '/api/orders/user', // 获取用户订单列表，需要拼接用户ID
+  ORDERS_BY_USER_STATUS: '/api/orders/user', // 获取用户指定状态订单列表，需要拼接用户ID和状态
+  ORDER_BY_ID: '/api/orders', // 获取订单详情/删除订单，需要拼接订单ID
+  ORDER_CANCEL: '/api/orders', // 取消订单，需要拼接订单ID/cancel
+  ORDER_PAY: '/api/orders', // 支付订单，需要拼接订单ID/pay
+  ORDER_COMPLETE: '/api/orders', // 完成订单，需要拼接订单ID/complete
 
   // 认证相关
   AUTH_SEND_CODE: '/api/auth/code/send',

@@ -26,61 +26,69 @@
                         <view class="shop-name">{{ order.storeName }}</view>
                     </view>
                     <view class="order-status">{{
-                        getStatusText(order.status)
+                        getStatusText(order.orderStatus)
                     }}</view>
                 </view>
 
                 <view class="order-content" @tap="viewOrderDetail(order)">
                     <image
                         class="product-image"
-                        :src="order.items[0].image"
+                        :src="getOrderFirstItemImage(order)"
                         mode="aspectFill"
                     ></image>
                     <view class="order-info">
                         <view class="product-summary">
-                            {{ order.items[0].name }}
-                            <text v-if="order.items.length > 1"
-                                >等{{ order.items.length }}件商品</text
+                            {{ getOrderFirstItemName(order) }}
+                            <text v-if="getOrderItemsCount(order) > 1"
+                                >等{{ getOrderItemsCount(order) }}件商品</text
                             >
                         </view>
                         <view class="order-time">{{
-                            formatTime(order.time)
+                            formatTime(order.createTime)
                         }}</view>
                         <view
                             class="discount-info"
-                            v-if="order.discount && order.discount.amount > 0"
+                            v-if="
+                                order.discountAmount &&
+                                Number(order.discountAmount) > 0
+                            "
                         >
                             <text class="discount-text"
-                                >已优惠: ¥{{ order.discount.amount }}</text
+                                >已优惠: ¥{{ order.discountAmount }}</text
                             >
                         </view>
                         <view
                             class="panda-coins"
-                            v-if="order.status !== 'cancelled'"
+                            v-if="order.orderStatus !== 'cancelled'"
                         >
                             <text class="panda-coins-text"
                                 >获得熊猫币:
                                 {{
-                                    order.pandaCoins ||
                                     getPandaCoins(
-                                        order.totalPrice,
-                                        order.discount?.amount || 0
+                                        order.totalAmount,
+                                        order.discountAmount || 0
                                     )
                                 }}</text
                             >
                         </view>
                     </view>
                     <view class="order-price">
-                        <view class="price-tag">¥{{ order.totalPrice }}</view>
+                        <view class="price-tag">¥{{ order.totalAmount }}</view>
                         <view class="price-detail"
                             >共{{ getTotalQuantity(order) }}件</view
                         >
                         <view
                             class="original-price"
-                            v-if="order.discount && order.discount.amount > 0"
+                            v-if="
+                                order.discountAmount &&
+                                Number(order.discountAmount) > 0
+                            "
                         >
                             <text
-                                >原价: ¥{{ order.discount.originalPrice }}</text
+                                >原价: ¥{{
+                                    Number(order.totalAmount) +
+                                    Number(order.discountAmount)
+                                }}</text
                             >
                         </view>
                     </view>
@@ -89,13 +97,13 @@
                 <view class="order-footer">
                     <view
                         class="action-btn"
-                        v-if="order.status === 'completed'"
+                        v-if="order.orderStatus === 'completed'"
                         @tap="reorder(order)"
                         >再来一单</view
                     >
                     <view
                         class="action-btn"
-                        v-if="order.status === 'pending'"
+                        v-if="order.orderStatus === 'pending'"
                         @tap="cancelOrder(index)"
                         >取消订单</view
                     >
@@ -111,59 +119,101 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { userState, updateUserState } from '../../utils/userState'
-import { orderApi } from '../../utils/api'
-console.log(userState)
+import {
+    fetchUserOrders,
+    cancelOrder as apiCancelOrder,
+    deleteOrder as apiDeleteOrder,
+    fetchOrderById
+} from '../../utils/api/orderApi'
 
 // 页面数据
 const hasOrders = ref(false)
 const orders = ref([])
 
+// 解析订单商品数据的辅助函数
+const parseOrderItems = (order) => {
+    if (!order || !order.orderItems) return []
+
+    try {
+        const items =
+            typeof order.orderItems === 'string'
+                ? JSON.parse(order.orderItems)
+                : order.orderItems
+        console.log('解析订单商品数据:', order.orderId, items)
+        return items
+    } catch (error) {
+        console.error('解析订单商品数据失败:', error)
+        return []
+    }
+}
+
+// 获取订单第一个商品的图片
+const getOrderFirstItemImage = (order) => {
+    const items = parseOrderItems(order)
+    const imageUrl =
+        items.length > 0 && items[0].image
+            ? items[0].image
+            : '/static/images/default-product.png'
+    console.log('订单商品图片:', order.orderId, imageUrl)
+    return imageUrl
+}
+
+// 获取订单第一个商品的名称
+const getOrderFirstItemName = (order) => {
+    const items = parseOrderItems(order)
+    const name = items.length > 0 && items[0].name ? items[0].name : '未知商品'
+    console.log('订单商品名称:', order.orderId, name)
+    return name
+}
+
+// 获取订单商品数量
+const getOrderItemsCount = (order) => {
+    const items = parseOrderItems(order)
+    return items.length
+}
+
 // 刷新订单数据
 const refreshOrders = async () => {
     try {
-        // 使用订单API获取订单数据
-        const userOrders = await orderApi.fetchUserOrders()
-
-        // 遍历所有订单，检查是否有未添加熊猫币的订单
-        let totalCoinsToAdd = 0
-
-        userOrders.forEach((order) => {
-            // 只处理未取消且没有添加过熊猫币的订单
-            if (order.status !== 'cancelled' && !order.pandaCoins) {
-                // 计算熊猫币
-                const coinsForOrder = getPandaCoins(
-                    order.totalPrice,
-                    order.discount?.amount || 0
-                )
-
-                // 更新订单的熊猫币信息
-                order.pandaCoins = coinsForOrder
-
-                // 累计需要添加的熊猫币
-                totalCoinsToAdd += coinsForOrder
-            }
-        })
-
-        // 如果有新的熊猫币需要添加
-        if (totalCoinsToAdd > 0) {
-            // 更新用户熊猫币总数
-            userState.pandaCoins += totalCoinsToAdd
-
-            // 更新本地存储中的用户信息
-            updateUserState({ pandaCoins: userState.pandaCoins })
-
-            // 更新本地存储中的订单信息
-            uni.setStorageSync('savedOrders', userOrders)
-
-            console.log(
-                `已添加${totalCoinsToAdd}熊猫币，当前总数：${userState.pandaCoins}`
-            )
+        // 获取当前用户ID
+        const userId = userState.userId
+        if (!userId) {
+            console.log('用户未登录，无法获取订单')
+            hasOrders.value = false
+            orders.value = []
+            return
         }
 
-        orders.value = userOrders
-        hasOrders.value = userOrders.length > 0
+        // 使用订单API从后端获取订单数据
+        const userOrders = await fetchUserOrders(userId)
+        console.log('后端返回的原始订单数据:', userOrders)
+
+        // 处理订单数据
+        if (userOrders && userOrders.length > 0) {
+            // 可以在这里处理订单数据格式，如果需要的话
+            orders.value = userOrders
+            hasOrders.value = true
+
+            // 打印订单数据字段
+            console.log('订单数据结构示例:', Object.keys(userOrders[0]))
+
+            // 检查orderItems字段
+            userOrders.forEach((order) => {
+                console.log(
+                    `订单 ${order.orderId} 的orderItems类型:`,
+                    typeof order.orderItems
+                )
+                console.log(
+                    `订单 ${order.orderId} 的orderItems值:`,
+                    order.orderItems
+                )
+            })
+        } else {
+            orders.value = []
+            hasOrders.value = false
+        }
     } catch (error) {
         console.error('获取订单列表失败:', error)
         uni.showToast({
@@ -197,6 +247,8 @@ const goToOrder = () => {
 
 // 格式化订单时间
 const formatTime = (timestamp) => {
+    if (!timestamp) return '未知时间'
+
     const date = new Date(timestamp)
     const month = date.getMonth() + 1
     const day = date.getDate()
@@ -209,16 +261,31 @@ const formatTime = (timestamp) => {
 // 获取订单状态文本
 const getStatusText = (status) => {
     const statusMap = {
-        pending: '待取餐',
+        pending: '待支付',
+        paid: '待取餐',
         completed: '已完成',
-        cancelled: '已取消'
+        cancelled: '已取消',
+        refunded: '已退款'
     }
     return statusMap[status] || '未知状态'
 }
 
 // 获取订单总商品数量
 const getTotalQuantity = (order) => {
-    return order.items.reduce((total, item) => total + item.quantity, 0)
+    if (!order.orderItems) return 0
+
+    try {
+        // 尝试解析订单商品JSON
+        const items =
+            typeof order.orderItems === 'string'
+                ? JSON.parse(order.orderItems)
+                : order.orderItems
+
+        return items.reduce((total, item) => total + (item.quantity || 1), 0)
+    } catch (error) {
+        console.error('解析订单商品数据失败:', error)
+        return 0
+    }
 }
 
 // 计算获得的熊猫币数量（向上取整）
@@ -230,17 +297,33 @@ const getPandaCoins = (price, discount = 0) => {
 
 // 再来一单
 const reorder = (order) => {
+    // 构建订单数据
+    let orderItems
+    try {
+        orderItems =
+            typeof order.orderItems === 'string'
+                ? JSON.parse(order.orderItems)
+                : order.orderItems
+    } catch (error) {
+        console.error('解析订单商品数据失败:', error)
+        uni.showToast({
+            title: '重新下单失败',
+            icon: 'none'
+        })
+        return
+    }
+
     // 复制当前订单信息
     const orderData = {
-        items: order.items,
-        totalPrice: order.totalPrice,
+        items: orderItems,
+        totalPrice: order.totalAmount,
         store: {
-            name: order.storeName
-            // 其他门店信息可以在实际应用中补充
+            name: order.storeName,
+            address: order.storeAddress
         },
         deliveryType: order.deliveryType,
         // 计算将要获得的熊猫币数量
-        pandaCoins: getPandaCoins(order.totalPrice, order.discount?.amount || 0)
+        pandaCoins: getPandaCoins(order.totalAmount, order.discountAmount || 0)
     }
 
     // 保存到本地存储，供订单确认页使用
@@ -253,44 +336,29 @@ const reorder = (order) => {
 }
 
 // 查看订单详情
-const viewOrderDetail = (order) => {
-    console.log('查看订单详情:', order.id)
+const viewOrderDetail = async (order) => {
+    try {
+        // 获取最新的订单详情
+        const orderId = order.orderId
+        const orderDetail = await fetchOrderById(orderId)
 
-    // 如果订单没有熊猫币信息，则添加
-    if (!order.pandaCoins && order.status !== 'cancelled') {
-        // 计算熊猫币
-        const coinsToAdd = getPandaCoins(
-            order.totalPrice,
-            order.discount?.amount || 0
-        )
+        // 将当前订单保存到本地存储，以便订单详情页面可以访问
+        uni.setStorageSync('currentOrderDetail', orderDetail)
 
-        // 更新订单的熊猫币信息
-        order.pandaCoins = coinsToAdd
-
-        // 更新用户熊猫币总数
-        userState.pandaCoins += coinsToAdd
-
-        // 更新本地存储中的订单信息
-        uni.setStorageSync('savedOrders', orders.value)
-
-        // 更新本地存储中的用户信息
-        updateUserState({ pandaCoins: userState.pandaCoins })
-
-        console.log(
-            `已添加${coinsToAdd}熊猫币，当前总数：${userState.pandaCoins}`
-        )
+        // 跳转到订单详情页面
+        uni.navigateTo({
+            url: `/pages/order-detail/order-detail?orderId=${orderId}`
+        })
+    } catch (error) {
+        console.error('获取订单详情失败:', error)
+        uni.showToast({
+            title: '获取订单详情失败',
+            icon: 'none'
+        })
     }
-
-    // 将当前订单保存到本地存储，以便订单详情页面可以访问
-    uni.setStorageSync('currentOrderDetail', order)
-
-    // 只传递订单ID，其他信息从本地存储获取
-    uni.navigateTo({
-        url: `/pages/order-detail/order-detail?orderId=${order.id}`
-    })
 }
 
-// 更新订单取消函数
+// 取消订单
 const cancelOrder = async (index) => {
     uni.showModal({
         title: '提示',
@@ -299,26 +367,21 @@ const cancelOrder = async (index) => {
             if (res.confirm) {
                 try {
                     // 获取要取消的订单ID
-                    const orderId = orders.value[index].id
+                    const orderId = orders.value[index].orderId
 
-                    // 使用API取消订单
-                    const updatedOrder = await orderApi.cancelOrder(orderId)
+                    // 调用API取消订单
+                    const result = await apiCancelOrder(orderId)
 
-                    // 更新本地订单列表
-                    orders.value[index] = updatedOrder
+                    if (result) {
+                        // 刷新订单列表
+                        await refreshOrders()
 
-                    // 如果有熊猫币，需要减去
-                    if (updatedOrder.pandaCoins) {
-                        userState.pandaCoins -= updatedOrder.pandaCoins
-                        // 更新用户状态
-                        updateUserState({ pandaCoins: userState.pandaCoins })
+                        // 提示用户
+                        uni.showToast({
+                            title: '订单已取消',
+                            icon: 'success'
+                        })
                     }
-
-                    // 提示用户
-                    uni.showToast({
-                        title: '订单已取消',
-                        icon: 'success'
-                    })
                 } catch (error) {
                     console.error('取消订单失败:', error)
                     uni.showToast({
@@ -332,29 +395,36 @@ const cancelOrder = async (index) => {
 }
 
 // 删除订单
-const deleteOrder = (index) => {
+const deleteOrder = async (index) => {
     uni.showModal({
         title: '提示',
         content: '确定要删除此订单吗？',
-        success: function (res) {
+        success: async function (res) {
             if (res.confirm) {
-                // 从列表中删除订单
-                const orderToDelete = orders.value[index]
-                orders.value.splice(index, 1)
+                try {
+                    // 获取要删除的订单ID
+                    const orderId = orders.value[index].orderId
 
-                // 更新本地存储
-                uni.setStorageSync('savedOrders', orders.value)
+                    // 调用API删除订单
+                    const result = await apiDeleteOrder(orderId)
 
-                // 如果删除后没有订单，显示空状态
-                if (orders.value.length === 0) {
-                    hasOrders.value = false
+                    if (result) {
+                        // 刷新订单列表
+                        await refreshOrders()
+
+                        // 提示用户
+                        uni.showToast({
+                            title: '订单已删除',
+                            icon: 'success'
+                        })
+                    }
+                } catch (error) {
+                    console.error('删除订单失败:', error)
+                    uni.showToast({
+                        title: '删除订单失败',
+                        icon: 'none'
+                    })
                 }
-
-                // 提示用户
-                uni.showToast({
-                    title: '订单已删除',
-                    icon: 'success'
-                })
             }
         }
     })

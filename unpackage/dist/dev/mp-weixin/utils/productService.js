@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
+require("./userState.js");
 const utils_api_productApi = require("./api/productApi.js");
 const utils_api_categoryApi = require("./api/categoryApi.js");
 const getProductData = async () => {

@@ -194,7 +194,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import CouponSelect from '../components/coupon-select.vue'
 import { userState } from '../../utils/userState'
 import { updateUserState } from '../../utils/userState'
-import { orderApi } from '../../utils/api'
+import { api } from '../../utils/api'
 import { userData, initUserData } from '../../utils/userData'
 
 // 定义数据
@@ -341,30 +341,42 @@ const handlePayment = async () => {
     // 保存需要删除的商品ID
     uni.setStorageSync('itemsToDeleteFromCart', selectedItemIds)
 
-    // 构建订单数据
+    // 计算金额
+    const totalAmountValue = parseFloat(originalPrice.value) // 订单总金额（原价）
+    const discountAmountValue = parseFloat(discountAmount.value) // 优惠金额
+    const actualAmountValue = parseFloat(totalPrice.value) // 实付金额（折后价）
+
+    console.log('订单支付信息:', {
+        总金额: totalAmountValue,
+        优惠金额: discountAmountValue,
+        实付金额: actualAmountValue,
+        选择的优惠券: selectedCoupon.value
+    })
+
+    // 构建订单数据，按照API接口文档的格式
     const orderData = {
-        storeName: orderConfirmData.store?.name || '默认店铺',
-        storeAddress: orderConfirmData.store?.address || '默认地址',
-        deliveryType: orderConfirmData.deliveryType || 'self',
-        items: orderConfirmData.items || [],
-        totalPrice: totalPrice.value,
-        discount: {
-            amount: discountAmount.value,
-            originalPrice: originalPrice.value,
-            coupon: selectedCoupon.value
-                ? {
-                      id: selectedCoupon.value.id,
-                      title: selectedCoupon.value.title,
-                      type: selectedCoupon.value.type,
-                      value: selectedCoupon.value.value
-                  }
-                : null
-        }
+        userId: userState.userId,
+        totalAmount: totalAmountValue.toFixed(2),
+        discountAmount: discountAmountValue.toFixed(2),
+        actualAmount: actualAmountValue.toFixed(2),
+        couponId: selectedCoupon.value ? selectedCoupon.value.id : null,
+        deliveryType: deliveryType.value || 'self',
+        storeName: orderConfirmData.store?.name || storeInfo.value.name,
+        storeAddress:
+            orderConfirmData.store?.address || storeInfo.value.address,
+        contactName: contactName.value || userInfo.value.nickname || '匿名用户',
+        contactPhone: contactPhone.value || userInfo.value.phone || '',
+        deliveryAddress:
+            deliveryType.value === 'delivery' ? orderUserAddress.value : '',
+        orderItems: JSON.stringify(orderItems.value)
     }
 
     try {
+        console.log('创建订单数据:', orderData)
+
         // 使用订单API创建订单
-        const newOrder = await orderApi.createOrder(orderData)
+        const newOrder = await api.order.createOrder(orderData)
+        console.log('创建订单成功:', newOrder)
 
         // 如果使用了优惠券，将其标记为已使用
         if (selectedCoupon.value) {
@@ -394,6 +406,7 @@ const handlePayment = async () => {
             }
         })
     } catch (error) {
+        console.error('订单创建失败:', error)
         uni.showToast({
             title: '订单创建失败',
             icon: 'none'
@@ -810,4 +823,4 @@ const handleCouponSelect = (coupon) => {
     border-radius: 20rpx;
     margin-right: 40rpx;
 }
-</style>
+</style>    

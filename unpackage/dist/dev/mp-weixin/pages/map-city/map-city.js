@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+require("../../utils/userState.js");
 const utils_api_cityApi = require("../../utils/api/cityApi.js");
 const _sfc_main = {
   __name: "map-city",

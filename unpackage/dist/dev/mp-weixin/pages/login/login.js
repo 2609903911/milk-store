@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+require("../../utils/userState.js");
 const utils_api_authApi = require("../../utils/api/authApi.js");
 const utils_userData = require("../../utils/userData.js");
 const common_assets = require("../../common/assets.js");
