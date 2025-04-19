@@ -487,17 +487,15 @@ const handlePhoneUpdateSuccess = (newPhone) => {
 
 // 跳转到地址管理
 const goToAddressManage = () => {
-    uni.showToast({
-        title: '地址管理功能即将上线',
-        icon: 'none'
+    uni.navigateTo({
+        url: '/pages/address/address'
     })
 }
 
 // 切换账号
 const switchAccount = () => {
-    uni.showToast({
-        title: '切换账号功能即将上线',
-        icon: 'none'
+    uni.navigateTo({
+        url: '/pages/login/login'
     })
 }
 

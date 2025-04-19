@@ -17,7 +17,7 @@
                 <input
                     class="form-input"
                     type="text"
-                    v-model="formData.name"
+                    v-model="formData.contactName"
                     placeholder="请输入联系人姓名"
                 />
             </view>
@@ -97,7 +97,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { get, post, put, request } from '../../utils/api/request'
+import { userState } from '../../utils/userState'
+import { onBackPress } from '@dcloudio/uni-app'
 
 // 获取页面参数
 const props = defineProps({
@@ -110,43 +113,143 @@ const props = defineProps({
 // 判断是编辑还是新增
 const isEdit = computed(() => !!props.id)
 
+// loading状态跟踪
+const isLoading = ref(false)
+
 // 表单数据
 const formData = ref({
-    name: '',
+    contactName: '',
     phone: '',
-    gender: 'male', // 默认为先生
+    gender: 'male',
     address: '',
     addressDetail: '',
     isDefault: false
 })
 
+// 确保页面卸载时关闭loading
+onUnmounted(() => {
+    if (isLoading.value) {
+        uni.hideLoading()
+        isLoading.value = false
+    }
+})
+
+// 监听返回事件，确保返回时关闭loading
+onBackPress(() => {
+    if (isLoading.value) {
+        uni.hideLoading()
+        isLoading.value = false
+    }
+})
+
+// 安全的显示loading
+const safeShowLoading = (title) => {
+    if (!isLoading.value) {
+        uni.showLoading({
+            title: title || '加载中...'
+        })
+        isLoading.value = true
+    }
+}
+
+// 安全的隐藏loading
+const safeHideLoading = () => {
+    if (isLoading.value) {
+        uni.hideLoading()
+        isLoading.value = false
+    }
+}
+
 // 页面初始化
 onMounted(() => {
-    // 如果是编辑模式，获取地址详情
+    // 如果是编辑模式
     if (isEdit.value) {
-        // 这里应该从后端获取地址详情
-        // 暂时使用模拟数据
-        if (props.id === '1') {
-            formData.value = {
-                name: 'Teia',
-                phone: '13012341672',
-                gender: 'male',
-                address: '都昌县湖滨学校西',
-                addressDetail: '1号楼',
-                isDefault: false
-            }
-        } else if (props.id === '2') {
-            formData.value = {
-                name: '1',
-                phone: '13012341672',
-                gender: 'male',
-                address: '九江市浔阳区委(陆家坊支路东)',
-                addressDetail: '1号',
-                isDefault: true
-            }
+        // 尝试从事件通道获取数据
+        const eventChannel = getOpenerEventChannel()
+
+        // 检查eventChannel是否存在及是否有addressData事件
+        if (eventChannel && eventChannel.on) {
+            eventChannel.on('addressData', function (data) {
+                if (data) {
+                    // 使用从事件通道获取的数据填充表单
+                    formData.value = {
+                        contactName: data.contactName || '',
+                        phone: data.phone || '',
+                        gender: data.gender || 'male',
+                        address: data.address || '',
+                        addressDetail: '', // 可能需要从API获取
+                        isDefault: !!data.isDefault
+                    }
+                } else {
+                    // 如果没有获取到数据，则从API获取
+                    fetchAddressDetail()
+                }
+            })
+        } else {
+            // 如果没有eventChannel，则从API获取
+            fetchAddressDetail()
         }
     }
 })
+
+// 获取当前页面的事件通道
+function getOpenerEventChannel() {
+    const pages = getCurrentPages()
+    const currentPage = pages[pages.length - 1]
+    const eventChannel = currentPage.getOpenerEventChannel()
+    return eventChannel
+}
+
+// 获取地址详情
+const fetchAddressDetail = async () => {
+    try {
+        // 显示加载中
+        safeShowLoading('加载中...')
+
+        // 从页面参数或路由参数中获取地址ID
+        const addressId = props.id
+
+        if (!addressId) {
+            safeHideLoading()
+            return uni.showToast({
+                title: '地址ID不能为空',
+                icon: 'none'
+            })
+        }
+
+        // 请求API获取地址详情
+        const result = await get(`/api/user/address/${addressId}`, {
+            userId: userState.userId
+        })
+
+        console.log('获取到的地址详情:', result)
+
+        if (result.code === 200 && result.data) {
+            // 更新表单数据
+            formData.value = {
+                contactName: result.data.contactName,
+                phone: result.data.phone,
+                gender: result.data.gender || 'male',
+                address: result.data.address,
+                addressDetail: result.data.addressDetail || '',
+                isDefault: result.data.isDefault
+            }
+        } else {
+            uni.showToast({
+                title: '获取地址详情失败',
+                icon: 'none'
+            })
+        }
+    } catch (error) {
+        console.error('获取地址详情失败:', error)
+        uni.showToast({
+            title: '获取地址详情失败，请重试',
+            icon: 'none'
+        })
+    } finally {
+        safeHideLoading()
+    }
+}
 
 // 返回上一页
 const goBack = () => {
@@ -167,9 +270,9 @@ const chooseLocation = () => {
 }
 
 // 保存地址
-const saveAddress = () => {
+const saveAddress = async () => {
     // 表单验证
-    if (!formData.value.name) {
+    if (!formData.value.contactName) {
         return uni.showToast({
             title: '请输入联系人姓名',
             icon: 'none'
@@ -197,35 +300,112 @@ const saveAddress = () => {
         })
     }
 
-    // 这里应该调用后端API保存地址
-    uni.showToast({
-        title: '地址保存成功',
-        icon: 'success',
-        success: () => {
-            setTimeout(() => {
-                uni.navigateBack()
-            }, 1500)
+    try {
+        // 显示加载中
+        safeShowLoading('保存中...')
+
+        // 构建提交的数据
+        const submitData = {
+            userId: userState.userId,
+            contactName: formData.value.contactName,
+            phone: formData.value.phone,
+            gender: formData.value.gender,
+            address: formData.value.address,
+            addressDetail: formData.value.addressDetail,
+            isDefault: formData.value.isDefault
         }
-    })
+
+        let result
+
+        // 根据是否编辑模式调用不同的API
+        if (isEdit.value) {
+            // 编辑地址
+            result = await put(`/api/user/address/${props.id}`, submitData)
+        } else {
+            // 新增地址
+            result = await post('/api/user/address', submitData)
+        }
+
+        console.log('保存地址结果:', result)
+
+        // 隐藏loading再显示toast
+        safeHideLoading()
+
+        if (result.code === 200) {
+            uni.showToast({
+                title: isEdit.value ? '地址更新成功' : '地址添加成功',
+                icon: 'success',
+                success: () => {
+                    setTimeout(() => {
+                        uni.navigateBack()
+                    }, 1500)
+                }
+            })
+        } else {
+            uni.showToast({
+                title: result.message || '保存失败',
+                icon: 'none'
+            })
+        }
+    } catch (error) {
+        console.error('保存地址失败:', error)
+        safeHideLoading()
+        uni.showToast({
+            title: '保存失败，请重试',
+            icon: 'none'
+        })
+    }
 }
 
 // 删除地址
-const deleteAddress = () => {
+const deleteAddress = async () => {
     uni.showModal({
         title: '提示',
         content: '确定要删除该收货地址吗？',
-        success: (res) => {
+        success: async (res) => {
             if (res.confirm) {
-                // 这里应该调用后端API删除地址
-                uni.showToast({
-                    title: '地址删除成功',
-                    icon: 'success',
-                    success: () => {
-                        setTimeout(() => {
-                            uni.navigateBack()
-                        }, 1500)
+                try {
+                    // 显示加载中
+                    safeShowLoading('删除中...')
+
+                    // 调用删除API
+                    const result = await request({
+                        url: `/api/user/address/${props.id}`,
+                        method: 'DELETE',
+                        data: {
+                            userId: userState.userId
+                        }
+                    })
+
+                    console.log('删除地址结果:', result)
+
+                    // 隐藏loading再显示toast
+                    safeHideLoading()
+
+                    if (result.code === 200) {
+                        uni.showToast({
+                            title: '地址删除成功',
+                            icon: 'success',
+                            success: () => {
+                                setTimeout(() => {
+                                    uni.navigateBack()
+                                }, 1500)
+                            }
+                        })
+                    } else {
+                        uni.showToast({
+                            title: result.message || '删除失败',
+                            icon: 'none'
+                        })
                     }
-                })
+                } catch (error) {
+                    console.error('删除地址失败:', error)
+                    safeHideLoading()
+                    uni.showToast({
+                        title: '删除失败，请重试',
+                        icon: 'none'
+                    })
+                }
             }
         }
     })
@@ -236,7 +416,7 @@ const deleteAddress = () => {
 .edit-address-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 94vh;
     background-color: #f5f5f5;
     margin-top: 44px; // 向上移动导航栏的高度
 }
@@ -281,7 +461,7 @@ const deleteAddress = () => {
     border-bottom: 1px solid #f0f0f0;
 
     .form-label {
-        width: 80px;
+        width: 100px;
         font-size: 14px;
         color: #333;
     }

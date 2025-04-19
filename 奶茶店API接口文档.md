@@ -79,8 +79,6 @@
 
 - **URL**: `/api/user/default-address`
 - **方法**: GET
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **返回**:
   ```json
   {
@@ -246,8 +244,6 @@
 
 - **URL**: `/api/user/default-address`
 - **方法**: GET
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **返回**:
   ```json
   {
@@ -264,10 +260,8 @@
 
 ### 获取用户所有地址
 
-- **URL**: `/api/user/addresses`
+- **URL**: `/api/user/addresses?userId={userId}`
 - **方法**: GET
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **返回**:
   ```json
   {
@@ -293,8 +287,6 @@
 
 - **URL**: `/api/user/address`
 - **方法**: POST
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **请求体**:
   ```json
   {
@@ -328,8 +320,6 @@
 
 - **URL**: `/api/user/address/{addressId}`
 - **方法**: PUT
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **参数**:
   - `addressId`: 地址ID
 - **请求体**:
@@ -347,8 +337,6 @@
 
 - **URL**: `/api/user/address/{addressId}/default`
 - **方法**: PUT
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **参数**:
   - `addressId`: 要设置为默认的地址ID
 
@@ -356,8 +344,6 @@
 
 - **URL**: `/api/user/address/{addressId}`
 - **方法**: DELETE
-- **头部**:
-  - `Authorization`: Bearer {token}
 - **参数**:
   - `addressId`: 要删除的地址ID
   

@@ -225,15 +225,13 @@ const _sfc_main = {
       });
     };
     const goToAddressManage = () => {
-      common_vendor.index.showToast({
-        title: "地址管理功能即将上线",
-        icon: "none"
+      common_vendor.index.navigateTo({
+        url: "/pages/address/address"
       });
     };
     const switchAccount = () => {
-      common_vendor.index.showToast({
-        title: "切换账号功能即将上线",
-        icon: "none"
+      common_vendor.index.navigateTo({
+        url: "/pages/login/login"
       });
     };
     const chooseAvatar = () => {
@@ -250,7 +248,7 @@ const _sfc_main = {
             title: "上传头像中..."
           });
           const fullUploadUrl = utils_api_config.getFullUrl(utils_api_config.API_PATHS.USER_AVATAR_UPLOAD);
-          common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:521", "上传URL:", fullUploadUrl);
+          common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:519", "上传URL:", fullUploadUrl);
           common_vendor.index.uploadFile({
             url: fullUploadUrl,
             // 使用完整URL
@@ -262,11 +260,11 @@ const _sfc_main = {
             success: (uploadRes) => {
               var _a;
               try {
-                common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:533", "上传结果:", uploadRes.data);
+                common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:531", "上传结果:", uploadRes.data);
                 const result = JSON.parse(uploadRes.data);
                 if (result.code === 200 && ((_a = result.data) == null ? void 0 : _a.avatarUrl)) {
                   let serverAvatarUrl = result.data.avatarUrl;
-                  common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:538", "服务器返回的头像URL:", serverAvatarUrl);
+                  common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:536", "服务器返回的头像URL:", serverAvatarUrl);
                   if (serverAvatarUrl.startsWith("/")) {
                     serverAvatarUrl = utils_api_config.getFullUrl(serverAvatarUrl);
                   }
@@ -287,7 +285,7 @@ const _sfc_main = {
                   });
                 }
               } catch (e) {
-                common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:567", "解析上传结果失败:", e, uploadRes.data);
+                common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:565", "解析上传结果失败:", e, uploadRes.data);
                 common_vendor.index.showToast({
                   title: "服务器返回数据格式错误",
                   icon: "none"
@@ -295,7 +293,7 @@ const _sfc_main = {
               }
             },
             fail: (err) => {
-              common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:575", "上传失败:", err);
+              common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:573", "上传失败:", err);
               common_vendor.index.showToast({
                 title: "上传失败，请稍后再试",
                 icon: "none"
@@ -309,7 +307,7 @@ const _sfc_main = {
       });
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:591", "头像加载失败:", userInfo.value.avatar);
+      common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:589", "头像加载失败:", userInfo.value.avatar);
       userInfo.value.avatar = "/static/images/avatar.png";
     };
     return (_ctx, _cache) => {

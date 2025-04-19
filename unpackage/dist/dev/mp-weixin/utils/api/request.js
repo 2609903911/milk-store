@@ -47,5 +47,24 @@ const get = (url, params = {}, options = {}) => {
     ...options
   });
 };
+const post = (url, data = {}, options = {}) => {
+  return request({
+    url,
+    method: utils_api_config.REQUEST_METHODS.POST,
+    data,
+    ...options
+  });
+};
+const put = (url, data = {}, options = {}) => {
+  return request({
+    url,
+    method: utils_api_config.REQUEST_METHODS.PUT,
+    data,
+    ...options
+  });
+};
 exports.get = get;
+exports.post = post;
+exports.put = put;
+exports.request = request;
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/utils/api/request.js.map
