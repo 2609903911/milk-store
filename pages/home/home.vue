@@ -93,7 +93,11 @@
                         <text
                             >优惠券
                             {{
-                                userData.coupons ? userData.coupons.length : 0
+                                userData.coupons
+                                    ? userData.coupons.filter(
+                                          (coupon) => coupon.status === 'valid'
+                                      ).length
+                                    : 0
                             }}</text
                         >
                     </view>
@@ -258,6 +262,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { userData, initUserData } from '../../utils/userData'
 import { bannerApi } from '../../utils/api'
 
@@ -268,7 +273,11 @@ onMounted(() => {
     fetchBannerData()
 })
 
-console.log('请求到的用户数据', userData)
+// 每次显示页面时刷新数据
+onShow(() => {
+    initUserData()
+    fetchBannerData()
+})
 
 const currentSwiper = ref(0)
 const swiperChange = (e) => {
@@ -283,9 +292,7 @@ const fetchBannerData = async () => {
     try {
         const banners = await bannerApi.fetchBanners()
         bannerList.value = banners
-        console.log('轮播图数据获取成功:', bannerList.value)
     } catch (error) {
-        console.error('轮播图数据请求异常:', error)
         // 请求失败时加载本地备用数据
         loadLocalBannerData()
     }
@@ -323,7 +330,6 @@ const loadLocalBannerData = () => {
             bgColor: '#e6d7f2' // 浅紫色背景
         }
     ]
-    console.log('已加载本地备用轮播图数据')
 }
 
 // 处理头像加载错误

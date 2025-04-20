@@ -3,8 +3,11 @@ package com.milkstore.controller;
 import com.milkstore.common.Result;
 import com.milkstore.entity.UserCoupon;
 import com.milkstore.service.UserCouponService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user-coupons")
+@Slf4j
 public class UserCouponController {
 
     @Autowired
@@ -89,5 +93,67 @@ public class UserCouponController {
                 "SHOW COLUMNS FROM coupon_template");
         
         return Result.success("查询成功", Map.of("columns", columns));
+    }
+
+    /**
+     * 根据ID获取优惠券详情
+     * @param id 优惠券ID
+     * @return 优惠券详情
+     */
+    @GetMapping("/{id}")
+    public Result<UserCoupon> getCouponById(@PathVariable("id") Long id) {
+        log.info("获取优惠券详情，ID: {}", id);
+        try {
+            UserCoupon userCoupon = userCouponService.findById(id);
+            if (userCoupon == null) {
+                return Result.error("优惠券不存在");
+            }
+            return Result.success("获取成功", userCoupon);
+        } catch (Exception e) {
+            log.error("获取优惠券详情失败", e);
+            return Result.error("获取优惠券详情失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 更新优惠券使用状态
+     * @param id 优惠券ID
+     * @param orderId 订单ID
+     * @return 更新结果
+     */
+    @PutMapping("/{id}/use")
+    public Result<?> useCoupon(
+            @PathVariable("id") Long id,
+            @RequestParam("orderId") String orderId) {
+        log.info("更新优惠券使用状态，ID: {}, 订单ID: {}", id, orderId);
+        try {
+            // 查找优惠券
+            UserCoupon userCoupon = userCouponService.findById(id);
+            if (userCoupon == null) {
+                return Result.error("优惠券不存在");
+            }
+            
+            // 检查优惠券状态
+            if ("used".equals(userCoupon.getStatus())) {
+                return Result.error("优惠券已被使用");
+            }
+            
+            // 更新优惠券状态
+            userCoupon.setStatus("used");
+            userCoupon.setUsedTime(new java.util.Date());
+            userCoupon.setOrderId(orderId);
+            
+            // 调用专门的方法使用优惠券
+            boolean success = userCouponService.useCoupon(id, orderId);
+            
+            if (success) {
+                return Result.success("优惠券使用成功", null);
+            } else {
+                return Result.error("优惠券使用失败");
+            }
+        } catch (Exception e) {
+            log.error("更新优惠券状态失败", e);
+            return Result.error("更新优惠券状态失败: " + e.getMessage());
+        }
     }
 } 

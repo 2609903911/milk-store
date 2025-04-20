@@ -4,7 +4,7 @@
 
 // API基础URL配置
 const BASE_URL = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:8080'  // 开发环境
+    ? 'http://localhost:8082'  // 开发环境
     : 'https://api.milkstore.com'  // 生产环境
 
 // 请求超时时间

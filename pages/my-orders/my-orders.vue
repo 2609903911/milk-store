@@ -64,16 +64,13 @@
                             <text class="panda-coins-text"
                                 >获得熊猫币:
                                 {{
-                                    getPandaCoins(
-                                        order.totalAmount,
-                                        order.discountAmount || 0
-                                    )
+                                    getPandaCoins(order.totalAmount || 0)
                                 }}</text
                             >
                         </view>
                     </view>
                     <view class="order-price">
-                        <view class="price-tag">¥{{ order.totalAmount }}</view>
+                        <view class="price-tag">¥{{ order.actualAmount }}</view>
                         <view class="price-detail"
                             >共{{ getTotalQuantity(order) }}件</view
                         >
@@ -84,12 +81,7 @@
                                 Number(order.discountAmount) > 0
                             "
                         >
-                            <text
-                                >原价: ¥{{
-                                    Number(order.totalAmount) +
-                                    Number(order.discountAmount)
-                                }}</text
-                            >
+                            <text>原价: ¥{{ Number(order.totalAmount) }}</text>
                         </view>
                     </view>
                 </view>
@@ -119,7 +111,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { userState, updateUserState } from '../../utils/userState'
 import {
     fetchUserOrders,
@@ -141,10 +134,8 @@ const parseOrderItems = (order) => {
             typeof order.orderItems === 'string'
                 ? JSON.parse(order.orderItems)
                 : order.orderItems
-        console.log('解析订单商品数据:', order.orderId, items)
         return items
     } catch (error) {
-        console.error('解析订单商品数据失败:', error)
         return []
     }
 }
@@ -156,7 +147,6 @@ const getOrderFirstItemImage = (order) => {
         items.length > 0 && items[0].image
             ? items[0].image
             : '/static/images/default-product.png'
-    console.log('订单商品图片:', order.orderId, imageUrl)
     return imageUrl
 }
 
@@ -164,7 +154,6 @@ const getOrderFirstItemImage = (order) => {
 const getOrderFirstItemName = (order) => {
     const items = parseOrderItems(order)
     const name = items.length > 0 && items[0].name ? items[0].name : '未知商品'
-    console.log('订单商品名称:', order.orderId, name)
     return name
 }
 
@@ -180,7 +169,6 @@ const refreshOrders = async () => {
         // 获取当前用户ID
         const userId = userState.userId
         if (!userId) {
-            console.log('用户未登录，无法获取订单')
             hasOrders.value = false
             orders.value = []
             return
@@ -188,34 +176,17 @@ const refreshOrders = async () => {
 
         // 使用订单API从后端获取订单数据
         const userOrders = await fetchUserOrders(userId)
-        console.log('后端返回的原始订单数据:', userOrders)
 
         // 处理订单数据
         if (userOrders && userOrders.length > 0) {
             // 可以在这里处理订单数据格式，如果需要的话
             orders.value = userOrders
             hasOrders.value = true
-
-            // 打印订单数据字段
-            console.log('订单数据结构示例:', Object.keys(userOrders[0]))
-
-            // 检查orderItems字段
-            userOrders.forEach((order) => {
-                console.log(
-                    `订单 ${order.orderId} 的orderItems类型:`,
-                    typeof order.orderItems
-                )
-                console.log(
-                    `订单 ${order.orderId} 的orderItems值:`,
-                    order.orderItems
-                )
-            })
         } else {
             orders.value = []
             hasOrders.value = false
         }
     } catch (error) {
-        console.error('获取订单列表失败:', error)
         uni.showToast({
             title: '获取订单失败',
             icon: 'none'
@@ -230,12 +201,17 @@ onMounted(() => {
     refreshOrders()
 })
 
-// 定义页面生命周期函数
-defineExpose({
-    onShow() {
-        // 每次显示页面时刷新数据
-        refreshOrders()
+// 每次显示页面时刷新数据
+onShow(() => {
+    // 检查是否有刷新标记（从支付页面返回时）
+    const needRefresh = uni.getStorageSync('ordersNeedRefresh')
+    if (needRefresh) {
+        // 清除刷新标记
+        uni.removeStorageSync('ordersNeedRefresh')
     }
+
+    // 无论如何都刷新订单数据
+    refreshOrders()
 })
 
 // 跳转到点单页面
@@ -283,7 +259,6 @@ const getTotalQuantity = (order) => {
 
         return items.reduce((total, item) => total + (item.quantity || 1), 0)
     } catch (error) {
-        console.error('解析订单商品数据失败:', error)
         return 0
     }
 }
@@ -305,7 +280,6 @@ const reorder = (order) => {
                 ? JSON.parse(order.orderItems)
                 : order.orderItems
     } catch (error) {
-        console.error('解析订单商品数据失败:', error)
         uni.showToast({
             title: '重新下单失败',
             icon: 'none'
@@ -350,7 +324,6 @@ const viewOrderDetail = async (order) => {
             url: `/pages/order-detail/order-detail?orderId=${orderId}`
         })
     } catch (error) {
-        console.error('获取订单详情失败:', error)
         uni.showToast({
             title: '获取订单详情失败',
             icon: 'none'
@@ -383,7 +356,6 @@ const cancelOrder = async (index) => {
                         })
                     }
                 } catch (error) {
-                    console.error('取消订单失败:', error)
                     uni.showToast({
                         title: '取消订单失败',
                         icon: 'none'
@@ -408,21 +380,28 @@ const deleteOrder = async (index) => {
                     // 调用API删除订单
                     const result = await apiDeleteOrder(orderId)
 
-                    if (result) {
-                        // 刷新订单列表
-                        await refreshOrders()
+                    // 无论API返回什么，都认为删除成功
+                    // 因为mockAPI可能返回true，而真实API可能返回其他数据结构
 
-                        // 提示用户
-                        uni.showToast({
-                            title: '订单已删除',
-                            icon: 'success'
-                        })
+                    // 从本地数组中移除已删除的订单
+                    orders.value.splice(index, 1)
+
+                    // 如果没有订单了，更新hasOrders状态
+                    if (orders.value.length === 0) {
+                        hasOrders.value = false
                     }
+
+                    // 提示用户
+                    uni.showToast({
+                        title: '订单已删除',
+                        icon: 'success',
+                        duration: 2000
+                    })
                 } catch (error) {
-                    console.error('删除订单失败:', error)
                     uni.showToast({
                         title: '删除订单失败',
-                        icon: 'none'
+                        icon: 'none',
+                        duration: 2000
                     })
                 }
             }

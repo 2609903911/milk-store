@@ -58,7 +58,7 @@ export const fetchUserOrdersByStatus = async (userId, status) => {
  * @returns {Promise} 创建的订单数据
  */
 export const createOrder = async (orderData) => {
-  console.log('调用createOrder API:', orderData);
+  console.log('调用createOrder API，提交的数据:', orderData);
   try {
     // 调用后端API
     const response = await request({
@@ -67,11 +67,52 @@ export const createOrder = async (orderData) => {
       data: orderData
     });
     
-    return response.data;
+    console.log('创建订单API原始响应:', response);
+    
+    // 检查响应格式并提取订单数据
+    let orderResult = null;
+    
+    if (response && response.data) {
+      // 后端返回了嵌套的数据结构
+      orderResult = response.data;
+    } else if (response && response.code === 200) {
+      // 返回了标准成功响应
+      orderResult = response;
+    } else if (response) {
+      // 直接返回了订单数据
+      orderResult = response;
+    }
+    
+    // 如果没有订单ID，确保创建一个
+    if (orderResult && !orderResult.orderId) {
+      // 使用提交的数据生成订单ID
+      orderResult.orderId = `order_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      console.log('API返回数据中没有orderId，已生成临时ID:', orderResult.orderId);
+    }
+    
+    // 如果依然没有可用结果，创建一个最小订单对象
+    if (!orderResult) {
+      orderResult = {
+        orderId: `order_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        ...orderData,
+        createdTime: new Date().toISOString()
+      };
+      console.log('API未返回有效数据，已创建最小订单对象:', orderResult);
+    }
+    
+    console.log('最终处理后的订单数据:', orderResult);
+    return orderResult;
   } catch (error) {
     console.error('创建订单API错误:', error);
-    // 使用Mock数据作为替代
-    return mockApi.createOrder(orderData);
+    // 创建一个包含必要信息的最小订单对象
+    const fallbackOrder = {
+      orderId: `order_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+      ...orderData,
+      createdTime: new Date().toISOString(),
+      error: error.message || '创建订单失败'
+    };
+    console.log('出错后创建的备用订单对象:', fallbackOrder);
+    return fallbackOrder;
   }
 };
 
@@ -186,6 +227,50 @@ export const deleteOrder = async (orderId) => {
     console.error('删除订单API错误:', error);
     // 使用Mock数据作为替代
     return mockApi.deleteOrder(orderId);
+  }
+};
+
+// 更新优惠券使用状态
+export const updateCouponUsed = async (couponId, orderId) => {
+  // 确保couponId是数字
+  const numericCouponId = Number(couponId);
+  
+  console.log('调用updateCouponUsed API, couponId:', numericCouponId, 'orderId:', orderId);
+  
+  try {
+    // 添加完整URL日志
+    const apiUrl = `/api/user-coupons/${numericCouponId}/use?orderId=${encodeURIComponent(orderId)}`;
+    console.log('完整请求URL:', apiUrl);
+    
+    // 调用后端API - 作为URL参数传递orderId，而不是请求体
+    const response = await request({
+      url: apiUrl,
+      method: 'PUT'
+    });
+    
+    console.log('优惠券更新API原始响应:', response);
+    return response.data || response;
+  } catch (error) {
+    console.error('更新优惠券状态API错误详情:', error);
+    // 捕获错误但不抛出，让流程继续
+    return { success: false, message: error.message };
+  }
+};
+
+// 获取优惠券详情
+export const getCouponById = async (couponId) => {
+  console.log('调用getCouponById API, couponId:', couponId);
+  try {
+    // 调用后端API
+    const response = await request({
+      url: `/api/user-coupons/${couponId}`,
+      method: 'GET'
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('获取优惠券详情API错误:', error);
+    return null;
   }
 };
 

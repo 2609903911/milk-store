@@ -195,6 +195,7 @@ import CouponSelect from '../components/coupon-select.vue'
 import { userState } from '../../utils/userState'
 import { updateUserState } from '../../utils/userState'
 import { api } from '../../utils/api'
+import { updateCouponUsed, getCouponById } from '../../utils/api/orderApi'
 import { userData, initUserData } from '../../utils/userData'
 
 // 定义数据
@@ -379,16 +380,77 @@ const handlePayment = async () => {
         console.log('创建订单成功:', newOrder)
 
         // 如果使用了优惠券，将其标记为已使用
-        if (selectedCoupon.value) {
-            // 更新userState中的优惠券状态
-            const stateIndex = userState.coupons.findIndex(
-                (c) => c.id === selectedCoupon.value.id
-            )
-            if (stateIndex !== -1) {
-                userState.coupons[stateIndex].status = 'used'
-                userState.coupons[stateIndex].usedTime = Date.now()
-                // 使用updateUserState保存完整的用户状态
-                updateUserState({ coupons: userState.coupons })
+        if (selectedCoupon.value && selectedCoupon.value.id) {
+            console.log('准备处理优惠券:', selectedCoupon.value.id)
+
+            // 首先获取最新的优惠券信息
+            try {
+                const couponResult = await getCouponById(
+                    selectedCoupon.value.id
+                )
+                console.log('获取到的优惠券信息:', couponResult)
+
+                // 获取优惠券对象（从结果中正确提取数据）
+                const couponInfo = couponResult?.data || couponResult
+
+                // 详细记录优惠券状态
+                console.log('优惠券ID:', couponInfo?.id)
+                console.log('优惠券状态:', couponInfo?.status)
+                console.log('优惠券使用时间:', couponInfo?.usedTime)
+                console.log('优惠券关联订单:', couponInfo?.orderId)
+
+                // 检查优惠券是否有效且未使用
+                if (couponInfo && couponInfo.status === 'valid') {
+                    // 通过API更新优惠券状态
+                    if (newOrder && newOrder.orderId) {
+                        console.log('使用订单ID更新优惠券:', newOrder.orderId)
+                        const result = await updateCouponUsed(
+                            selectedCoupon.value.id,
+                            newOrder.orderId
+                        )
+                        console.log('优惠券状态更新结果:', result)
+
+                        if (result && (result.success || result.code === 200)) {
+                            console.log('优惠券已成功标记为已使用')
+                        } else {
+                            console.error(
+                                '优惠券状态更新失败:',
+                                result?.message || result?.msg || '未知错误'
+                            )
+                        }
+                    } else {
+                        const orderId = `ORD${new Date()
+                            .toISOString()
+                            .replace(/[-:.TZ]/g, '')
+                            .substring(0, 14)}${Math.floor(
+                            Math.random() * 1000
+                        )}`
+                        console.log('使用生成的订单ID更新优惠券:', orderId)
+                        const result = await updateCouponUsed(
+                            selectedCoupon.value.id,
+                            orderId
+                        )
+                        console.log('优惠券状态更新结果:', result)
+
+                        if (result && (result.success || result.code === 200)) {
+                            console.log('优惠券已成功标记为已使用')
+                        } else {
+                            console.error(
+                                '优惠券状态更新失败:',
+                                result?.message || result?.msg || '未知错误'
+                            )
+                        }
+                    }
+                } else {
+                    console.warn(
+                        '优惠券不可用或已被使用:',
+                        couponInfo?.status,
+                        '优惠券ID:',
+                        couponInfo?.id
+                    )
+                }
+            } catch (error) {
+                console.error('处理优惠券过程中出错:', error)
             }
         }
 

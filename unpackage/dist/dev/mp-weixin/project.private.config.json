@@ -16,6 +16,13 @@
           "scene": null
         },
         {
+          "name": "pages/my-orders/my-orders",
+          "pathName": "pages/my-orders/my-orders",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/home/home",
           "pathName": "pages/home/home",
           "query": "",

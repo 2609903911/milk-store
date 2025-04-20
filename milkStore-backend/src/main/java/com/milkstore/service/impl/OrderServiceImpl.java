@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
             
             // 设置初始状态为待支付
             if (order.getOrderStatus() == null || order.getOrderStatus().isEmpty()) {
-                order.setOrderStatus("pending");
+                order.setOrderStatus("completed");
             }
             
             // 设置创建时间

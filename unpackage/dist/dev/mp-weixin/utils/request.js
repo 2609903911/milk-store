@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "http://localhost:8082";
 const TIMEOUT = 1e4;
 const isXHRSupported = () => {
   try {

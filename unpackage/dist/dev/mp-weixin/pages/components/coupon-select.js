@@ -33,7 +33,6 @@ const _sfc_main = {
     const emit = __emit;
     const selectedCoupon = common_vendor.ref(null);
     const availableCoupons = common_vendor.computed(() => {
-      common_vendor.index.__f__("log", "at pages/components/coupon-select.vue:177", "原始优惠券数据:", JSON.stringify(utils_userData.userData.coupons, null, 2));
       return utils_userData.userData.coupons.filter((coupon) => {
         if (!coupon.couponTemplate) {
           return false;
@@ -70,13 +69,11 @@ const _sfc_main = {
       }
     };
     const formatDate = (timestamp) => {
-      common_vendor.index.__f__("log", "at pages/components/coupon-select.vue:235", "格式化日期输入值:", timestamp, typeof timestamp);
       if (!timestamp)
         return "未设置日期";
       try {
         const date = new Date(timestamp);
         if (isNaN(date.getTime())) {
-          common_vendor.index.__f__("log", "at pages/components/coupon-select.vue:243", "无效日期:", timestamp);
           return "无效日期";
         }
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
@@ -84,7 +81,7 @@ const _sfc_main = {
           "0"
         )}-${String(date.getDate()).padStart(2, "0")}`;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/components/coupon-select.vue:252", "日期格式化错误:", error);
+        common_vendor.index.__f__("error", "at pages/components/coupon-select.vue:248", "日期格式化错误:", error);
         return "日期错误";
       }
     };

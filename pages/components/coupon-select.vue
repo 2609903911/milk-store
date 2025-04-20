@@ -174,8 +174,6 @@ const selectedCoupon = ref(null)
 
 // 可用的优惠券列表
 const availableCoupons = computed(() => {
-    console.log('原始优惠券数据:', JSON.stringify(userData.coupons, null, 2))
-
     // 根据优惠券状态和条件过滤
     return userData.coupons.filter((coupon) => {
         // 检查优惠券是否有效
@@ -232,7 +230,6 @@ const getCouponColorClass = (type) => {
 
 // 格式化日期
 const formatDate = (timestamp) => {
-    console.log('格式化日期输入值:', timestamp, typeof timestamp)
     if (!timestamp) return '未设置日期'
 
     try {
@@ -240,7 +237,6 @@ const formatDate = (timestamp) => {
 
         // 检查日期是否有效
         if (isNaN(date.getTime())) {
-            console.log('无效日期:', timestamp)
             return '无效日期'
         }
 

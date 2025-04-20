@@ -5,7 +5,7 @@ const utils_userState = require("../../utils/userState.js");
 const utils_api_orderApi = require("../../utils/api/orderApi.js");
 const _sfc_main = {
   __name: "my-orders",
-  setup(__props, { expose: __expose }) {
+  setup(__props) {
     const hasOrders = common_vendor.ref(false);
     const orders = common_vendor.ref([]);
     const parseOrderItems = (order) => {
@@ -13,23 +13,19 @@ const _sfc_main = {
         return [];
       try {
         const items = typeof order.orderItems === "string" ? JSON.parse(order.orderItems) : order.orderItems;
-        common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:144", "解析订单商品数据:", order.orderId, items);
         return items;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:147", "解析订单商品数据失败:", error);
         return [];
       }
     };
     const getOrderFirstItemImage = (order) => {
       const items = parseOrderItems(order);
       const imageUrl = items.length > 0 && items[0].image ? items[0].image : "/static/images/default-product.png";
-      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:159", "订单商品图片:", order.orderId, imageUrl);
       return imageUrl;
     };
     const getOrderFirstItemName = (order) => {
       const items = parseOrderItems(order);
       const name = items.length > 0 && items[0].name ? items[0].name : "未知商品";
-      common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:167", "订单商品名称:", order.orderId, name);
       return name;
     };
     const getOrderItemsCount = (order) => {
@@ -40,37 +36,19 @@ const _sfc_main = {
       try {
         const userId = utils_userState.userState.userId;
         if (!userId) {
-          common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:183", "用户未登录，无法获取订单");
           hasOrders.value = false;
           orders.value = [];
           return;
         }
         const userOrders = await utils_api_orderApi.fetchUserOrders(userId);
-        common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:191", "后端返回的原始订单数据:", userOrders);
         if (userOrders && userOrders.length > 0) {
           orders.value = userOrders;
           hasOrders.value = true;
-          common_vendor.index.__f__("log", "at pages/my-orders/my-orders.vue:200", "订单数据结构示例:", Object.keys(userOrders[0]));
-          userOrders.forEach((order) => {
-            common_vendor.index.__f__(
-              "log",
-              "at pages/my-orders/my-orders.vue:204",
-              `订单 ${order.orderId} 的orderItems类型:`,
-              typeof order.orderItems
-            );
-            common_vendor.index.__f__(
-              "log",
-              "at pages/my-orders/my-orders.vue:208",
-              `订单 ${order.orderId} 的orderItems值:`,
-              order.orderItems
-            );
-          });
         } else {
           orders.value = [];
           hasOrders.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:218", "获取订单列表失败:", error);
         common_vendor.index.showToast({
           title: "获取订单失败",
           icon: "none"
@@ -82,10 +60,12 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       refreshOrders();
     });
-    __expose({
-      onShow() {
-        refreshOrders();
+    common_vendor.onShow(() => {
+      const needRefresh = common_vendor.index.getStorageSync("ordersNeedRefresh");
+      if (needRefresh) {
+        common_vendor.index.removeStorageSync("ordersNeedRefresh");
       }
+      refreshOrders();
     });
     const goToOrder = () => {
       common_vendor.index.switchTab({
@@ -119,7 +99,6 @@ const _sfc_main = {
         const items = typeof order.orderItems === "string" ? JSON.parse(order.orderItems) : order.orderItems;
         return items.reduce((total, item) => total + (item.quantity || 1), 0);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:286", "解析订单商品数据失败:", error);
         return 0;
       }
     };
@@ -132,7 +111,6 @@ const _sfc_main = {
       try {
         orderItems = typeof order.orderItems === "string" ? JSON.parse(order.orderItems) : order.orderItems;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:308", "解析订单商品数据失败:", error);
         common_vendor.index.showToast({
           title: "重新下单失败",
           icon: "none"
@@ -164,7 +142,6 @@ const _sfc_main = {
           url: `/pages/order-detail/order-detail?orderId=${orderId}`
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:353", "获取订单详情失败:", error);
         common_vendor.index.showToast({
           title: "获取订单详情失败",
           icon: "none"
@@ -188,7 +165,6 @@ const _sfc_main = {
                 });
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:386", "取消订单失败:", error);
               common_vendor.index.showToast({
                 title: "取消订单失败",
                 icon: "none"
@@ -207,18 +183,20 @@ const _sfc_main = {
             try {
               const orderId = orders.value[index].orderId;
               const result = await utils_api_orderApi.deleteOrder(orderId);
-              if (result) {
-                await refreshOrders();
-                common_vendor.index.showToast({
-                  title: "订单已删除",
-                  icon: "success"
-                });
+              orders.value.splice(index, 1);
+              if (orders.value.length === 0) {
+                hasOrders.value = false;
               }
+              common_vendor.index.showToast({
+                title: "订单已删除",
+                icon: "success",
+                duration: 2e3
+              });
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:422", "删除订单失败:", error);
               common_vendor.index.showToast({
                 title: "删除订单失败",
-                icon: "none"
+                icon: "none",
+                duration: 2e3
               });
             }
           }
@@ -252,13 +230,13 @@ const _sfc_main = {
           } : {}, {
             k: order.orderStatus !== "cancelled"
           }, order.orderStatus !== "cancelled" ? {
-            l: common_vendor.t(getPandaCoins(order.totalAmount, order.discountAmount || 0))
+            l: common_vendor.t(getPandaCoins(order.totalAmount || 0))
           } : {}, {
-            m: common_vendor.t(order.totalAmount),
+            m: common_vendor.t(order.actualAmount),
             n: common_vendor.t(getTotalQuantity(order)),
             o: order.discountAmount && Number(order.discountAmount) > 0
           }, order.discountAmount && Number(order.discountAmount) > 0 ? {
-            p: common_vendor.t(Number(order.totalAmount) + Number(order.discountAmount))
+            p: common_vendor.t(Number(order.totalAmount))
           } : {}, {
             q: common_vendor.o(($event) => viewOrderDetail(order), index),
             r: order.orderStatus === "completed"

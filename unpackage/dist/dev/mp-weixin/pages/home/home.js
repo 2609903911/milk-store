@@ -11,7 +11,10 @@ const _sfc_main = {
       utils_userData.initUserData();
       fetchBannerData();
     });
-    common_vendor.index.__f__("log", "at pages/home/home.vue:271", "请求到的用户数据", utils_userData.userData);
+    common_vendor.onShow(() => {
+      utils_userData.initUserData();
+      fetchBannerData();
+    });
     const currentSwiper = common_vendor.ref(0);
     const swiperChange = (e) => {
       currentSwiper.value = e.detail.current;
@@ -21,9 +24,7 @@ const _sfc_main = {
       try {
         const banners = await utils_api_bannerApi.fetchBanners();
         bannerList.value = banners;
-        common_vendor.index.__f__("log", "at pages/home/home.vue:286", "轮播图数据获取成功:", bannerList.value);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:288", "轮播图数据请求异常:", error);
         loadLocalBannerData();
       }
     };
@@ -62,7 +63,6 @@ const _sfc_main = {
           // 浅紫色背景
         }
       ];
-      common_vendor.index.__f__("log", "at pages/home/home.vue:326", "已加载本地备用轮播图数据");
     };
     const handleAvatarError = () => {
       if (utils_userData.userData.avatar !== "/static/images/avatar.png") {
@@ -124,7 +124,7 @@ const _sfc_main = {
         f: common_vendor.unref(utils_userData.userData).avatar || "/static/images/avatar.png",
         g: common_vendor.o(handleAvatarError),
         h: common_vendor.t(common_vendor.unref(utils_userData.userData).nickname),
-        i: common_vendor.t(common_vendor.unref(utils_userData.userData).coupons ? common_vendor.unref(utils_userData.userData).coupons.length : 0),
+        i: common_vendor.t(common_vendor.unref(utils_userData.userData).coupons ? common_vendor.unref(utils_userData.userData).coupons.filter((coupon) => coupon.status === "valid").length : 0),
         j: common_vendor.o(navigateToCoupons),
         k: common_assets._imports_0$2,
         l: common_vendor.o(navigateToOrder),

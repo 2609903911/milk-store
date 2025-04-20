@@ -185,8 +185,6 @@ const getPandaCoins = (price, discount = 0) => {
 // 在页面加载时获取订单数据
 onMounted(async () => {
     try {
-        console.log('订单详情页面已加载')
-
         // 针对不同平台获取页面参数
         let urlOrderId = ''
 
@@ -197,7 +195,6 @@ onMounted(async () => {
             const currentPage = mpPages[mpPages.length - 1]
             // 微信小程序直接从options获取
             urlOrderId = currentPage.options?.orderId || ''
-            console.log('微信小程序环境，获取订单ID:', urlOrderId)
         }
         // #endif
 
@@ -207,7 +204,6 @@ onMounted(async () => {
         const currentPage = pages[pages.length - 1]
         const options = currentPage?.$page?.options || {}
         urlOrderId = options.orderId || ''
-        console.log('其他环境，获取订单ID:', urlOrderId)
         // #endif
 
         let orderDetail = null
@@ -216,33 +212,41 @@ onMounted(async () => {
         if (urlOrderId) {
             try {
                 orderDetail = await orderApi.fetchOrderById(urlOrderId)
-                console.log('通过API获取到订单信息:', orderDetail)
             } catch (error) {
-                console.error('通过API获取订单失败:', error)
                 // 尝试从本地存储获取
                 orderDetail = uni.getStorageSync('currentOrderDetail')
-                console.log('从本地存储获取订单信息:', orderDetail)
             }
         } else {
             // 从本地存储获取订单信息
             orderDetail = uni.getStorageSync('currentOrderDetail')
-            console.log('从本地存储获取订单信息:', orderDetail)
         }
 
         // 验证参数 - 允许没有urlOrderId也可以显示，只要有orderDetail
         if (
             orderDetail &&
-            (urlOrderId === '' || orderDetail.id === urlOrderId)
+            (urlOrderId === '' || orderDetail.orderId === urlOrderId)
         ) {
             // 从本地存储加载所有订单数据
-            orderId.value = orderDetail.id || ''
-            orderStatus.value = orderDetail.status || ''
+            orderId.value = orderDetail.orderId || ''
+            orderStatus.value =
+                orderDetail.orderStatus || orderDetail.status || ''
             storeName.value = orderDetail.storeName || ''
             storeAddress.value = orderDetail.storeAddress || ''
-            orderItems.value = orderDetail.items || []
-            totalPrice.value = orderDetail.totalPrice || '0.00'
-            discount.value = orderDetail.discount?.amount || '0.00'
-            originalPrice.value = orderDetail.discount?.originalPrice || '0.00'
+            orderItems.value = Array.isArray(orderDetail.orderItems)
+                ? orderDetail.orderItems
+                : typeof orderDetail.orderItems === 'string'
+                ? JSON.parse(orderDetail.orderItems)
+                : orderDetail.items || []
+            totalPrice.value =
+                orderDetail.totalAmount || orderDetail.totalPrice || '0.00'
+            discount.value =
+                orderDetail.discountAmount ||
+                orderDetail.discount?.amount ||
+                '0.00'
+            originalPrice.value =
+                orderDetail.totalAmount ||
+                orderDetail.discount?.originalPrice ||
+                '0.00'
 
             // 获取熊猫币，如果没有则计算
             if (orderDetail.pandaCoins) {
@@ -256,8 +260,6 @@ onMounted(async () => {
             } else {
                 pandaCoins.value = 0
             }
-
-            console.log('店铺地址:', storeAddress.value)
 
             // 格式化时间
             if (orderDetail.time) {
@@ -274,7 +276,6 @@ onMounted(async () => {
                 orderTime.value = '无信息'
             }
         } else {
-            console.error('订单ID不匹配或未找到订单信息')
             uni.showToast({
                 title: '未找到订单信息',
                 icon: 'none'
@@ -286,7 +287,6 @@ onMounted(async () => {
             }, 1500)
         }
     } catch (error) {
-        console.error('获取订单详情出错:', error)
         uni.showToast({
             title: '获取订单信息失败',
             icon: 'none'
@@ -308,9 +308,6 @@ const copyOrderNumber = () => {
 
 // 再来一单功能
 const reorderItems = () => {
-    console.log('再来一单')
-
-    console.log('originalPrice', originalPrice.value)
     // 复制当前订单信息
     const orderData = {
         items: orderItems.value,
@@ -324,8 +321,6 @@ const reorderItems = () => {
         pandaCoins: getPandaCoins(originalPrice.value, discount.value) // 添加熊猫币信息
     }
 
-    console.log('准备提交的订单数据:', orderData)
-
     // 保存到本地存储，供订单确认页使用
     uni.setStorageSync('orderConfirmData', orderData)
 
@@ -337,7 +332,6 @@ const reorderItems = () => {
 
 // 点击提示文本跳转到熊猫币商城页面
 const navigateToPandaStore = () => {
-    console.log('跳转到熊猫币商城页面')
     uni.navigateTo({
         url: '/pages/panda-store/panda-store'
     })
