@@ -139,7 +139,7 @@
                     ></image>
                     <text>学子卡</text>
                 </view>
-                <view class="function-item">
+                <view class="function-item" @click="navigateToTogetherDrink">
                     <image
                         class="function-icon"
                         src="/static/images/double-cups.png"
@@ -358,6 +358,13 @@ const navigateToOrder = () => {
 const navigateToPandaStore = () => {
     uni.navigateTo({
         url: '/pages/panda-store/panda-store'
+    })
+}
+
+// 跳转到一起喝页面
+const navigateToTogetherDrink = () => {
+    uni.navigateTo({
+        url: '/pages/together-drink/together-drink'
     })
 }
 </script>

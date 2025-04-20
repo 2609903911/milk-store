@@ -9,15 +9,8 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/my-orders/my-orders",
-          "pathName": "pages/my-orders/my-orders",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/my-orders/my-orders",
-          "pathName": "pages/my-orders/my-orders",
+          "name": "pages/together-drink/together-drink",
+          "pathName": "pages/together-drink/together-drink",
           "query": "",
           "launchMode": "default",
           "scene": null

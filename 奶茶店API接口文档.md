@@ -15,6 +15,7 @@
 - [地址相关接口](#地址相关接口)
 - [商城商品相关接口](#商城商品相关接口)
 - [订单相关接口](#订单相关接口)
+- [一起喝相关接口](#一起喝相关接口)
 
 ## 认证相关接口
 
@@ -80,18 +81,6 @@
 
 - **URL**: `/api/user/default-address`
 - **方法**: GET
-- **返回**:
-  ```json
-  {
-    "code": 200,
-    "message": "获取默认地址成功",
-    "data": {
-      "address": "详细地址",
-      "contactName": "联系人姓名",
-      "phone": "联系电话"
-    }
-  }
-  ```
 - **说明**: 该接口使用Authorization头部中的token识别用户身份，无需传递userId参数
 
 ## 优惠券相关接口
@@ -245,44 +234,12 @@
 
 - **URL**: `/api/user/default-address`
 - **方法**: GET
-- **返回**:
-  ```json
-  {
-    "code": 200,
-    "message": "获取默认地址成功",
-    "data": {
-      "address": "详细地址",
-      "contactName": "联系人姓名",
-      "phone": "联系电话"
-    }
-  }
-  ```
 - **说明**: 该接口通过Authorization头部中的token识别用户，无需传递userId参数
 
 ### 获取用户所有地址
 
 - **URL**: `/api/user/addresses?userId={userId}`
 - **方法**: GET
-- **返回**:
-  ```json
-  {
-    "code": 200,
-    "message": "获取地址列表成功",
-    "data": [
-      {
-        "id": "地址ID",
-        "userId": "用户ID",
-        "contactName": "联系人姓名",
-        "gender": "性别",
-        "phone": "联系电话",
-        "address": "详细地址",
-        "isDefault": true, 
-        "createTime": "创建时间",
-        "updateTime": "更新时间"
-      }
-    ]
-  }
-  ```
 
 ### 添加用户地址
 
@@ -296,24 +253,6 @@
     "phone": "联系电话",
     "address": "详细地址",
     "isDefault": true/false
-  }
-  ```
-- **返回**:
-  ```json
-  {
-    "code": 200,
-    "message": "添加地址成功",
-    "data": {
-      "id": "新地址ID",
-      "userId": "用户ID",
-      "contactName": "联系人姓名",
-      "gender": "性别",
-      "phone": "联系电话",
-      "address": "详细地址",
-      "isDefault": true/false,
-      "createTime": "创建时间",
-      "updateTime": "更新时间"
-    }
   }
   ```
 
@@ -375,7 +314,6 @@
 - **URL**: `/api/store/home`
 - **方法**: GET
 - **参数**: 无
-- **返回**: 所有商品及按分类分组的商品
 
 ### 添加商城商品（管理员接口）
 
@@ -486,3 +424,82 @@
 - **方法**: DELETE
 - **参数**:
   - `orderId`: 订单ID
+
+## 一起喝相关接口
+
+### 创建邀请
+
+- **URL**: `/api/together-drink/invitations`
+- **方法**: POST
+- **请求体**:
+  ```json
+  {
+    "userId": "创建者用户ID",
+    "productId": "产品ID",
+    "productName": "产品名称",
+    "productImage": "产品图片",
+    "productPrice": "产品价格",
+    "participantsLimit": "参与人数限制",
+    "expireTime": "过期时间（可选）"
+  }
+  ```
+
+### 获取邀请详情
+
+- **URL**: `/api/together-drink/invitations/{invitationId}`
+- **方法**: GET
+- **参数**:
+  - `invitationId`: 邀请ID
+
+### 通过邀请码获取邀请
+
+- **URL**: `/api/together-drink/invitations/code/{inviteCode}`
+- **方法**: GET
+- **参数**:
+  - `inviteCode`: 邀请码
+
+### 加入邀请
+
+- **URL**: `/api/together-drink/invitations/{invitationId}/join`
+- **方法**: POST
+- **参数**:
+  - `invitationId`: 邀请ID
+- **请求体**:
+  ```json
+  {
+    "userId": "参与者用户ID"
+  }
+  ```
+
+### 取消邀请
+
+- **URL**: `/api/together-drink/invitations/{invitationId}/cancel`
+- **方法**: PUT
+- **参数**:
+  - `invitationId`: 邀请ID
+- **请求体**:
+  ```json
+  {
+    "userId": "取消者用户ID（必须是创建者）"
+  }
+  ```
+
+### 完成邀请并创建订单
+
+- **URL**: `/api/together-drink/invitations/{invitationId}/complete`
+- **方法**: POST
+- **参数**:
+  - `invitationId`: 邀请ID
+- **请求体**:
+  ```json
+  {
+    "orderAddress": "订单配送地址"
+  }
+  ```
+
+### 获取用户参与的邀请
+
+- **URL**: `/api/together-drink/invitations/user/{userId}`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID

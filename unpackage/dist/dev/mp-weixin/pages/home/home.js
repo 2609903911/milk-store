@@ -84,6 +84,11 @@ const _sfc_main = {
         url: "/pages/panda-store/panda-store"
       });
     };
+    const navigateToTogetherDrink = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/together-drink/together-drink"
+      });
+    };
     return (_ctx, _cache) => {
       return {
         a: common_vendor.f(bannerList.value, (item, index, i0) => {
@@ -133,9 +138,10 @@ const _sfc_main = {
         o: common_vendor.o(navigateToPandaStore),
         p: common_assets._imports_3,
         q: common_assets._imports_4,
-        r: common_assets._imports_5,
-        s: common_assets._imports_6,
-        t: common_assets._imports_7
+        r: common_vendor.o(navigateToTogetherDrink),
+        s: common_assets._imports_5,
+        t: common_assets._imports_6,
+        v: common_assets._imports_7
       };
     };
   }

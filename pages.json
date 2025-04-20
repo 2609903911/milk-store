@@ -124,6 +124,13 @@
                 "navigationBarTitleText" : "编辑地址",
                 "navigationStyle" : "custom"
             }
+        },
+        {
+            "path" : "pages/together-drink/together-drink",
+            "style" : {
+                "navigationBarTitleText" : "一起喝",
+                "navigationStyle" : "default"
+            }
         }
     ],
     "globalStyle" : {

@@ -24,6 +24,7 @@ if (!Math) {
   "./pages/agreement/privacy-policy.js";
   "./pages/address/address.js";
   "./pages/address/edit-address.js";
+  "./pages/together-drink/together-drink.js";
 }
 const _sfc_main = {
   onLaunch: function() {
