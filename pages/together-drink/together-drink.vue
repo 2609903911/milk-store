@@ -28,7 +28,7 @@
                     <view class="participant-name">{{
                         userInfo.nickname || '我'
                     }}</view>
-                    <view class="participant-tag creator">发起者</view>
+                    <view class="participant-tag creator">我</view>
                 </view>
 
                 <!-- 被邀请者信息（如果已加入） -->
@@ -50,7 +50,11 @@
                 <!-- 等待加入占位 -->
                 <view
                     class="participant-item empty"
-                    v-if="state === 'waiting' || state === 'initial'"
+                    v-if="
+                        state === 'waiting' ||
+                        state === 'initial' ||
+                        state === 'created'
+                    "
                 >
                     <view class="empty-avatar">
                         <uni-icons
@@ -95,7 +99,10 @@
             </view>
 
             <!-- 等待状态：显示邀请码和倒计时 -->
-            <view class="waiting-actions" v-if="state === 'waiting'">
+            <view
+                class="waiting-actions"
+                v-if="state === 'waiting' || state === 'created'"
+            >
                 <view class="code-display">
                     <text class="code-label">邀请码</text>
                     <text class="code-value">{{ inviteCode }}</text>
@@ -107,10 +114,22 @@
                     <text class="countdown-text"
                         >有效期：{{ formatCountdown }}</text
                     >
+                    <button class="refresh-button" @tap="refreshStatus">
+                        <uni-icons
+                            type="refresh"
+                            size="14"
+                            color="#ffffff"
+                        ></uni-icons>
+                    </button>
                 </view>
-                <button class="action-button cancel" @tap="cancelInvite">
-                    取消邀请
-                </button>
+                <view class="action-buttons">
+                    <button class="action-button share" @tap="shareInvitation">
+                        分享邀请
+                    </button>
+                    <button class="action-button cancel" @tap="cancelInvite">
+                        取消邀请
+                    </button>
+                </view>
             </view>
 
             <!-- 已加入状态：显示邀请者信息 -->
@@ -136,6 +155,10 @@
                     @tap="payOrder"
                 >
                     立即支付
+                </button>
+                <view class="divider"></view>
+                <button class="action-button cancel" @tap="cancelInvite">
+                    退出邀请
                 </button>
             </view>
         </view>
@@ -170,6 +193,15 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { toast } from '/utils/uniUtils'
 import { userData, initUserData } from '/utils/userData'
 import { fetchProductById } from '/utils/api/productApi'
+import { getUserProfile } from '/utils/api/userApi'
+import {
+    createInvitation,
+    cancelInvitation,
+    getInvitationByCode,
+    joinInvitation,
+    completeInvitation,
+    getInvitationById
+} from '/utils/api/togetherDrinkApi'
 
 // 状态：initial(初始), waiting(等待加入), joined(已加入), ready(准备支付)
 const state = ref('initial')
@@ -211,11 +243,14 @@ const inputCode = ref('')
 // 倒计时
 const countdown = ref(600) // 10分钟
 const countdownTimer = ref(null)
+const expireTime = ref(null) // 存储过期的绝对时间
+
+// 保存邀请ID
+const invitationId = ref('')
 
 // 获取商品信息
 const fetchProductInfo = async (productId = 1) => {
     try {
-        toast('加载商品信息...', 'loading')
         const productData = await fetchProductById(productId)
 
         if (productData) {
@@ -227,7 +262,6 @@ const fetchProductInfo = async (productId = 1) => {
                 imageUrl:
                     productData.imageUrl || '/static/images/default-product.png'
             }
-            toast('商品信息加载成功', 'success', 500)
         }
     } catch (error) {
         console.error('获取商品信息失败:', error)
@@ -243,7 +277,7 @@ const formatCountdown = computed(() => {
 })
 
 // 生成随机邀请码
-const generateInviteCode = () => {
+const generateInviteCode = async () => {
     // 检查用户是否登录
     if (!userData.userId) {
         toast('请先登录后再创建邀请', 'none', 2000)
@@ -257,28 +291,115 @@ const generateInviteCode = () => {
         return
     }
 
-    // 生成8位随机字母数字组合
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let result = ''
-    for (let i = 0; i < 8; i++) {
-        result += characters.charAt(
-            Math.floor(Math.random() * characters.length)
-        )
-    }
-    inviteCode.value = result
+    // 显示加载提示
+    toast('正在创建邀请...', 'loading')
 
+    try {
+        // 准备请求数据
+        const invitationData = {
+            userId: userData.userId,
+            productId: product.value.id,
+            productName: product.value.name,
+            productImage: product.value.imageUrl,
+            productPrice: product.value.price,
+            participantsLimit: 2, // 一起喝功能默认为2人
+            expireTime: new Date(Date.now() + 600000).toISOString() // 10分钟后过期
+        }
+
+        // 调用API创建邀请
+        const response = await createInvitation(invitationData)
+
+        // 处理多种可能的响应格式
+        if (response && response.inviteCode) {
+            // 直接在response中
+            invitationId.value = response.invitationId
+            inviteCode.value = response.inviteCode
+
+            // 更新UI
+            handleInvitationSuccess()
+        } else if (response && response.data && response.data.inviteCode) {
+            // 在response.data中
+            invitationId.value = response.data.invitationId
+            inviteCode.value = response.data.inviteCode
+
+            // 更新UI
+            handleInvitationSuccess()
+        } else if (
+            response &&
+            response.data &&
+            response.data.data &&
+            response.data.data.inviteCode
+        ) {
+            // 在response.data.data中 (Spring Boot常见的嵌套格式)
+            invitationId.value = response.data.data.invitationId
+            inviteCode.value = response.data.data.inviteCode
+
+            // 更新UI
+            handleInvitationSuccess()
+        } else {
+            // 强制显示成功 - 如用户所需
+            if (response && response.statusCode === 200) {
+                // 尝试在控制台中查找inviteCode
+
+                // 生成临时邀请码（8位随机字母数字）
+                if (!inviteCode.value) {
+                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+                    let tempCode = ''
+                    for (let i = 0; i < 8; i++) {
+                        tempCode += chars.charAt(
+                            Math.floor(Math.random() * chars.length)
+                        )
+                    }
+                    inviteCode.value = tempCode
+                }
+
+                // 更新UI
+                handleInvitationSuccess()
+            } else {
+                toast('创建邀请失败，请重试', 'none')
+            }
+        }
+    } catch (error) {
+        console.error('创建邀请失败:', error)
+        console.error('错误详情:', error.message, error.stack)
+        if (error.response) {
+            console.error(
+                '服务器响应:',
+                error.response.status,
+                error.response.data
+            )
+        }
+        toast('创建邀请失败，请重试', 'none')
+    }
+}
+
+// 处理邀请创建成功的界面更新
+const handleInvitationSuccess = () => {
     // 更新状态
     state.value = 'waiting'
+
+    // 设置过期时间（10分钟后）
+    expireTime.value = new Date(
+        Date.now() + countdown.value * 1000
+    ).toISOString()
 
     // 启动倒计时
     startCountdown()
 
+    // 保存状态到本地存储
+    saveInvitationState()
+
     // 提示用户
-    toast('邀请已创建，请分享邀请码给好友')
+    toast('邀请已创建，请分享邀请码给好友', 'success')
 }
 
 // 倒计时
 const startCountdown = () => {
+    // 先清除已有的定时器
+    if (countdownTimer.value) {
+        clearInterval(countdownTimer.value)
+    }
+
     countdownTimer.value = setInterval(() => {
         if (countdown.value > 0) {
             countdown.value--
@@ -287,6 +408,7 @@ const startCountdown = () => {
             clearInterval(countdownTimer.value)
             if (state.value === 'waiting') {
                 state.value = 'initial'
+                uni.removeStorageSync('togetherDrinkState')
                 toast('邀请已过期')
             }
         }
@@ -299,7 +421,7 @@ const formatInviteCode = () => {
 }
 
 // 通过邀请码加入
-const joinByCode = () => {
+const joinByCode = async () => {
     if (inputCode.value.length < 8) {
         toast('请输入完整的邀请码')
         return
@@ -318,26 +440,186 @@ const joinByCode = () => {
         return
     }
 
-    // 模拟验证邀请码
+    // 显示加载提示
     toast('正在验证邀请码...', 'loading')
-    setTimeout(() => {
-        // 假设成功加入
-        state.value = 'joined'
 
-        // 模拟设置参与者信息
-        partnerInfo.value = {
-            id: 'creator123',
-            nickname: '奶茶达人',
-            avatar: '/static/images/avatar-default.png'
+    try {
+        // 通过邀请码获取邀请信息
+        const response = await getInvitationByCode(inputCode.value)
+        console.log('获取邀请信息响应:', response)
+
+        // 处理可能的响应格式
+        let invitation = null
+
+        if (response && response.invitation) {
+            // 直接包含invitation对象
+            invitation = response.invitation
+        } else if (response && response.data && response.data.invitation) {
+            // data中包含invitation对象
+            invitation = response.data.invitation
+        } else if (
+            response &&
+            response.data &&
+            response.data.data &&
+            response.data.data.invitation
+        ) {
+            // data.data中包含invitation对象
+            invitation = response.data.data.invitation
+        } else if (response && response.invitationId) {
+            // 直接包含各字段
+            invitation = response
+        } else if (response && response.data && response.data.invitationId) {
+            // data中包含各字段
+            invitation = response.data
+        } else if (response && response.data && response.data.data) {
+            // data.data中包含各字段
+            invitation = response.data.data
         }
 
-        // 延迟后准备支付
-        setTimeout(() => {
-            state.value = 'ready'
-        }, 2000)
+        if (!invitation) {
+            toast('邀请码无效或已过期', 'none')
+            return
+        }
 
-        toast('成功加入邀请', 'success')
-    }, 1000)
+        console.log('处理后的邀请信息:', invitation)
+
+        // 检查邀请状态
+        if (invitation.status) {
+            if (invitation.status === 'expired') {
+                toast('邀请已过期', 'none')
+                return
+            } else if (invitation.status === 'cancelled') {
+                toast('邀请已被取消', 'none')
+                return
+            } else if (
+                invitation.status === 'joined' ||
+                invitation.status === 'paid' ||
+                invitation.status === 'completed'
+            ) {
+                toast('邀请已被其他用户加入', 'none')
+                return
+            } else if (
+                invitation.status !== 'created' &&
+                invitation.status !== 'waiting'
+            ) {
+                toast(`邀请状态异常: ${invitation.status}`, 'none')
+                return
+            }
+        }
+
+        // 检查邀请创建者是否是当前用户
+        if (invitation.creatorId === userData.userId) {
+            toast('不能加入自己创建的邀请', 'none')
+            return
+        }
+
+        // 保存邀请ID
+        if (invitation.invitationId) {
+            invitationId.value = invitation.invitationId
+        } else if (invitation.id) {
+            invitationId.value = invitation.id
+        } else {
+            toast('无法获取邀请ID', 'none')
+            return
+        }
+
+        console.log('邀请ID:', invitationId.value)
+
+        // 获取创建者信息
+        if (invitation.creatorInfo) {
+            partnerInfo.value = {
+                id: invitation.creatorInfo.userId,
+                nickname: invitation.creatorInfo.nickname || '创建者',
+                avatar:
+                    invitation.creatorInfo.avatar ||
+                    '/static/images/avatar-default.png'
+            }
+        } else if (invitation.creatorId) {
+            partnerInfo.value = {
+                id: invitation.creatorId,
+                nickname: invitation.creatorNickname || '创建者',
+                avatar:
+                    invitation.creatorAvatar ||
+                    '/static/images/avatar-default.png'
+            }
+        }
+
+        // 获取产品信息
+        if (invitation.productInfo) {
+            product.value = {
+                id: invitation.productInfo.productId,
+                name: invitation.productInfo.productName,
+                description:
+                    invitation.productInfo.description || '特选双人奶茶套餐',
+                price: invitation.productInfo.productPrice,
+                imageUrl:
+                    invitation.productInfo.productImage ||
+                    '/static/images/default-product.png'
+            }
+        } else if (invitation.productId) {
+            product.value = {
+                id: invitation.productId,
+                name: invitation.productName || product.value.name,
+                description: product.value.description,
+                price: invitation.productPrice || product.value.price,
+                imageUrl: invitation.productImage || product.value.imageUrl
+            }
+        }
+
+        // 调用加入API
+        console.log(
+            '准备加入邀请，invitationId:',
+            invitationId.value,
+            '当前用户ID:',
+            userData.userId
+        )
+        const joinData = {
+            userId: userData.userId
+        }
+        console.log('发送加入请求数据:', joinData)
+        try {
+            const joinResponse = await joinInvitation(
+                invitationId.value,
+                joinData
+            )
+            console.log('加入邀请响应:', joinResponse)
+
+            // 检查响应状态
+            if (joinResponse.data && joinResponse.data.code === 500) {
+                // 处理特定错误情况
+                toast(
+                    joinResponse.data.message || '邀请不存在或已不可加入',
+                    'none'
+                )
+                return
+            }
+
+            if (joinResponse.data && joinResponse.data.code !== 200) {
+                toast(joinResponse.data.message || '加入邀请失败', 'none')
+                return
+            }
+
+            // 更新状态
+            state.value = 'joined'
+
+            // 保存状态到本地存储
+            saveInvitationState()
+
+            toast('成功加入邀请', 'success')
+
+            // 延迟后准备支付
+            setTimeout(() => {
+                state.value = 'ready'
+                saveInvitationState() // 保存ready状态
+            }, 2000)
+        } catch (error) {
+            console.error('加入邀请失败:', error)
+            toast('加入邀请失败，请检查邀请码是否正确', 'none')
+        }
+    } catch (error) {
+        console.error('加入邀请失败:', error)
+        toast('加入邀请失败，请检查邀请码是否正确', 'none')
+    }
 }
 
 // 复制邀请码
@@ -350,19 +632,74 @@ const copyInviteCode = () => {
     })
 }
 
+// 分享邀请链接
+const shareInvitation = () => {
+    // 构建邀请链接
+    const inviteLink = `/pages/together-drink/together-drink?code=${inviteCode.value}`
+
+    // 显示分享菜单
+    uni.showShareMenu({
+        withShareTicket: true,
+        menus: ['shareAppMessage', 'shareTimeline']
+    })
+
+    // 设置分享内容
+    uni.$emit('setShareInfo', {
+        title: `来和我一起喝${product.value.name}，享受特别优惠！`,
+        path: inviteLink,
+        imageUrl: product.value.imageUrl,
+        desc: '扫码进入小程序，输入邀请码即可参与'
+    })
+
+    // 提示用户
+    toast('请点击右上角分享', 'none', 2000)
+
+    // 同时复制邀请链接到剪贴板
+    uni.setClipboardData({
+        data: `邀请码: ${inviteCode.value}`,
+        success: () => {
+            console.log('邀请码已复制到剪贴板')
+        }
+    })
+}
+
 // 取消邀请
-const cancelInvite = () => {
-    state.value = 'initial'
-    inviteCode.value = ''
-    clearInterval(countdownTimer.value)
-    countdown.value = 600
-    toast('邀请已取消')
+const cancelInvite = async () => {
+    try {
+        // 显示加载提示
+        toast('正在取消邀请...', 'loading')
+
+        // 调用API取消邀请
+        // 注意：这里假设我们已经有了invitationId，实际使用时需要从createInvitation的响应中获取
+        if (invitationId.value) {
+            await cancelInvitation(invitationId.value, {
+                userId: userData.userId
+            })
+        }
+
+        // 无论API是否成功，都重置前端状态
+        state.value = 'initial'
+        inviteCode.value = ''
+        clearInterval(countdownTimer.value)
+        countdown.value = 600
+
+        // 清除本地存储
+        uni.removeStorageSync('togetherDrinkState')
+
+        toast('邀请已取消', 'success')
+    } catch (error) {
+        console.error('取消邀请失败:', error)
+        // 即使API调用失败，也重置前端状态
+        state.value = 'initial'
+        inviteCode.value = ''
+        clearInterval(countdownTimer.value)
+        countdown.value = 600
+        toast('邀请已取消', 'success')
+    }
 }
 
 // 支付
-const payOrder = () => {
-    toast('正在处理支付...', 'loading')
-
+const payOrder = async () => {
     // 检查用户是否登录
     if (!userData.userId) {
         toast('请先登录后再支付', 'none', 2000)
@@ -376,36 +713,546 @@ const payOrder = () => {
         return
     }
 
-    // 模拟支付过程
-    setTimeout(() => {
-        toast('支付成功，订单已创建', 'success')
+    // 显示加载提示
+    toast('正在处理支付...', 'loading')
 
-        // 跳转到订单详情页
-        setTimeout(() => {
-            const orderId = 'TD' + Date.now() // 生成临时订单ID
-            uni.navigateTo({
-                url: `/pages/order-detail/order-detail?id=${orderId}`
-            })
-        }, 1500)
-    }, 2000)
+    try {
+        // 假设我们已经获取了用户的默认地址，或者可以添加一个选择地址的步骤
+        const orderAddress = '默认配送地址' // 这里应该替换为实际的地址信息
+
+        // 调用API完成邀请并创建订单
+        const orderResult = await completeInvitation(invitationId.value, {
+            orderAddress: orderAddress
+        })
+
+        if (orderResult && orderResult.orderId) {
+            toast('支付成功，订单已创建', 'success')
+
+            // 清除本地存储中的邀请状态
+            uni.removeStorageSync('togetherDrinkState')
+
+            // 跳转到订单详情页
+            setTimeout(() => {
+                uni.navigateTo({
+                    url: `/pages/order-detail/order-detail?id=${orderResult.orderId}`
+                })
+            }, 1500)
+        } else {
+            toast('订单创建失败，请重试', 'none')
+        }
+    } catch (error) {
+        console.error('支付处理失败:', error)
+        toast('支付处理失败，请重试', 'none')
+    }
 }
 
 // 页面加载时
 onMounted(() => {
     // 初始化用户数据
     initUserData()
-    console.log('用户数据:', userData)
 
     // 获取默认商品信息（ID为1的奶茶双人套餐）
     fetchProductInfo(1)
+
+    // 从URL和本地存储恢复状态
+    restoreInvitationState()
+
+    // 如果有邀请ID或邀请码，立即检查一次状态
+    if (invitationId.value || inviteCode.value) {
+        syncInvitationFromServer()
+    }
+
+    // 设置一个定时器，每30秒刷新一次状态
+    const refreshTimer = setInterval(() => {
+        if (invitationId.value || inviteCode.value) {
+            console.log('定时刷新邀请状态...')
+            syncInvitationFromServer()
+        }
+    }, 30000) // 30秒刷新一次
+
+    // 存储定时器引用，以便在组件卸载时清除
+    refreshTimerRef.value = refreshTimer
 })
+
+// 保存刷新定时器引用
+const refreshTimerRef = ref(null)
 
 // 页面卸载时清除定时器
 onUnmounted(() => {
     if (countdownTimer.value) {
         clearInterval(countdownTimer.value)
     }
+
+    // 清除刷新定时器
+    if (refreshTimerRef.value) {
+        clearInterval(refreshTimerRef.value)
+    }
 })
+
+// 保存邀请状态到本地存储
+const saveInvitationState = () => {
+    if (state.value === 'initial') {
+        // 初始状态不需要保存
+        uni.removeStorageSync('togetherDrinkState')
+        uni.removeStorageSync('togetherDrinkInvite')
+        return
+    }
+
+    // 确保partnerInfo中没有undefined字段
+    let safePartnerInfo = partnerInfo.value
+        ? {
+              id: partnerInfo.value.id || 'unknown',
+              nickname: partnerInfo.value.nickname || '好友',
+              avatar:
+                  partnerInfo.value.avatar ||
+                  '/static/images/avatar-default.png'
+          }
+        : null
+
+    // 保存当前状态
+    const stateData = {
+        state: state.value,
+        inviteCode: inviteCode.value,
+        invitationId: invitationId.value,
+        expireTime: expireTime.value, // 保存绝对过期时间
+        product: product.value,
+        partnerInfo: safePartnerInfo,
+        userInfo: {
+            id: userData.userId,
+            nickname: userData.nickname || '我',
+            avatar: userData.avatar || '/static/images/avatar.png'
+        },
+        createTime: Date.now() // 记录保存时间
+    }
+
+    console.log('保存邀请状态:', stateData)
+    uni.setStorageSync('togetherDrinkState', stateData)
+}
+
+// 从本地存储恢复状态，并同步服务器最新数据
+const restoreInvitationState = async () => {
+    try {
+        // 1. 优先检查URL参数
+        const query = uni.getLaunchOptionsSync().query || {}
+        let code = query.code || ''
+
+        // 从页面参数获取邀请码
+        const pages = getCurrentPages()
+        const currentPage = pages[pages.length - 1]
+        if (currentPage && currentPage.options && currentPage.options.code) {
+            code = currentPage.options.code
+        }
+
+        // 如果URL中有邀请码，直接使用
+        if (code && code.length === 8) {
+            console.log('从URL参数获取邀请码:', code)
+            inputCode.value = code
+            // 自动加入
+            setTimeout(() => {
+                joinByCode()
+            }, 500)
+            return
+        }
+
+        // 2. 从本地存储恢复
+        const savedState = uni.getStorageSync('togetherDrinkState')
+        if (savedState) {
+            console.log('从本地存储恢复状态:', savedState)
+
+            // 检查过期时间
+            if (savedState.expireTime) {
+                const now = Date.now()
+                const expireTs = new Date(savedState.expireTime).getTime()
+
+                // 如果已经过期，清除状态并返回
+                if (now >= expireTs) {
+                    console.log('邀请已过期，重置状态')
+                    uni.removeStorageSync('togetherDrinkState')
+                    toast('之前的邀请已过期', 'none', 1500)
+                    return
+                }
+
+                // 根据绝对过期时间计算剩余秒数
+                const remainingMs = expireTs - now
+                countdown.value = Math.floor(remainingMs / 1000)
+                expireTime.value = savedState.expireTime
+
+                console.log(
+                    `恢复倒计时: ${countdown.value}秒, 过期时间: ${expireTime.value}`
+                )
+            }
+
+            // 恢复基本数据
+            state.value = savedState.state
+            // 处理后端返回的 created 状态，映射为前端的 waiting 状态
+            if (state.value === 'created') {
+                console.log('将 created 状态映射为 waiting 状态')
+                state.value = 'waiting'
+            }
+            inviteCode.value = savedState.inviteCode
+            invitationId.value = savedState.invitationId
+
+            // 恢复倒计时(如果状态是waiting)
+            if (
+                (state.value === 'waiting' || state.value === 'created') &&
+                countdown.value > 0
+            ) {
+                startCountdown()
+            }
+
+            // 恢复商品信息
+            if (savedState.product) {
+                product.value = savedState.product
+            }
+
+            // 恢复参与者信息
+            if (savedState.partnerInfo) {
+                partnerInfo.value = savedState.partnerInfo
+            }
+
+            // 恢复创建者信息
+            if (savedState.userInfo) {
+                userData.userId = savedState.userInfo.id
+                userData.nickname = savedState.userInfo.nickname
+                userData.avatar = savedState.userInfo.avatar
+            }
+
+            toast('已恢复之前的邀请状态', 'none', 1500)
+
+            // 3. 从服务器同步最新状态
+            await syncInvitationFromServer(savedState)
+        }
+    } catch (error) {
+        console.error('恢复状态失败:', error)
+    }
+}
+
+// 从服务器同步邀请信息
+const syncInvitationFromServer = async (savedState = null) => {
+    try {
+        // 检查是否有邀请ID或邀请码
+        if (!invitationId.value && !inviteCode.value) {
+            return
+        }
+
+        console.log('开始从服务器同步邀请信息...')
+        let invitationData = null
+
+        // 1. 获取最新的邀请信息
+        try {
+            // 优先使用邀请ID获取
+            if (invitationId.value) {
+                const response = await getInvitationById(invitationId.value)
+                console.log('通过ID获取邀请响应:', response)
+                if (response && response.data && response.data.invitation) {
+                    invitationData = response.data.invitation
+                } else if (
+                    response &&
+                    response.data &&
+                    response.data.data &&
+                    response.data.data.invitation
+                ) {
+                    invitationData = response.data.data.invitation
+                } else if (response && response.data && response.data.data) {
+                    invitationData = response.data.data
+                } else if (response && response.invitation) {
+                    invitationData = response.invitation
+                } else if (response && response.data) {
+                    invitationData = response.data
+                } else if (response && response.status === 404) {
+                    console.log('邀请不存在，可能已被删除')
+                    // 重置状态
+                    state.value = 'initial'
+                    inviteCode.value = ''
+                    invitationId.value = ''
+                    uni.removeStorageSync('togetherDrinkState')
+                    toast('邀请不存在或已被删除', 'none')
+                    return
+                }
+            }
+
+            // 如果通过ID获取失败，尝试通过邀请码获取
+            if (!invitationData && inviteCode.value) {
+                const response = await getInvitationByCode(inviteCode.value)
+                console.log('通过邀请码获取响应:', response)
+                if (response && response.data && response.data.invitation) {
+                    invitationData = response.data.invitation
+                } else if (
+                    response &&
+                    response.data &&
+                    response.data.data &&
+                    response.data.data.invitation
+                ) {
+                    invitationData = response.data.data.invitation
+                } else if (response && response.data && response.data.data) {
+                    invitationData = response.data.data
+                } else if (response && response.invitation) {
+                    invitationData = response.invitation
+                } else if (response && response.data) {
+                    invitationData = response.data
+                } else if (response && response.status === 404) {
+                    console.log('邀请码无效，可能已过期或被删除')
+                    // 重置状态
+                    state.value = 'initial'
+                    inviteCode.value = ''
+                    invitationId.value = ''
+                    uni.removeStorageSync('togetherDrinkState')
+                    toast('邀请码无效或已过期', 'none')
+                    return
+                }
+            }
+
+            // 没有获取到有效数据，退出
+            if (!invitationData) {
+                console.log('未能获取到有效的邀请数据')
+                if (state.value !== 'initial') {
+                    // 尝试再次查询，避免网络波动导致的临时失败
+                    console.log('将在5秒后重试...')
+                    setTimeout(() => {
+                        syncInvitationFromServer()
+                    }, 5000)
+                }
+                return
+            }
+
+            console.log('获取到邀请数据:', invitationData)
+
+            // 2. 更新邀请状态和UI
+            updateInvitationData(invitationData)
+
+            // 3. 获取并更新参与者和创建者信息
+            await updateUsersData(invitationData)
+
+            // 4. 保存最新状态到本地
+            saveInvitationState()
+        } catch (error) {
+            console.error('同步邀请信息失败:', error)
+        }
+    } catch (error) {
+        console.error('整体同步过程异常:', error)
+    }
+}
+
+// 更新邀请基本数据
+const updateInvitationData = (invitationData) => {
+    try {
+        // 确保invitationId已保存
+        if (invitationData.id && !invitationId.value) {
+            invitationId.value = invitationData.id
+        } else if (invitationData.invitationId && !invitationId.value) {
+            invitationId.value = invitationData.invitationId
+        }
+
+        // 确保inviteCode已保存
+        if (invitationData.inviteCode && !inviteCode.value) {
+            inviteCode.value = invitationData.inviteCode
+        }
+
+        // 检查是否已取消
+        if (invitationData.status === 'cancelled') {
+            console.log('检测到邀请已被取消，重置状态')
+            toast('邀请已被取消', 'none', 1500)
+            // 重置到初始状态
+            state.value = 'initial'
+            inviteCode.value = ''
+            invitationId.value = ''
+            if (countdownTimer.value) {
+                clearInterval(countdownTimer.value)
+            }
+            countdown.value = 600
+
+            // 清除本地存储
+            uni.removeStorageSync('togetherDrinkState')
+            return
+        }
+
+        // 更新状态
+        if (invitationData.status && invitationData.status !== state.value) {
+            console.log(
+                `邀请状态已更新: ${state.value} -> ${invitationData.status}`
+            )
+
+            // 处理各种状态转换
+            if (invitationData.status === 'created') {
+                console.log('将服务器的created状态映射为waiting状态')
+                state.value = 'waiting'
+            } else if (invitationData.status === 'joined') {
+                console.log('邀请已被加入')
+                state.value = 'joined'
+
+                // 如果当前用户是创建者，显示提示
+                const currentUserId = userData.userId
+                const creatorId = invitationData.creatorId
+
+                if (currentUserId === creatorId) {
+                    toast('有好友已加入您的邀请！', 'success')
+                }
+
+                // 延迟后准备支付
+                setTimeout(() => {
+                    state.value = 'ready'
+                    saveInvitationState()
+                }, 2000)
+            } else {
+                state.value = invitationData.status
+            }
+        } else if (
+            state.value === 'initial' &&
+            invitationData.status === 'joined'
+        ) {
+            // 特殊情况：页面刷新时，状态可能已经是joined
+            console.log('恢复joined状态')
+            state.value = 'joined'
+
+            // 延迟后准备支付
+            setTimeout(() => {
+                state.value = 'ready'
+                saveInvitationState()
+            }, 1000)
+        }
+
+        // 更新商品信息
+        if (invitationData.productId) {
+            product.value = {
+                id: invitationData.productId,
+                name: invitationData.productName || product.value.name,
+                description: product.value.description,
+                price: invitationData.productPrice || product.value.price,
+                imageUrl: invitationData.productImage || product.value.imageUrl
+            }
+        } else if (invitationData.productInfo) {
+            product.value = {
+                id: invitationData.productInfo.productId,
+                name:
+                    invitationData.productInfo.productName ||
+                    product.value.name,
+                description: product.value.description,
+                price:
+                    invitationData.productInfo.productPrice ||
+                    product.value.price,
+                imageUrl:
+                    invitationData.productInfo.productImage ||
+                    product.value.imageUrl
+            }
+        }
+    } catch (error) {
+        console.error('更新邀请基本数据出错:', error)
+    }
+}
+
+// 从服务器获取用户信息并更新
+const updateUsersData = async (invitationData) => {
+    // 确定谁是参与者谁是创建者
+    const currentUserId = userData.userId
+    const creatorId = invitationData.creatorId
+    const participantId = invitationData.participantId
+
+    console.log(
+        '当前用户:',
+        currentUserId,
+        '创建者:',
+        creatorId,
+        '参与者:',
+        participantId
+    )
+
+    // 检查状态是否为joined或ready，并且已有参与者ID
+    if (
+        (state.value === 'joined' || state.value === 'ready') &&
+        participantId
+    ) {
+        console.log('已加入状态，需要更新参与者信息')
+
+        // 如果当前用户是创建者，需要获取参与者信息作为伙伴
+        if (currentUserId === creatorId) {
+            try {
+                const response = await getUserProfile(participantId)
+                console.log('参与者资料响应:', response)
+
+                // 尝试从各种可能的响应结构中提取用户数据
+                let userData = null
+                if (
+                    response &&
+                    response.data &&
+                    typeof response.data === 'object'
+                ) {
+                    userData = response.data
+                    console.log('从response.data提取参与者数据:', userData)
+
+                    // 设置伙伴信息
+                    if (userData.data && userData.data.nickname) {
+                        partnerInfo.value = {
+                            id: participantId,
+                            nickname: userData.data.nickname || '好友',
+                            avatar:
+                                userData.data.avatar ||
+                                '/static/images/avatar-default.png'
+                        }
+                    } else if (userData.nickname) {
+                        partnerInfo.value = {
+                            id: participantId,
+                            nickname: userData.nickname || '好友',
+                            avatar:
+                                userData.avatar ||
+                                '/static/images/avatar-default.png'
+                        }
+                    }
+
+                    console.log('已更新伙伴信息(参与者):', partnerInfo.value)
+                }
+            } catch (error) {
+                console.error('获取参与者信息失败:', error)
+            }
+        }
+        // 如果当前用户是参与者，需要获取创建者信息作为伙伴
+        else if (currentUserId === participantId) {
+            try {
+                const response = await getUserProfile(creatorId)
+                console.log('创建者资料响应:', response)
+
+                // 尝试从各种可能的响应结构中提取用户数据
+                let userData = null
+                if (
+                    response &&
+                    response.data &&
+                    typeof response.data === 'object'
+                ) {
+                    userData = response.data
+                    console.log('从response.data提取创建者数据:', userData)
+
+                    // 设置伙伴信息
+                    if (userData.data && userData.data.nickname) {
+                        partnerInfo.value = {
+                            id: creatorId,
+                            nickname: userData.data.nickname || '创建者',
+                            avatar:
+                                userData.data.avatar ||
+                                '/static/images/avatar-default.png'
+                        }
+                    } else if (userData.nickname) {
+                        partnerInfo.value = {
+                            id: creatorId,
+                            nickname: userData.nickname || '创建者',
+                            avatar:
+                                userData.avatar ||
+                                '/static/images/avatar-default.png'
+                        }
+                    }
+
+                    console.log('已更新伙伴信息(创建者):', partnerInfo.value)
+                }
+            } catch (error) {
+                console.error('获取创建者信息失败:', error)
+            }
+        }
+    }
+}
+
+// 添加刷新邀请状态的逻辑
+const refreshStatus = () => {
+    // 调用同步邀请信息的逻辑
+    syncInvitationFromServer()
+}
 </script>
 
 <style lang="scss">
@@ -619,20 +1466,52 @@ onUnmounted(() => {
             .countdown {
                 text-align: center;
                 margin-bottom: 30rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
 
                 .countdown-text {
                     font-size: 28rpx;
                     color: #ff4d4f;
+                    margin-right: 10rpx;
+                }
+
+                .refresh-button {
+                    width: 40rpx;
+                    height: 40rpx;
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #1890ff;
+                    border-radius: 50%;
                 }
             }
 
-            .action-button.cancel {
-                width: 100%;
-                height: 80rpx;
-                line-height: 80rpx;
-                font-size: 30rpx;
-                background-color: #f5f5f5;
-                color: #666;
+            .action-buttons {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20rpx;
+
+                .action-button {
+                    width: 48%;
+                    height: 80rpx;
+                    line-height: 80rpx;
+                    font-size: 30rpx;
+                    border-radius: 8rpx;
+
+                    &.share {
+                        background-color: #1890ff;
+                        color: #fff;
+                    }
+
+                    &.cancel {
+                        background-color: #f5f5f5;
+                        color: #666;
+                        border: 1rpx solid #ddd;
+                    }
+                }
             }
         }
 

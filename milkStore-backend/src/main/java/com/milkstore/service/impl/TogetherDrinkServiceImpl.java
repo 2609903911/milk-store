@@ -37,7 +37,7 @@ public class TogetherDrinkServiceImpl implements TogetherDrinkService {
     private OrderMapper orderMapper;
     
     private static final String[] INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".split("");
-    private static final int INVITE_CODE_LENGTH = 6;
+    private static final int INVITE_CODE_LENGTH = 8;
     private static final Random random = new Random();
 
     @Override
@@ -51,17 +51,28 @@ public class TogetherDrinkServiceImpl implements TogetherDrinkService {
         invitation.setInviteCode(inviteCode);
         invitation.setCreatorId(creatorId);
         invitation.setProductId(productId);
+        invitation.setStatus("created");
+        invitation.setCreateTime(LocalDateTime.now());
+        invitation.setExpireTime(LocalDateTime.now().plusHours(24)); // 设置24小时后过期
+        
+        // 设置总金额（商品价格）
+        BigDecimal totalAmount = BigDecimal.valueOf(productPrice);
+        invitation.setTotalAmount(totalAmount);
+        
+        // 设置非数据库字段，用于返回数据
         invitation.setProductName(productName);
         invitation.setProductImage(productImage);
         invitation.setProductPrice(productPrice);
-        invitation.setStatus("waiting");
-        invitation.setCreateTime(LocalDateTime.now());
-        invitation.setExpireTime(LocalDateTime.now().plusHours(24)); // 设置24小时后过期
         
         // 保存到数据库
         invitationMapper.insert(invitation);
         
         return invitation;
+    }
+
+    @Override
+    public TogetherDrinkInvitation getInvitationById(Long invitationId) {
+        return invitationMapper.findById(invitationId);
     }
 
     @Override
@@ -74,7 +85,8 @@ public class TogetherDrinkServiceImpl implements TogetherDrinkService {
     public TogetherDrinkInvitation joinInvitation(Long invitationId, String participantId) {
         TogetherDrinkInvitation invitation = invitationMapper.findById(invitationId);
         
-        if (invitation == null || !"waiting".equals(invitation.getStatus())) {
+        // 修改状态检查逻辑，只允许状态为'created'的邀请被加入
+        if (invitation == null || !"created".equals(invitation.getStatus())) {
             throw new IllegalStateException("邀请不存在或已不可加入");
         }
         
@@ -106,13 +118,13 @@ public class TogetherDrinkServiceImpl implements TogetherDrinkService {
             return false;
         }
         
-        // 只有在等待状态或已加入状态可以取消
-        if (!"waiting".equals(invitation.getStatus()) && !"joined".equals(invitation.getStatus())) {
+        // 只有在created状态或joined状态可以取消
+        if (!"created".equals(invitation.getStatus()) && !"joined".equals(invitation.getStatus())) {
             return false;
         }
         
-        // 更新状态为"canceled"
-        invitationMapper.updateStatus(invitationId, "canceled");
+        // 更新状态为"cancelled"
+        invitationMapper.updateStatus(invitationId, "cancelled");
         
         return true;
     }
@@ -155,7 +167,7 @@ public class TogetherDrinkServiceImpl implements TogetherDrinkService {
         // 创建订单
         Map<String, Object> result = orderService.createOrder(order);
         
-        // 更新邀请状态为"completed"
+        // 更新邀请状态为"paid"
         invitationMapper.updateOrderId(invitationId, orderId);
         
         return orderId;
@@ -212,8 +224,8 @@ public class TogetherDrinkServiceImpl implements TogetherDrinkService {
             return false;
         }
         
-        // 检查状态是否为等待中
-        return "waiting".equals(invitation.getStatus());
+        // 检查状态是否为created（等待加入）
+        return "created".equals(invitation.getStatus());
     }
     
     /**

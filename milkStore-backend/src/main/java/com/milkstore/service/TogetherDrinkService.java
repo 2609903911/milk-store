@@ -23,6 +23,13 @@ public interface TogetherDrinkService {
     TogetherDrinkInvitation createInvitation(String creatorId, Long productId, String productName, String productImage, Double productPrice);
     
     /**
+     * 根据ID获取邀请信息
+     * @param invitationId 邀请ID
+     * @return 邀请对象
+     */
+    TogetherDrinkInvitation getInvitationById(Long invitationId);
+    
+    /**
      * 获取邀请信息
      * @param inviteCode 邀请码
      * @return 邀请对象

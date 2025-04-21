@@ -17,8 +17,8 @@ public interface TogetherDrinkInvitationMapper {
      * @param invitation 邀请信息
      * @return 影响行数
      */
-    @Insert("INSERT INTO together_drink_invitation (invite_code, creator_id, product_id, product_name, product_image, product_price, status, create_time, expire_time) " +
-            "VALUES (#{inviteCode}, #{creatorId}, #{productId}, #{productName}, #{productImage}, #{productPrice}, #{status}, #{createTime}, #{expireTime})")
+    @Insert("INSERT INTO together_drink_invitations (invitation_code, creator_id, product_id, status, total_amount, created_at, expires_at) " +
+            "VALUES (#{inviteCode}, #{creatorId}, #{productId}, #{status}, #{totalAmount}, #{createTime}, #{expireTime})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(TogetherDrinkInvitation invitation);
 
@@ -27,7 +27,18 @@ public interface TogetherDrinkInvitationMapper {
      * @param inviteCode 邀请码
      * @return 邀请信息
      */
-    @Select("SELECT * FROM together_drink_invitation WHERE invite_code = #{inviteCode}")
+    @Select("SELECT * FROM together_drink_invitations WHERE invitation_code = #{inviteCode}")
+    @Results({
+        @Result(property = "id", column = "id"),
+        @Result(property = "inviteCode", column = "invitation_code"),
+        @Result(property = "creatorId", column = "creator_id"),
+        @Result(property = "participantId", column = "participant_id"),
+        @Result(property = "productId", column = "product_id"),
+        @Result(property = "status", column = "status"),
+        @Result(property = "createTime", column = "created_at"),
+        @Result(property = "expireTime", column = "expires_at"),
+        @Result(property = "completeTime", column = "paid_at")
+    })
     TogetherDrinkInvitation findByInviteCode(String inviteCode);
 
     /**
@@ -36,7 +47,7 @@ public interface TogetherDrinkInvitationMapper {
      * @param status 新状态
      * @return 影响行数
      */
-    @Update("UPDATE together_drink_invitation SET status = #{status} WHERE id = #{id}")
+    @Update("UPDATE together_drink_invitations SET status = #{status} WHERE id = #{id}")
     int updateStatus(@Param("id") Long id, @Param("status") String status);
 
     /**
@@ -45,7 +56,7 @@ public interface TogetherDrinkInvitationMapper {
      * @param participantId 参与者ID
      * @return 影响行数
      */
-    @Update("UPDATE together_drink_invitation SET participant_id = #{participantId}, status = 'joined' WHERE id = #{id}")
+    @Update("UPDATE together_drink_invitations SET participant_id = #{participantId}, status = 'joined', joined_at = NOW() WHERE id = #{id}")
     int join(@Param("id") Long id, @Param("participantId") String participantId);
 
     /**
@@ -54,7 +65,7 @@ public interface TogetherDrinkInvitationMapper {
      * @param orderId 订单ID
      * @return 影响行数
      */
-    @Update("UPDATE together_drink_invitation SET order_id = #{orderId}, status = 'completed', complete_time = NOW() WHERE id = #{id}")
+    @Update("UPDATE together_drink_invitations SET payer_id = #{orderId}, status = 'paid', paid_at = NOW() WHERE id = #{id}")
     int updateOrderId(@Param("id") Long id, @Param("orderId") String orderId);
 
     /**
@@ -62,7 +73,18 @@ public interface TogetherDrinkInvitationMapper {
      * @param userId 用户ID
      * @return 邀请列表
      */
-    @Select("SELECT * FROM together_drink_invitation WHERE creator_id = #{userId} ORDER BY create_time DESC")
+    @Select("SELECT * FROM together_drink_invitations WHERE creator_id = #{userId} ORDER BY created_at DESC")
+    @Results({
+        @Result(property = "id", column = "id"),
+        @Result(property = "inviteCode", column = "invitation_code"),
+        @Result(property = "creatorId", column = "creator_id"),
+        @Result(property = "participantId", column = "participant_id"),
+        @Result(property = "productId", column = "product_id"),
+        @Result(property = "status", column = "status"),
+        @Result(property = "createTime", column = "created_at"),
+        @Result(property = "expireTime", column = "expires_at"),
+        @Result(property = "completeTime", column = "paid_at")
+    })
     List<TogetherDrinkInvitation> findByCreatorId(String userId);
 
     /**
@@ -70,7 +92,18 @@ public interface TogetherDrinkInvitationMapper {
      * @param userId 用户ID
      * @return 邀请列表
      */
-    @Select("SELECT * FROM together_drink_invitation WHERE participant_id = #{userId} ORDER BY create_time DESC")
+    @Select("SELECT * FROM together_drink_invitations WHERE participant_id = #{userId} ORDER BY created_at DESC")
+    @Results({
+        @Result(property = "id", column = "id"),
+        @Result(property = "inviteCode", column = "invitation_code"),
+        @Result(property = "creatorId", column = "creator_id"),
+        @Result(property = "participantId", column = "participant_id"),
+        @Result(property = "productId", column = "product_id"),
+        @Result(property = "status", column = "status"),
+        @Result(property = "createTime", column = "created_at"),
+        @Result(property = "expireTime", column = "expires_at"),
+        @Result(property = "completeTime", column = "paid_at")
+    })
     List<TogetherDrinkInvitation> findByParticipantId(String userId);
 
     /**
@@ -78,8 +111,8 @@ public interface TogetherDrinkInvitationMapper {
      * @param now 当前时间
      * @return 影响行数
      */
-    @Update("UPDATE together_drink_invitation SET status = 'expired' " +
-            "WHERE status IN ('waiting', 'joined') AND expire_time < #{now}")
+    @Update("UPDATE together_drink_invitations SET status = 'expired' " +
+            "WHERE status IN ('created', 'joined') AND expires_at < #{now}")
     int updateExpiredInvitations(Date now);
 
     /**
@@ -87,6 +120,17 @@ public interface TogetherDrinkInvitationMapper {
      * @param id 邀请ID
      * @return 邀请信息
      */
-    @Select("SELECT * FROM together_drink_invitation WHERE id = #{id}")
+    @Select("SELECT * FROM together_drink_invitations WHERE id = #{id}")
+    @Results({
+        @Result(property = "id", column = "id"),
+        @Result(property = "inviteCode", column = "invitation_code"),
+        @Result(property = "creatorId", column = "creator_id"),
+        @Result(property = "participantId", column = "participant_id"),
+        @Result(property = "productId", column = "product_id"),
+        @Result(property = "status", column = "status"),
+        @Result(property = "createTime", column = "created_at"),
+        @Result(property = "expireTime", column = "expires_at"),
+        @Result(property = "completeTime", column = "paid_at")
+    })
     TogetherDrinkInvitation findById(Long id);
 } 

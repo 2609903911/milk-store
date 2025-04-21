@@ -1,5 +1,6 @@
 package com.milkstore.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -33,29 +34,9 @@ public class TogetherDrinkInvitation implements Serializable {
     private String creatorId;
     
     /**
-     * 创建者昵称
-     */
-    private String creatorNickname;
-    
-    /**
-     * 创建者头像
-     */
-    private String creatorAvatar;
-    
-    /**
      * 参与者ID
      */
     private String participantId;
-    
-    /**
-     * 参与者昵称
-     */
-    private String participantNickname;
-    
-    /**
-     * 参与者头像
-     */
-    private String participantAvatar;
     
     /**
      * 商品ID
@@ -63,29 +44,24 @@ public class TogetherDrinkInvitation implements Serializable {
     private Long productId;
     
     /**
-     * 商品名称
-     */
-    private String productName;
-    
-    /**
-     * 商品价格
-     */
-    private Double productPrice;
-    
-    /**
-     * 商品图片
-     */
-    private String productImage;
-    
-    /**
      * 邀请状态：
-     * CREATED - 已创建
-     * JOINED - 已有人加入
-     * CANCELED - 已取消
-     * EXPIRED - 已过期
-     * COMPLETED - 已完成（已创建订单）
+     * created - 已创建
+     * joined - 已有人加入
+     * paid - 已支付
+     * cancelled - 已取消
+     * expired - 已过期
      */
     private String status;
+    
+    /**
+     * 总金额
+     */
+    private BigDecimal totalAmount;
+    
+    /**
+     * 支付者ID
+     */
+    private String payerId;
     
     /**
      * 创建时间
@@ -100,15 +76,58 @@ public class TogetherDrinkInvitation implements Serializable {
     private LocalDateTime expireTime;
     
     /**
-     * 完成时间
+     * 加入时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime completeTime;
+    private LocalDateTime joinedAt;
     
     /**
-     * 关联的订单ID
+     * 支付时间
      */
-    private String orderId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime paidAt;
+    
+    // 以下为非数据库字段，用于传输数据
+    
+    /**
+     * 创建者昵称（非数据库字段）
+     */
+    private transient String creatorNickname;
+    
+    /**
+     * 创建者头像（非数据库字段）
+     */
+    private transient String creatorAvatar;
+    
+    /**
+     * 参与者昵称（非数据库字段）
+     */
+    private transient String participantNickname;
+    
+    /**
+     * 参与者头像（非数据库字段）
+     */
+    private transient String participantAvatar;
+    
+    /**
+     * 商品名称（非数据库字段）
+     */
+    private transient String productName;
+    
+    /**
+     * 商品价格（非数据库字段）
+     */
+    private transient Double productPrice;
+    
+    /**
+     * 商品图片（非数据库字段）
+     */
+    private transient String productImage;
+    
+    /**
+     * 关联的订单ID（非数据库字段，使用payerId代替）
+     */
+    private transient String orderId;
     
     /**
      * 商品信息（非数据库字段）
@@ -130,7 +149,7 @@ public class TogetherDrinkInvitation implements Serializable {
      */
     @JsonIgnore
     public boolean isExpired() {
-        if ("EXPIRED".equals(status) || "CANCELED".equals(status) || "COMPLETED".equals(status)) {
+        if ("expired".equals(status) || "cancelled".equals(status) || "paid".equals(status)) {
             return true;
         }
         
@@ -146,7 +165,7 @@ public class TogetherDrinkInvitation implements Serializable {
      */
     @JsonIgnore
     public boolean canJoin() {
-        return "CREATED".equals(status) && !isExpired() && participantId == null;
+        return "created".equals(status) && !isExpired() && participantId == null;
     }
     
     /**
@@ -154,7 +173,7 @@ public class TogetherDrinkInvitation implements Serializable {
      */
     @JsonIgnore
     public boolean isReadyForOrder() {
-        return "JOINED".equals(status) && 
+        return "joined".equals(status) && 
                participantId != null && 
                expireTime != null && 
                expireTime.isAfter(LocalDateTime.now());

@@ -44,6 +44,13 @@ export const request = (options) => {
             ? options.url 
             : BASE_URL + options.url;
         
+        // 记录请求信息
+        console.log('【请求开始】', {
+            url: url,
+            method: options.method || 'GET',
+            data: options.data
+        });
+        
         // 显示加载中提示
         if (options.loading !== false) {
             uni.showLoading({
@@ -205,6 +212,12 @@ export const request = (options) => {
                     uni.showToast({
                         title: '服务器异常，请稍后重试',
                         icon: 'none'
+                    });
+                    console.error('【请求错误】服务器返回500错误:', {
+                        url: url,
+                        method: options.method || 'GET',
+                        requestData: options.data,
+                        response: res.data
                     });
                     reject(new Error('服务器异常'));
                 } else {

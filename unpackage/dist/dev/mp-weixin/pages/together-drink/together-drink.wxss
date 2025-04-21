@@ -199,18 +199,46 @@
 .together-drink-container .action-area .waiting-actions .countdown {
   text-align: center;
   margin-bottom: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .together-drink-container .action-area .waiting-actions .countdown .countdown-text {
   font-size: 28rpx;
   color: #ff4d4f;
+  margin-right: 10rpx;
 }
-.together-drink-container .action-area .waiting-actions .action-button.cancel {
-  width: 100%;
+.together-drink-container .action-area .waiting-actions .countdown .refresh-button {
+  width: 40rpx;
+  height: 40rpx;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1890ff;
+  border-radius: 50%;
+}
+.together-drink-container .action-area .waiting-actions .action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+.together-drink-container .action-area .waiting-actions .action-buttons .action-button {
+  width: 48%;
   height: 80rpx;
   line-height: 80rpx;
   font-size: 30rpx;
+  border-radius: 8rpx;
+}
+.together-drink-container .action-area .waiting-actions .action-buttons .action-button.share {
+  background-color: #1890ff;
+  color: #fff;
+}
+.together-drink-container .action-area .waiting-actions .action-buttons .action-button.cancel {
   background-color: #f5f5f5;
   color: #666;
+  border: 1rpx solid #ddd;
 }
 .together-drink-container .action-area .joined-actions .join-success {
   display: flex;
