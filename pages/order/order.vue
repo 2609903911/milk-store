@@ -265,9 +265,6 @@
                                     <view class="coupon-desc">{{
                                         coupon.description
                                     }}</view>
-                                    <view class="coupon-period"
-                                        >有效期至{{ coupon.expireDate }}</view
-                                    >
                                     <view class="coupon-scope">{{
                                         coupon.scope
                                     }}</view>
@@ -307,6 +304,8 @@ import { getProductData, initProductData } from '../../utils/productData'
 // 使用easycom自动注册组件，不需要手动导入
 // 组件名称已在pages.json中注册
 import { BASE_URL, API_PATHS } from '../../utils/api/config'
+// 引入userData
+import { userData, initUserData } from '../../utils/userData'
 
 // 显式导入shop-detail组件以确保微信小程序能正确加载
 import OrderDetail from '../components/shop-detail.vue'
@@ -379,6 +378,9 @@ const getUserDefaultAddress = () => {
 onMounted(() => {
     // 初始化数据
     initData()
+
+    // 初始化用户数据
+    initUserData()
 
     // 获取存储的门店信息
     updateStoreInfo()
@@ -631,69 +633,113 @@ const formatDate = (timestamp) => {
 }
 // 获取用户信息中的优惠券
 const loadUserCoupons = () => {
-    // 直接从全局状态获取优惠券数据，而不是从localStorage
-    if (userState.coupons && Array.isArray(userState.coupons)) {
-        // 将用户信息中的优惠券转换为订单页面需要的格式
-        coupons.value = userState.coupons.map((coupon) => {
-            // 根据优惠券类型生成不同的显示内容
-            let discount = ''
-            let unit = ''
-            let color = ''
+    try {
+        // 使用userData中的优惠券数据
+        if (userData.coupons && Array.isArray(userData.coupons)) {
+            // 将用户信息中的优惠券转换为订单页面需要的格式
+            coupons.value = userData.coupons
+                .map((coupon) => {
+                    // 根据优惠券类型生成不同的显示内容
+                    let discount = ''
+                    let unit = ''
+                    let color = ''
 
-            switch (coupon.type) {
-                case 'discount': // 折扣券
-                    discount = coupon.value
-                    unit = '折'
-                    color = '#007AFF'
-                    break
-                case 'cash': // 现金券
-                    discount = coupon.value
-                    unit = '元'
-                    color = '#FF6B00'
-                    break
-                case 'free': // 免单券
-                    discount = '免单'
-                    unit = ''
-                    color = '#FF2D55'
-                    break
-                case 'specialPrice': // 特价券
-                    discount = coupon.value
-                    unit = '元'
-                    color = '#AF52DE'
-                    break
-                case 'shipping': // 免运费券
-                    discount = '免'
-                    unit = '运费'
-                    color = '#5856D6'
-                    break
-                default:
-                    discount = coupon.value
-                    unit = ''
-                    color = '#007AFF'
-            }
+                    // 获取优惠券类型和值
+                    // 优先使用couponTemplate中的数据
+                    const couponType =
+                        coupon.couponTemplate?.type || coupon.type
+                    const couponValue =
+                        coupon.couponTemplate?.value || coupon.value
+                    const couponTitle =
+                        coupon.couponTemplate?.title || coupon.title
+                    const couponDesc =
+                        coupon.couponTemplate?.description || coupon.description
+                    const couponScope =
+                        coupon.couponTemplate?.scope || coupon.scope
+                    const minOrderAmount =
+                        coupon.couponTemplate?.minOrderAmount ||
+                        coupon.minOrderAmount ||
+                        0
 
-            // 格式化过期时间
-            const expireDate = formatDate(coupon.endTime)
+                    switch (couponType) {
+                        case 'discount': // 折扣券
+                            discount = couponValue
+                            unit = '折'
+                            color = '#007AFF'
+                            break
+                        case 'cash': // 现金券
+                            discount = couponValue
+                            unit = '元'
+                            color = '#FF6B00'
+                            break
+                        case 'free': // 免单券
+                            discount = '免单'
+                            unit = ''
+                            color = '#FF2D55'
+                            break
+                        case 'specialPrice': // 特价券
+                            discount = couponValue
+                            unit = '元'
+                            color = '#AF52DE'
+                            break
+                        case 'shipping': // 免运费券
+                            discount = '免'
+                            unit = '运费'
+                            color = '#5856D6'
+                            break
+                        default:
+                            discount = couponValue
+                            unit = ''
+                            color = '#007AFF'
+                    }
 
-            return {
-                id: coupon.id,
-                discount,
-                unit,
-                type: coupon.scope === 'all' ? '全场通用' : '部分商品',
-                title: coupon.title,
-                description:
-                    coupon.description ||
-                    (coupon.minOrderAmount > 0
-                        ? `满${coupon.minOrderAmount}元可用`
-                        : ''),
-                expireDate,
-                scope: coupon.description,
-                color,
-                originalCoupon: coupon // 保存原始优惠券数据，便于后续使用
-            }
-        })
-    } else {
-        // 未找到优惠券数据
+                    // 获取过期时间
+                    // 优先使用优惠券自身的endTime，如果没有则使用模板中的
+                    let endTime = null
+                    if (coupon.endTime) {
+                        endTime = coupon.endTime
+                    } else if (
+                        coupon.createTime &&
+                        coupon.couponTemplate?.validDays
+                    ) {
+                        // 如果有创建时间和有效天数，计算过期时间
+                        const createDate = new Date(coupon.createTime)
+                        createDate.setDate(
+                            createDate.getDate() +
+                                coupon.couponTemplate.validDays
+                        )
+                        endTime = createDate.toISOString()
+                    }
+
+                    // 格式化过期时间
+                    const expireDate = formatDate(endTime)
+
+                    return {
+                        id: coupon.id,
+                        discount,
+                        unit,
+                        type: couponScope === 'all' ? '全场通用' : '部分商品',
+                        title: couponTitle,
+                        description:
+                            couponDesc ||
+                            (minOrderAmount > 0
+                                ? `满${minOrderAmount}元可用`
+                                : ''),
+                        expireDate,
+                        scope: couponDesc,
+                        color,
+                        status: coupon.status || 'valid', // 添加状态
+                        originalCoupon: coupon // 保存原始优惠券数据，便于后续使用
+                    }
+                })
+                .filter((coupon) => coupon.status !== 'used') // 过滤掉已使用的优惠券
+        } else {
+            // 未找到优惠券数据，显示空数组
+            coupons.value = []
+        }
+    } catch (error) {
+        // 出错则设置为空数组
+        coupons.value = []
     }
 }
 
@@ -701,13 +747,6 @@ const loadUserCoupons = () => {
 const useCoupon = (coupon) => {
     // 切换到菜单
     activeTab.value = 'menu'
-
-    // 可以在这里添加优惠券使用逻辑
-    uni.showToast({
-        title: '已选择优惠券：' + coupon.title,
-        icon: 'none'
-    })
-
     // 这里可以添加其他逻辑，如标记当前使用的优惠券等
 }
 
@@ -771,7 +810,6 @@ const orderCartRef = ref(null)
 // 处理添加到购物车
 const handleAddToCart = (item) => {
     // 添加调试日志
-    console.log('订单页面接收到的购物车项：', item)
 
     // 由于shop-detail组件已经将商品添加到了本地存储
     // 我们只需要刷新购物车组件显示

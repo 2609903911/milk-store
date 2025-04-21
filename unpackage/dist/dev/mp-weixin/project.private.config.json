@@ -9,6 +9,13 @@
     "miniprogram": {
       "list": [
         {
+          "name": "pages/order/order",
+          "pathName": "pages/order/order",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/together-drink/together-drink",
           "pathName": "pages/together-drink/together-drink",
           "query": "",

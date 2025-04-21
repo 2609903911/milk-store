@@ -2,7 +2,8 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_productData = require("../../utils/productData.js");
 const utils_api_config = require("../../utils/api/config.js");
-const utils_userState = require("../../utils/userState.js");
+const utils_userData = require("../../utils/userData.js");
+require("../../utils/userState.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_shop_detail2 = common_vendor.resolveComponent("shop-detail");
@@ -58,6 +59,7 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     common_vendor.onMounted(() => {
       initData();
+      utils_userData.initUserData();
       updateStoreInfo();
       common_vendor.index.$on("store-selected", handleStoreSelected);
       common_vendor.index.$on("refresh-order-page", refreshPage);
@@ -218,65 +220,86 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
       return `${year}-${month}-${day}`;
     };
     const loadUserCoupons = () => {
-      if (utils_userState.userState.coupons && Array.isArray(utils_userState.userState.coupons)) {
-        coupons.value = utils_userState.userState.coupons.map((coupon) => {
-          let discount = "";
-          let unit = "";
-          let color = "";
-          switch (coupon.type) {
-            case "discount":
-              discount = coupon.value;
-              unit = "折";
-              color = "#007AFF";
-              break;
-            case "cash":
-              discount = coupon.value;
-              unit = "元";
-              color = "#FF6B00";
-              break;
-            case "free":
-              discount = "免单";
-              unit = "";
-              color = "#FF2D55";
-              break;
-            case "specialPrice":
-              discount = coupon.value;
-              unit = "元";
-              color = "#AF52DE";
-              break;
-            case "shipping":
-              discount = "免";
-              unit = "运费";
-              color = "#5856D6";
-              break;
-            default:
-              discount = coupon.value;
-              unit = "";
-              color = "#007AFF";
-          }
-          const expireDate = formatDate(coupon.endTime);
-          return {
-            id: coupon.id,
-            discount,
-            unit,
-            type: coupon.scope === "all" ? "全场通用" : "部分商品",
-            title: coupon.title,
-            description: coupon.description || (coupon.minOrderAmount > 0 ? `满${coupon.minOrderAmount}元可用` : ""),
-            expireDate,
-            scope: coupon.description,
-            color,
-            originalCoupon: coupon
-            // 保存原始优惠券数据，便于后续使用
-          };
-        });
+      try {
+        if (utils_userData.userData.coupons && Array.isArray(utils_userData.userData.coupons)) {
+          coupons.value = utils_userData.userData.coupons.map((coupon) => {
+            var _a, _b, _c, _d, _e, _f, _g;
+            let discount = "";
+            let unit = "";
+            let color = "";
+            const couponType = ((_a = coupon.couponTemplate) == null ? void 0 : _a.type) || coupon.type;
+            const couponValue = ((_b = coupon.couponTemplate) == null ? void 0 : _b.value) || coupon.value;
+            const couponTitle = ((_c = coupon.couponTemplate) == null ? void 0 : _c.title) || coupon.title;
+            const couponDesc = ((_d = coupon.couponTemplate) == null ? void 0 : _d.description) || coupon.description;
+            const couponScope = ((_e = coupon.couponTemplate) == null ? void 0 : _e.scope) || coupon.scope;
+            const minOrderAmount = ((_f = coupon.couponTemplate) == null ? void 0 : _f.minOrderAmount) || coupon.minOrderAmount || 0;
+            switch (couponType) {
+              case "discount":
+                discount = couponValue;
+                unit = "折";
+                color = "#007AFF";
+                break;
+              case "cash":
+                discount = couponValue;
+                unit = "元";
+                color = "#FF6B00";
+                break;
+              case "free":
+                discount = "免单";
+                unit = "";
+                color = "#FF2D55";
+                break;
+              case "specialPrice":
+                discount = couponValue;
+                unit = "元";
+                color = "#AF52DE";
+                break;
+              case "shipping":
+                discount = "免";
+                unit = "运费";
+                color = "#5856D6";
+                break;
+              default:
+                discount = couponValue;
+                unit = "";
+                color = "#007AFF";
+            }
+            let endTime = null;
+            if (coupon.endTime) {
+              endTime = coupon.endTime;
+            } else if (coupon.createTime && ((_g = coupon.couponTemplate) == null ? void 0 : _g.validDays)) {
+              const createDate = new Date(coupon.createTime);
+              createDate.setDate(
+                createDate.getDate() + coupon.couponTemplate.validDays
+              );
+              endTime = createDate.toISOString();
+            }
+            const expireDate = formatDate(endTime);
+            return {
+              id: coupon.id,
+              discount,
+              unit,
+              type: couponScope === "all" ? "全场通用" : "部分商品",
+              title: couponTitle,
+              description: couponDesc || (minOrderAmount > 0 ? `满${minOrderAmount}元可用` : ""),
+              expireDate,
+              scope: couponDesc,
+              color,
+              status: coupon.status || "valid",
+              // 添加状态
+              originalCoupon: coupon
+              // 保存原始优惠券数据，便于后续使用
+            };
+          }).filter((coupon) => coupon.status !== "used");
+        } else {
+          coupons.value = [];
+        }
+      } catch (error) {
+        coupons.value = [];
       }
     };
     const useCoupon = (coupon) => {
       activeTab.value = "menu";
-      common_vendor.index.showToast({
-        title: "已选择优惠券：" + coupon.title,
-        icon: "none"
-      });
     };
     common_vendor.ref(1);
     common_vendor.ref(0);
@@ -299,7 +322,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
     };
     const orderCartRef = common_vendor.ref(null);
     const handleAddToCart = (item) => {
-      common_vendor.index.__f__("log", "at pages/order/order.vue:774", "订单页面接收到的购物车项：", item);
       common_vendor.nextTick$1(() => {
         if (orderCartRef.value) {
           orderCartRef.value.loadCartItems();
@@ -451,11 +473,10 @@ const _sfc_main = /* @__PURE__ */ Object.assign({
             d: coupon.color,
             e: common_vendor.t(coupon.title),
             f: common_vendor.t(coupon.description),
-            g: common_vendor.t(coupon.expireDate),
-            h: common_vendor.t(coupon.scope),
-            i: common_vendor.o(($event) => useCoupon(coupon), index),
-            j: coupon.color,
-            k: index
+            g: common_vendor.t(coupon.scope),
+            h: common_vendor.o(($event) => useCoupon(), index),
+            i: coupon.color,
+            j: index
           };
         })
       }, {

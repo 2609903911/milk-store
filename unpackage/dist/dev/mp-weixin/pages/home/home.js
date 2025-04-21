@@ -20,6 +20,12 @@ const _sfc_main = {
       currentSwiper.value = e.detail.current;
     };
     const bannerList = common_vendor.ref([]);
+    const newsImages = common_vendor.ref([
+      "/static/images/news1.png",
+      "/static/images/news2.png",
+      "/static/images/news3.gif",
+      "/static/images/news4.png"
+    ]);
     const fetchBannerData = async () => {
       try {
         const banners = await utils_api_bannerApi.fetchBanners();
@@ -141,7 +147,12 @@ const _sfc_main = {
         r: common_vendor.o(navigateToTogetherDrink),
         s: common_assets._imports_5,
         t: common_assets._imports_6,
-        v: common_assets._imports_7
+        v: common_vendor.f(newsImages.value, (item, index, i0) => {
+          return {
+            a: item,
+            b: index
+          };
+        })
       };
     };
   }

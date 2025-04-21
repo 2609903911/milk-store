@@ -13,7 +13,8 @@
 - [轮播图相关接口](#轮播图相关接口)
 - [城市相关接口](#城市相关接口)
 - [地址相关接口](#地址相关接口)
-- [商城商品相关接口](#商城商品相关接口)
+- [熊猫币商城相关接口](#熊猫币商城相关接口)
+- [熊猫币交易相关接口](#熊猫币交易相关接口)
 - [订单相关接口](#订单相关接口)
 - [一起喝相关接口](#一起喝相关接口)
 
@@ -38,6 +39,7 @@
 - **参数**:
   - `phone`: 手机号
   - `code`: 验证码
+- **返回**: 登录结果，包括用户信息、勋章、优惠券和token
 
 ## 用户相关接口
 
@@ -77,11 +79,21 @@
   ```
 - **说明**: 需要先使用`/api/auth/code/send`发送验证码，type参数为"update_phone"
 
-### 获取用户默认地址
+### 上传用户头像
 
-- **URL**: `/api/user/default-address`
+- **URL**: `/api/user/upload-avatar`
+- **方法**: POST
+- **参数**:
+  - `avatarFile`: 头像文件（MultipartFile）
+  - `userId`: 用户ID
+- **返回**: 用户头像的访问URL
+
+### 访问用户头像
+
+- **URL**: `/api/uploads/avatar/{filename}`
 - **方法**: GET
-- **说明**: 该接口使用Authorization头部中的token识别用户身份，无需传递userId参数
+- **参数**:
+  - `filename`: 头像文件名称
 
 ## 优惠券相关接口
 
@@ -114,6 +126,21 @@
 - **参数**:
   - `userId`: 用户ID
   - `status`: 优惠券状态
+
+### 根据ID获取优惠券详情
+
+- **URL**: `/api/user-coupons/{id}`
+- **方法**: GET
+- **参数**:
+  - `id`: 优惠券ID
+
+### 更新优惠券使用状态
+
+- **URL**: `/api/user-coupons/{id}/use`
+- **方法**: PUT
+- **参数**:
+  - `id`: 优惠券ID
+  - `orderId`: 订单ID
 
 ### 检查数据库表结构
 
@@ -148,6 +175,14 @@
 - **方法**: GET
 - **参数**:
   - `userId`: 用户ID
+
+### 使用点亮星激活勋章
+
+- **URL**: `/api/medals/activate`
+- **方法**: POST
+- **参数**:
+  - `userId`: 用户ID
+  - `medalId`: 勋章ID
 
 ## 产品相关接口
 
@@ -234,12 +269,15 @@
 
 - **URL**: `/api/user/default-address`
 - **方法**: GET
-- **说明**: 该接口通过Authorization头部中的token识别用户，无需传递userId参数
+- **参数**:
+  - `userId`: 用户ID
 
 ### 获取用户所有地址
 
-- **URL**: `/api/user/addresses?userId={userId}`
+- **URL**: `/api/user/addresses`
 - **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
 
 ### 添加用户地址
 
@@ -248,6 +286,7 @@
 - **请求体**:
   ```json
   {
+    "userId": "用户ID",
     "contactName": "联系人姓名",
     "gender": "male/female",
     "phone": "联系电话",
@@ -265,6 +304,7 @@
 - **请求体**:
   ```json
   {
+    "userId": "用户ID",
     "contactName": "联系人姓名",
     "gender": "male/female",
     "phone": "联系电话",
@@ -279,6 +319,7 @@
 - **方法**: PUT
 - **参数**:
   - `addressId`: 要设置为默认的地址ID
+  - `userId`: 用户ID
 
 ### 删除用户地址
 
@@ -286,8 +327,9 @@
 - **方法**: DELETE
 - **参数**:
   - `addressId`: 要删除的地址ID
+  - `userId`: 用户ID
   
-## 商城商品相关接口
+## 熊猫币商城相关接口
 
 ### 获取所有商城商品
 
@@ -320,15 +362,6 @@
 - **URL**: `/api/store/admin/products`
 - **方法**: POST
 - **参数**: 商品对象（JSON格式）
-  - `title`: 商品标题
-  - `type`: 商品类型
-  - `value`: 商品价值
-  - `minOrderAmount`: 最低订单金额
-  - `description`: 商品描述
-  - `validity`: 有效期
-  - `coinsCost`: 所需熊猫币
-  - `category`: 分类
-  - `imageUrl`: 商品图片URL（可选）
 
 ### 更新商城商品（管理员接口）
 
@@ -344,6 +377,56 @@
 - **方法**: DELETE
 - **参数**:
   - `id`: 商品ID
+
+## 熊猫币交易相关接口
+
+### 创建交易记录
+
+- **URL**: `/api/transactions`
+- **方法**: POST
+- **请求体**: 交易记录信息（JSON格式）
+
+### 创建优惠券兑换交易
+
+- **URL**: `/api/transactions/coupon`
+- **方法**: POST
+- **请求体**: 包含用户ID、商品ID、花费熊猫币等信息
+
+### 创建点亮星兑换交易
+
+- **URL**: `/api/transactions/lightstar`
+- **方法**: POST
+- **请求体**: 包含用户ID、商品ID、花费熊猫币和点亮星数量等信息
+
+### 获取交易详情
+
+- **URL**: `/api/transactions/{id}`
+- **方法**: GET
+- **参数**:
+  - `id`: 交易ID
+
+### 获取用户交易历史
+
+- **URL**: `/api/transactions/user/{userId}`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+
+### 分页获取所有交易记录
+
+- **URL**: `/api/transactions`
+- **方法**: GET
+- **参数**:
+  - `page`: 页码（默认1）
+  - `size`: 每页记录数（默认10）
+
+### 更新交易状态
+
+- **URL**: `/api/transactions/{id}/status`
+- **方法**: PUT
+- **参数**:
+  - `id`: 交易ID
+  - `status`: 新状态
 
 ## 订单相关接口
 
