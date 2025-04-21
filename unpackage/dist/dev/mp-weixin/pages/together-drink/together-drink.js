@@ -45,6 +45,14 @@ const _sfc_main = {
     const countdownTimer = common_vendor.ref(null);
     const expireTime = common_vendor.ref(null);
     const invitationId = common_vendor.ref("");
+    const deliveryType = common_vendor.ref("self");
+    const storeAddress = common_vendor.ref({
+      id: "",
+      name: "",
+      address: "",
+      distance: ""
+    });
+    const userAddress = common_vendor.ref(null);
     const fetchProductInfo = async (productId = 1) => {
       try {
         const productData = await utils_api_productApi.fetchProductById(productId);
@@ -58,7 +66,6 @@ const _sfc_main = {
           };
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:267", "获取商品信息失败:", error);
         utils_uniUtils.toast("获取商品信息失败，使用默认商品", "none", 2e3);
       }
     };
@@ -121,17 +128,6 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:363", "创建邀请失败:", error);
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:364", "错误详情:", error.message, error.stack);
-        if (error.response) {
-          common_vendor.index.__f__(
-            "error",
-            "at pages/together-drink/together-drink.vue:366",
-            "服务器响应:",
-            error.response.status,
-            error.response.data
-          );
-        }
         utils_uniUtils.toast("创建邀请失败，请重试", "none");
       }
     };
@@ -181,7 +177,6 @@ const _sfc_main = {
       utils_uniUtils.toast("正在验证邀请码...", "loading");
       try {
         const response = await utils_api_togetherDrinkApi.getInvitationByCode(inputCode.value);
-        common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:449", "获取邀请信息响应:", response);
         let invitation = null;
         if (response && response.invitation) {
           invitation = response.invitation;
@@ -200,7 +195,6 @@ const _sfc_main = {
           utils_uniUtils.toast("邀请码无效或已过期", "none");
           return;
         }
-        common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:484", "处理后的邀请信息:", invitation);
         if (invitation.status) {
           if (invitation.status === "expired") {
             utils_uniUtils.toast("邀请已过期", "none");
@@ -228,7 +222,6 @@ const _sfc_main = {
           utils_uniUtils.toast("无法获取邀请ID", "none");
           return;
         }
-        common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:526", "邀请ID:", invitationId.value);
         if (invitation.creatorInfo) {
           partnerInfo.value = {
             id: invitation.creatorInfo.userId,
@@ -259,24 +252,14 @@ const _sfc_main = {
             imageUrl: invitation.productImage || product.value.imageUrl
           };
         }
-        common_vendor.index.__f__(
-          "log",
-          "at pages/together-drink/together-drink.vue:570",
-          "准备加入邀请，invitationId:",
-          invitationId.value,
-          "当前用户ID:",
-          utils_userData.userData.userId
-        );
         const joinData = {
           userId: utils_userData.userData.userId
         };
-        common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:579", "发送加入请求数据:", joinData);
         try {
           const joinResponse = await utils_api_togetherDrinkApi.joinInvitation(
             invitationId.value,
             joinData
           );
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:585", "加入邀请响应:", joinResponse);
           if (joinResponse.data && joinResponse.data.code === 500) {
             utils_uniUtils.toast(
               joinResponse.data.message || "邀请不存在或已不可加入",
@@ -296,11 +279,9 @@ const _sfc_main = {
             saveInvitationState();
           }, 2e3);
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:616", "加入邀请失败:", error);
           utils_uniUtils.toast("加入邀请失败，请检查邀请码是否正确", "none");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:620", "加入邀请失败:", error);
         utils_uniUtils.toast("加入邀请失败，请检查邀请码是否正确", "none");
       }
     };
@@ -326,10 +307,7 @@ const _sfc_main = {
       });
       utils_uniUtils.toast("请点击右上角分享", "none", 2e3);
       common_vendor.index.setClipboardData({
-        data: `邀请码: ${inviteCode.value}`,
-        success: () => {
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:661", "邀请码已复制到剪贴板");
-        }
+        data: `邀请码: ${inviteCode.value}`
       });
     };
     const cancelInvite = async () => {
@@ -347,13 +325,179 @@ const _sfc_main = {
         common_vendor.index.removeStorageSync("togetherDrinkState");
         utils_uniUtils.toast("邀请已取消", "success");
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:691", "取消邀请失败:", error);
         state.value = "initial";
         inviteCode.value = "";
         clearInterval(countdownTimer.value);
         countdown.value = 600;
         utils_uniUtils.toast("邀请已取消", "success");
       }
+    };
+    common_vendor.onMounted(() => {
+      utils_userData.initUserData();
+      fetchProductInfo(1);
+      initAddressInfo();
+      restoreInvitationState();
+      if (invitationId.value || inviteCode.value) {
+        syncInvitationFromServer();
+      }
+      const refreshTimer = setInterval(() => {
+        if (invitationId.value || inviteCode.value) {
+          syncInvitationFromServer();
+        }
+      }, 3e4);
+      refreshTimerRef.value = refreshTimer;
+    });
+    const initAddressInfo = () => {
+      try {
+        const storeInfo = common_vendor.index.getStorageSync("selectedStore");
+        if (storeInfo) {
+          const store = typeof storeInfo === "string" ? JSON.parse(storeInfo) : storeInfo;
+          storeAddress.value = {
+            id: store.id || "",
+            name: store.name || "",
+            address: store.address || "",
+            distance: store.distance || ""
+          };
+        } else {
+          storeAddress.value = {
+            id: "",
+            name: "",
+            address: "",
+            distance: ""
+          };
+        }
+      } catch (error) {
+        storeAddress.value = {
+          id: "",
+          name: "",
+          address: "",
+          distance: ""
+        };
+      }
+      checkNetworkAndGetAddress();
+    };
+    const checkNetworkAndGetAddress = () => {
+      common_vendor.index.getNetworkType({
+        success: (res) => {
+          if (res.networkType === "none") {
+            tryUseLocalAddress();
+          } else {
+            if (deliveryType.value === "delivery") {
+              getUserDefaultAddress();
+            }
+          }
+        },
+        fail: () => {
+          if (deliveryType.value === "delivery") {
+            getUserDefaultAddress();
+          }
+        }
+      });
+    };
+    const getUserDefaultAddress = () => {
+      const userId = utils_userData.userData.userId;
+      if (!userId) {
+        userAddress.value = {
+          address: "请先登录并设置收货地址",
+          name: "",
+          phone: ""
+        };
+        return;
+      }
+      try {
+        const cachedAddress = common_vendor.index.getStorageSync("userDefaultAddress");
+        if (cachedAddress) {
+          const addressObj = typeof cachedAddress === "string" ? JSON.parse(cachedAddress) : cachedAddress;
+        }
+      } catch (err) {
+      }
+      const requestUrl = `http://localhost:8082/api/user/default-address?userId=${userId}`;
+      const timeout = setTimeout(() => {
+        tryUseLocalAddress();
+      }, 5e3);
+      common_vendor.index.request({
+        url: requestUrl,
+        method: "GET",
+        success: (res) => {
+          clearTimeout(timeout);
+          if (res.data && res.data.code === 200 && res.data.data && res.data.data.address) {
+            const addressData = res.data.data.address;
+            userAddress.value = {
+              id: addressData.id || "",
+              name: addressData.name || utils_userData.userData.nickname || "用户",
+              phone: addressData.phone || utils_userData.userData.phone || "",
+              address: addressData.address || "请设置默认收货地址"
+            };
+            common_vendor.index.setStorageSync(
+              "userDefaultAddress",
+              JSON.stringify(userAddress.value)
+            );
+          } else {
+            if (!tryUseLocalAddress()) {
+              userAddress.value = {
+                address: "请设置默认收货地址",
+                name: utils_userData.userData.nickname || "用户",
+                phone: utils_userData.userData.phone || ""
+              };
+            }
+          }
+        },
+        fail: () => {
+          clearTimeout(timeout);
+          if (!tryUseLocalAddress()) {
+            userAddress.value = {
+              address: "获取地址失败，请重试",
+              name: utils_userData.userData.nickname || "用户",
+              phone: utils_userData.userData.phone || ""
+            };
+          }
+        }
+      });
+    };
+    const tryUseLocalAddress = () => {
+      try {
+        const cachedAddress = common_vendor.index.getStorageSync("userDefaultAddress");
+        if (cachedAddress) {
+          const addressObj = typeof cachedAddress === "string" ? JSON.parse(cachedAddress) : cachedAddress;
+          userAddress.value = addressObj;
+          return true;
+        }
+      } catch (err) {
+      }
+      {
+        userAddress.value = {
+          id: "mock-address-001",
+          name: utils_userData.userData.nickname || "测试用户",
+          phone: "13800138000",
+          address: "杭州市西湖区西溪路600号古墩路口"
+        };
+        return true;
+      }
+    };
+    const selectDelivery = (type) => {
+      deliveryType.value = type;
+      if (type === "delivery") {
+        checkNetworkAndGetAddress();
+      }
+    };
+    const selectAddress = () => {
+      if (!utils_userData.userData.userId) {
+        utils_uniUtils.toast("请先登录后再选择地址", "none", 2e3);
+        setTimeout(() => {
+          common_vendor.index.navigateTo({
+            url: "/pages/login/login"
+          });
+        }, 1500);
+        return;
+      }
+      common_vendor.index.navigateTo({
+        url: "/pages/address/address-list?select=true"
+      });
+      common_vendor.index.$once("addressSelected", (address) => {
+        if (address) {
+          userAddress.value = address;
+        }
+      });
     };
     const payOrder = async () => {
       if (!utils_userData.userData.userId) {
@@ -365,11 +509,24 @@ const _sfc_main = {
         }, 1500);
         return;
       }
+      if (deliveryType.value === "delivery" && !userAddress.value) {
+        utils_uniUtils.toast("请先选择收货地址", "none");
+        return;
+      }
       utils_uniUtils.toast("正在处理支付...", "loading");
       try {
-        const orderAddress = "默认配送地址";
+        let orderAddress = storeAddress.value.address;
+        let deliveryInfo = {
+          type: deliveryType.value,
+          storeAddress: storeAddress.value.address
+        };
+        if (deliveryType.value === "delivery") {
+          orderAddress = userAddress.value.address;
+          deliveryInfo.userAddress = userAddress.value;
+        }
         const orderResult = await utils_api_togetherDrinkApi.completeInvitation(invitationId.value, {
-          orderAddress
+          orderAddress,
+          deliveryInfo
         });
         if (orderResult && orderResult.orderId) {
           utils_uniUtils.toast("支付成功，订单已创建", "success");
@@ -383,25 +540,9 @@ const _sfc_main = {
           utils_uniUtils.toast("订单创建失败，请重试", "none");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:744", "支付处理失败:", error);
         utils_uniUtils.toast("支付处理失败，请重试", "none");
       }
     };
-    common_vendor.onMounted(() => {
-      utils_userData.initUserData();
-      fetchProductInfo(1);
-      restoreInvitationState();
-      if (invitationId.value || inviteCode.value) {
-        syncInvitationFromServer();
-      }
-      const refreshTimer = setInterval(() => {
-        if (invitationId.value || inviteCode.value) {
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:768", "定时刷新邀请状态...");
-          syncInvitationFromServer();
-        }
-      }, 3e4);
-      refreshTimerRef.value = refreshTimer;
-    });
     const refreshTimerRef = common_vendor.ref(null);
     common_vendor.onUnmounted(() => {
       if (countdownTimer.value) {
@@ -438,7 +579,6 @@ const _sfc_main = {
         createTime: Date.now()
         // 记录保存时间
       };
-      common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:828", "保存邀请状态:", stateData);
       common_vendor.index.setStorageSync("togetherDrinkState", stateData);
     };
     const restoreInvitationState = async () => {
@@ -451,7 +591,6 @@ const _sfc_main = {
           code = currentPage.options.code;
         }
         if (code && code.length === 8) {
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:848", "从URL参数获取邀请码:", code);
           inputCode.value = code;
           setTimeout(() => {
             joinByCode();
@@ -460,12 +599,10 @@ const _sfc_main = {
         }
         const savedState = common_vendor.index.getStorageSync("togetherDrinkState");
         if (savedState) {
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:860", "从本地存储恢复状态:", savedState);
           if (savedState.expireTime) {
             const now = Date.now();
             const expireTs = new Date(savedState.expireTime).getTime();
             if (now >= expireTs) {
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:869", "邀请已过期，重置状态");
               common_vendor.index.removeStorageSync("togetherDrinkState");
               utils_uniUtils.toast("之前的邀请已过期", "none", 1500);
               return;
@@ -473,15 +610,9 @@ const _sfc_main = {
             const remainingMs = expireTs - now;
             countdown.value = Math.floor(remainingMs / 1e3);
             expireTime.value = savedState.expireTime;
-            common_vendor.index.__f__(
-              "log",
-              "at pages/together-drink/together-drink.vue:880",
-              `恢复倒计时: ${countdown.value}秒, 过期时间: ${expireTime.value}`
-            );
           }
           state.value = savedState.state;
           if (state.value === "created") {
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:889", "将 created 状态映射为 waiting 状态");
             state.value = "waiting";
           }
           inviteCode.value = savedState.inviteCode;
@@ -504,7 +635,6 @@ const _sfc_main = {
           await syncInvitationFromServer(savedState);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:926", "恢复状态失败:", error);
       }
     };
     const syncInvitationFromServer = async (savedState = null) => {
@@ -512,12 +642,10 @@ const _sfc_main = {
         if (!invitationId.value && !inviteCode.value) {
           return;
         }
-        common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:938", "开始从服务器同步邀请信息...");
         let invitationData = null;
         try {
           if (invitationId.value) {
             const response = await utils_api_togetherDrinkApi.getInvitationById(invitationId.value);
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:946", "通过ID获取邀请响应:", response);
             if (response && response.data && response.data.invitation) {
               invitationData = response.data.invitation;
             } else if (response && response.data && response.data.data && response.data.data.invitation) {
@@ -529,7 +657,6 @@ const _sfc_main = {
             } else if (response && response.data) {
               invitationData = response.data;
             } else if (response && response.status === 404) {
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:963", "邀请不存在，可能已被删除");
               state.value = "initial";
               inviteCode.value = "";
               invitationId.value = "";
@@ -540,7 +667,6 @@ const _sfc_main = {
           }
           if (!invitationData && inviteCode.value) {
             const response = await utils_api_togetherDrinkApi.getInvitationByCode(inviteCode.value);
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:977", "通过邀请码获取响应:", response);
             if (response && response.data && response.data.invitation) {
               invitationData = response.data.invitation;
             } else if (response && response.data && response.data.data && response.data.data.invitation) {
@@ -552,7 +678,6 @@ const _sfc_main = {
             } else if (response && response.data) {
               invitationData = response.data;
             } else if (response && response.status === 404) {
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:994", "邀请码无效，可能已过期或被删除");
               state.value = "initial";
               inviteCode.value = "";
               invitationId.value = "";
@@ -562,24 +687,19 @@ const _sfc_main = {
             }
           }
           if (!invitationData) {
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1007", "未能获取到有效的邀请数据");
             if (state.value !== "initial") {
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1010", "将在5秒后重试...");
               setTimeout(() => {
                 syncInvitationFromServer();
               }, 5e3);
             }
             return;
           }
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1018", "获取到邀请数据:", invitationData);
           updateInvitationData(invitationData);
           await updateUsersData(invitationData);
           saveInvitationState();
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:1029", "同步邀请信息失败:", error);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:1032", "整体同步过程异常:", error);
       }
     };
     const updateInvitationData = (invitationData) => {
@@ -593,7 +713,6 @@ const _sfc_main = {
           inviteCode.value = invitationData.inviteCode;
         }
         if (invitationData.status === "cancelled") {
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1053", "检测到邀请已被取消，重置状态");
           utils_uniUtils.toast("邀请已被取消", "none", 1500);
           state.value = "initial";
           inviteCode.value = "";
@@ -606,16 +725,9 @@ const _sfc_main = {
           return;
         }
         if (invitationData.status && invitationData.status !== state.value) {
-          common_vendor.index.__f__(
-            "log",
-            "at pages/together-drink/together-drink.vue:1071",
-            `邀请状态已更新: ${state.value} -> ${invitationData.status}`
-          );
           if (invitationData.status === "created") {
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1077", "将服务器的created状态映射为waiting状态");
             state.value = "waiting";
           } else if (invitationData.status === "joined") {
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1080", "邀请已被加入");
             state.value = "joined";
             const currentUserId = utils_userData.userData.userId;
             const creatorId = invitationData.creatorId;
@@ -630,7 +742,6 @@ const _sfc_main = {
             state.value = invitationData.status;
           }
         } else if (state.value === "initial" && invitationData.status === "joined") {
-          common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1104", "恢复joined状态");
           state.value = "joined";
           setTimeout(() => {
             state.value = "ready";
@@ -655,76 +766,56 @@ const _sfc_main = {
           };
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:1139", "更新邀请基本数据出错:", error);
       }
     };
     const updateUsersData = async (invitationData) => {
       const currentUserId = utils_userData.userData.userId;
       const creatorId = invitationData.creatorId;
       const participantId = invitationData.participantId;
-      common_vendor.index.__f__(
-        "log",
-        "at pages/together-drink/together-drink.vue:1150",
-        "当前用户:",
-        currentUserId,
-        "创建者:",
-        creatorId,
-        "参与者:",
-        participantId
-      );
       if ((state.value === "joined" || state.value === "ready") && participantId) {
-        common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1164", "已加入状态，需要更新参与者信息");
         if (currentUserId === creatorId) {
           try {
             const response = await utils_api_userApi.getUserProfile(participantId);
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1170", "参与者资料响应:", response);
-            let userData = null;
+            let userData2 = null;
             if (response && response.data && typeof response.data === "object") {
-              userData = response.data;
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1180", "从response.data提取参与者数据:", userData);
-              if (userData.data && userData.data.nickname) {
+              userData2 = response.data;
+              if (userData2.data && userData2.data.nickname) {
                 partnerInfo.value = {
                   id: participantId,
-                  nickname: userData.data.nickname || "好友",
-                  avatar: userData.data.avatar || "/static/images/avatar-default.png"
+                  nickname: userData2.data.nickname || "好友",
+                  avatar: userData2.data.avatar || "/static/images/avatar-default.png"
                 };
-              } else if (userData.nickname) {
+              } else if (userData2.nickname) {
                 partnerInfo.value = {
                   id: participantId,
-                  nickname: userData.nickname || "好友",
-                  avatar: userData.avatar || "/static/images/avatar-default.png"
+                  nickname: userData2.nickname || "好友",
+                  avatar: userData2.avatar || "/static/images/avatar-default.png"
                 };
               }
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1201", "已更新伙伴信息(参与者):", partnerInfo.value);
             }
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:1204", "获取参与者信息失败:", error);
           }
         } else if (currentUserId === participantId) {
           try {
             const response = await utils_api_userApi.getUserProfile(creatorId);
-            common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1211", "创建者资料响应:", response);
-            let userData = null;
+            let userData2 = null;
             if (response && response.data && typeof response.data === "object") {
-              userData = response.data;
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1221", "从response.data提取创建者数据:", userData);
-              if (userData.data && userData.data.nickname) {
+              userData2 = response.data;
+              if (userData2.data && userData2.data.nickname) {
                 partnerInfo.value = {
                   id: creatorId,
-                  nickname: userData.data.nickname || "创建者",
-                  avatar: userData.data.avatar || "/static/images/avatar-default.png"
+                  nickname: userData2.data.nickname || "创建者",
+                  avatar: userData2.data.avatar || "/static/images/avatar-default.png"
                 };
-              } else if (userData.nickname) {
+              } else if (userData2.nickname) {
                 partnerInfo.value = {
                   id: creatorId,
-                  nickname: userData.nickname || "创建者",
-                  avatar: userData.avatar || "/static/images/avatar-default.png"
+                  nickname: userData2.nickname || "创建者",
+                  avatar: userData2.avatar || "/static/images/avatar-default.png"
                 };
               }
-              common_vendor.index.__f__("log", "at pages/together-drink/together-drink.vue:1242", "已更新伙伴信息(创建者):", partnerInfo.value);
             }
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:1245", "获取创建者信息失败:", error);
           }
         }
       }
@@ -738,57 +829,102 @@ const _sfc_main = {
         b: common_vendor.t(product.value.name),
         c: common_vendor.t(product.value.description),
         d: common_vendor.t(product.value.price),
-        e: userInfo.value.avatar || "/static/images/avatar.png",
-        f: common_vendor.t(userInfo.value.nickname || "我"),
-        g: state.value === "joined" || state.value === "ready"
-      }, state.value === "joined" || state.value === "ready" ? {
-        h: partnerInfo.value.avatar || "/static/images/avatar.png",
-        i: common_vendor.t(partnerInfo.value.nickname || "好友")
-      } : {}, {
-        j: state.value === "waiting" || state.value === "initial" || state.value === "created"
-      }, state.value === "waiting" || state.value === "initial" || state.value === "created" ? {
+        e: common_vendor.p({
+          type: deliveryType.value === "self" ? "checkbox-filled" : "circle",
+          size: "20",
+          color: deliveryType.value === "self" ? "#1890ff" : "#999"
+        }),
+        f: deliveryType.value === "self" ? 1 : "",
+        g: common_vendor.o(($event) => selectDelivery("self")),
+        h: common_vendor.p({
+          type: deliveryType.value === "delivery" ? "checkbox-filled" : "circle",
+          size: "20",
+          color: deliveryType.value === "delivery" ? "#1890ff" : "#999"
+        }),
+        i: deliveryType.value === "delivery" ? 1 : "",
+        j: common_vendor.o(($event) => selectDelivery("delivery")),
         k: common_vendor.p({
+          type: "location",
+          size: "16",
+          color: "#666"
+        }),
+        l: common_vendor.t(storeAddress.value.name),
+        m: common_vendor.t(storeAddress.value.address),
+        n: storeAddress.value.distance
+      }, storeAddress.value.distance ? {
+        o: common_vendor.t(storeAddress.value.distance)
+      } : {}, {
+        p: deliveryType.value === "delivery"
+      }, deliveryType.value === "delivery" ? common_vendor.e({
+        q: common_vendor.p({
+          type: "home",
+          size: "16",
+          color: "#666"
+        }),
+        r: userAddress.value
+      }, userAddress.value ? {
+        s: common_vendor.t(userAddress.value.address),
+        t: common_vendor.t(userAddress.value.name),
+        v: common_vendor.t(userAddress.value.phone)
+      } : {
+        w: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#999"
+        }),
+        x: common_vendor.o(selectAddress)
+      }) : {}, {
+        y: userInfo.value.avatar || "/static/images/avatar.png",
+        z: common_vendor.t(userInfo.value.nickname || "我"),
+        A: state.value === "joined" || state.value === "ready"
+      }, state.value === "joined" || state.value === "ready" ? {
+        B: partnerInfo.value.avatar || "/static/images/avatar.png",
+        C: common_vendor.t(partnerInfo.value.nickname || "好友")
+      } : {}, {
+        D: state.value === "waiting" || state.value === "initial" || state.value === "created"
+      }, state.value === "waiting" || state.value === "initial" || state.value === "created" ? {
+        E: common_vendor.p({
           type: "contact",
           size: "30",
           color: "#CCCCCC"
         })
       } : {}, {
-        l: state.value === "initial"
+        F: state.value === "initial"
       }, state.value === "initial" ? {
-        m: common_vendor.o(generateInviteCode),
-        n: common_vendor.o([($event) => inputCode.value = $event.detail.value, formatInviteCode]),
-        o: inputCode.value,
-        p: common_vendor.o(joinByCode),
-        q: !inputCode.value || inputCode.value.length < 8
+        G: common_vendor.o(generateInviteCode),
+        H: common_vendor.o([($event) => inputCode.value = $event.detail.value, formatInviteCode]),
+        I: inputCode.value,
+        J: common_vendor.o(joinByCode),
+        K: !inputCode.value || inputCode.value.length < 8
       } : {}, {
-        r: state.value === "waiting" || state.value === "created"
+        L: state.value === "waiting" || state.value === "created"
       }, state.value === "waiting" || state.value === "created" ? {
-        s: common_vendor.t(inviteCode.value),
-        t: common_vendor.o(copyInviteCode),
-        v: common_vendor.t(formatCountdown.value),
-        w: common_vendor.p({
+        M: common_vendor.t(inviteCode.value),
+        N: common_vendor.o(copyInviteCode),
+        O: common_vendor.t(formatCountdown.value),
+        P: common_vendor.p({
           type: "refresh",
           size: "14",
           color: "#ffffff"
         }),
-        x: common_vendor.o(refreshStatus),
-        y: common_vendor.o(shareInvitation),
-        z: common_vendor.o(cancelInvite)
+        Q: common_vendor.o(refreshStatus),
+        R: common_vendor.o(shareInvitation),
+        S: common_vendor.o(cancelInvite)
       } : {}, {
-        A: state.value === "joined"
+        T: state.value === "joined"
       }, state.value === "joined" ? {
-        B: common_vendor.p({
+        U: common_vendor.p({
           type: "checkbox-filled",
           size: "24",
           color: "#07c160"
         }),
-        C: common_vendor.t(partnerInfo.value.nickname)
+        V: common_vendor.t(partnerInfo.value.nickname)
       } : {}, {
-        D: state.value === "ready"
+        W: state.value === "ready"
       }, state.value === "ready" ? {
-        E: common_vendor.t(totalPrice.value),
-        F: common_vendor.o(payOrder),
-        G: common_vendor.o(cancelInvite)
+        X: common_vendor.t(totalPrice.value),
+        Y: common_vendor.o(payOrder),
+        Z: common_vendor.o(cancelInvite)
       } : {});
     };
   }

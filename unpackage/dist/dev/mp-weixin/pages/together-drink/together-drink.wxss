@@ -62,6 +62,139 @@
   color: #ff4d4f;
   font-weight: bold;
 }
+.together-drink-container .delivery-area {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+.together-drink-container .delivery-area .delivery-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+.together-drink-container .delivery-area .delivery-options {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+}
+.together-drink-container .delivery-area .delivery-options .delivery-option {
+  display: flex;
+  align-items: center;
+  width: 45%;
+  height: 80rpx;
+  padding: 0 20rpx;
+  border-radius: 8rpx;
+  background-color: #f5f5f5;
+  border: 2rpx solid transparent;
+}
+.together-drink-container .delivery-area .delivery-options .delivery-option uni-icons {
+  margin-right: 20rpx;
+}
+.together-drink-container .delivery-area .delivery-options .delivery-option text {
+  font-size: 28rpx;
+  color: #333;
+}
+.together-drink-container .delivery-area .delivery-options .delivery-option.active {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+.together-drink-container .delivery-area .delivery-options .delivery-option.active text {
+  color: #1890ff;
+  font-weight: bold;
+}
+.together-drink-container .delivery-area .address-info {
+  margin-top: 20rpx;
+}
+.together-drink-container .delivery-area .address-info .store-address {
+  margin-bottom: 20rpx;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  background-color: #f8f8f8;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-label uni-icons {
+  margin-right: 10rpx;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-label text {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-content {
+  margin-left: 30rpx;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-content .store-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-content .store-full-address {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 6rpx;
+  line-height: 1.4;
+}
+.together-drink-container .delivery-area .address-info .store-address .address-content .store-distance {
+  font-size: 24rpx;
+  color: #999;
+}
+.together-drink-container .delivery-area .address-info .user-address {
+  margin-top: 20rpx;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  background-color: #f8f8f8;
+}
+.together-drink-container .delivery-area .address-info .user-address .address-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+.together-drink-container .delivery-area .address-info .user-address .address-label uni-icons {
+  margin-right: 10rpx;
+}
+.together-drink-container .delivery-area .address-info .user-address .address-label text {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+.together-drink-container .delivery-area .address-info .user-address .address-content {
+  margin-left: 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.4;
+}
+.together-drink-container .delivery-area .address-info .user-address .address-content .address-detail {
+  margin-top: 10rpx;
+  display: flex;
+  justify-content: space-between;
+}
+.together-drink-container .delivery-area .address-info .user-address .address-content .address-detail text {
+  font-size: 26rpx;
+  color: #666;
+}
+.together-drink-container .delivery-area .address-info .user-address .no-address {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  border: 1rpx dashed #ddd;
+  border-radius: 8rpx;
+  margin: 20rpx 0 10rpx;
+  background-color: #fff;
+}
+.together-drink-container .delivery-area .address-info .user-address .no-address text {
+  font-size: 28rpx;
+  color: #1890ff;
+}
+.together-drink-container .delivery-area .address-info .user-address .no-address uni-icons {
+  margin-left: 10rpx;
+}
 .together-drink-container .participants-area {
   background-color: #fff;
   border-radius: 12rpx;
@@ -135,6 +268,7 @@
   height: 80rpx;
   line-height: 80rpx;
   font-size: 30rpx;
+  margin-top: 30rpx;
 }
 .together-drink-container .action-area .initial-actions .action-button.primary {
   background-color: #1890ff;
@@ -222,7 +356,6 @@
 .together-drink-container .action-area .waiting-actions .action-buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: 20rpx;
 }
 .together-drink-container .action-area .waiting-actions .action-buttons .action-button {
   width: 48%;
@@ -298,4 +431,7 @@
   line-height: 1.6;
   padding: 10rpx 0;
   display: block;
+}
+.action-button.cancel {
+  margin-top: 20rpx;
 }

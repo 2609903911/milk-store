@@ -14,6 +14,100 @@
             </view>
         </view>
 
+        <!-- 配送方式选择区域 -->
+        <view class="delivery-area">
+            <view class="delivery-title">配送方式</view>
+            <view class="delivery-options">
+                <view
+                    class="delivery-option"
+                    :class="{ active: deliveryType === 'self' }"
+                    @tap="selectDelivery('self')"
+                >
+                    <uni-icons
+                        :type="
+                            deliveryType === 'self'
+                                ? 'checkbox-filled'
+                                : 'circle'
+                        "
+                        size="20"
+                        :color="deliveryType === 'self' ? '#1890ff' : '#999'"
+                    ></uni-icons>
+                    <text>门店自取</text>
+                </view>
+                <view
+                    class="delivery-option"
+                    :class="{ active: deliveryType === 'delivery' }"
+                    @tap="selectDelivery('delivery')"
+                >
+                    <uni-icons
+                        :type="
+                            deliveryType === 'delivery'
+                                ? 'checkbox-filled'
+                                : 'circle'
+                        "
+                        size="20"
+                        :color="
+                            deliveryType === 'delivery' ? '#1890ff' : '#999'
+                        "
+                    ></uni-icons>
+                    <text>外卖配送</text>
+                </view>
+            </view>
+
+            <!-- 地址显示区域 -->
+            <view class="address-info">
+                <!-- 门店地址 -->
+                <view class="store-address">
+                    <view class="address-label">
+                        <uni-icons
+                            type="location"
+                            size="16"
+                            color="#666"
+                        ></uni-icons>
+                        <text>门店地址</text>
+                    </view>
+                    <view class="address-content">
+                        <view class="store-name">{{ storeAddress.name }}</view>
+                        <view class="store-full-address">{{
+                            storeAddress.address
+                        }}</view>
+                        <view
+                            class="store-distance"
+                            v-if="storeAddress.distance"
+                            >距离: {{ storeAddress.distance }}</view
+                        >
+                    </view>
+                </view>
+
+                <!-- 外卖配送地址 -->
+                <view class="user-address" v-if="deliveryType === 'delivery'">
+                    <view class="address-label">
+                        <uni-icons
+                            type="home"
+                            size="16"
+                            color="#666"
+                        ></uni-icons>
+                        <text>配送地址</text>
+                    </view>
+                    <view class="address-content" v-if="userAddress">
+                        {{ userAddress.address }}
+                        <view class="address-detail">
+                            <text>{{ userAddress.name }}</text>
+                            <text>{{ userAddress.phone }}</text>
+                        </view>
+                    </view>
+                    <view class="no-address" v-else @tap="selectAddress">
+                        <text>点击选择收货地址</text>
+                        <uni-icons
+                            type="right"
+                            size="16"
+                            color="#999"
+                        ></uni-icons>
+                    </view>
+                </view>
+            </view>
+        </view>
+
         <!-- 参与者信息区 -->
         <view class="participants-area">
             <view class="participant-title">参与者</view>
@@ -248,6 +342,18 @@ const expireTime = ref(null) // 存储过期的绝对时间
 // 保存邀请ID
 const invitationId = ref('')
 
+// 配送方式
+const deliveryType = ref('self')
+
+// 地址信息
+const storeAddress = ref({
+    id: '',
+    name: '',
+    address: '',
+    distance: ''
+})
+const userAddress = ref(null)
+
 // 获取商品信息
 const fetchProductInfo = async (productId = 1) => {
     try {
@@ -264,7 +370,6 @@ const fetchProductInfo = async (productId = 1) => {
             }
         }
     } catch (error) {
-        console.error('获取商品信息失败:', error)
         toast('获取商品信息失败，使用默认商品', 'none', 2000)
     }
 }
@@ -360,15 +465,6 @@ const generateInviteCode = async () => {
             }
         }
     } catch (error) {
-        console.error('创建邀请失败:', error)
-        console.error('错误详情:', error.message, error.stack)
-        if (error.response) {
-            console.error(
-                '服务器响应:',
-                error.response.status,
-                error.response.data
-            )
-        }
         toast('创建邀请失败，请重试', 'none')
     }
 }
@@ -446,7 +542,6 @@ const joinByCode = async () => {
     try {
         // 通过邀请码获取邀请信息
         const response = await getInvitationByCode(inputCode.value)
-        console.log('获取邀请信息响应:', response)
 
         // 处理可能的响应格式
         let invitation = null
@@ -480,8 +575,6 @@ const joinByCode = async () => {
             toast('邀请码无效或已过期', 'none')
             return
         }
-
-        console.log('处理后的邀请信息:', invitation)
 
         // 检查邀请状态
         if (invitation.status) {
@@ -522,8 +615,6 @@ const joinByCode = async () => {
             toast('无法获取邀请ID', 'none')
             return
         }
-
-        console.log('邀请ID:', invitationId.value)
 
         // 获取创建者信息
         if (invitation.creatorInfo) {
@@ -567,26 +658,17 @@ const joinByCode = async () => {
         }
 
         // 调用加入API
-        console.log(
-            '准备加入邀请，invitationId:',
-            invitationId.value,
-            '当前用户ID:',
-            userData.userId
-        )
         const joinData = {
             userId: userData.userId
         }
-        console.log('发送加入请求数据:', joinData)
         try {
             const joinResponse = await joinInvitation(
                 invitationId.value,
                 joinData
             )
-            console.log('加入邀请响应:', joinResponse)
 
             // 检查响应状态
             if (joinResponse.data && joinResponse.data.code === 500) {
-                // 处理特定错误情况
                 toast(
                     joinResponse.data.message || '邀请不存在或已不可加入',
                     'none'
@@ -613,11 +695,9 @@ const joinByCode = async () => {
                 saveInvitationState() // 保存ready状态
             }, 2000)
         } catch (error) {
-            console.error('加入邀请失败:', error)
             toast('加入邀请失败，请检查邀请码是否正确', 'none')
         }
     } catch (error) {
-        console.error('加入邀请失败:', error)
         toast('加入邀请失败，请检查邀请码是否正确', 'none')
     }
 }
@@ -656,10 +736,7 @@ const shareInvitation = () => {
 
     // 同时复制邀请链接到剪贴板
     uni.setClipboardData({
-        data: `邀请码: ${inviteCode.value}`,
-        success: () => {
-            console.log('邀请码已复制到剪贴板')
-        }
+        data: `邀请码: ${inviteCode.value}`
     })
 }
 
@@ -670,7 +747,6 @@ const cancelInvite = async () => {
         toast('正在取消邀请...', 'loading')
 
         // 调用API取消邀请
-        // 注意：这里假设我们已经有了invitationId，实际使用时需要从createInvitation的响应中获取
         if (invitationId.value) {
             await cancelInvitation(invitationId.value, {
                 userId: userData.userId
@@ -688,7 +764,6 @@ const cancelInvite = async () => {
 
         toast('邀请已取消', 'success')
     } catch (error) {
-        console.error('取消邀请失败:', error)
         // 即使API调用失败，也重置前端状态
         state.value = 'initial'
         inviteCode.value = ''
@@ -696,6 +771,251 @@ const cancelInvite = async () => {
         countdown.value = 600
         toast('邀请已取消', 'success')
     }
+}
+
+// 页面加载时
+onMounted(() => {
+    // 初始化用户数据
+    initUserData()
+
+    // 获取默认商品信息（ID为1的奶茶双人套餐）
+    fetchProductInfo(1)
+
+    // 初始化地址信息
+    initAddressInfo()
+
+    // 从URL和本地存储恢复状态
+    restoreInvitationState()
+
+    // 如果有邀请ID或邀请码，立即检查一次状态
+    if (invitationId.value || inviteCode.value) {
+        syncInvitationFromServer()
+    }
+
+    // 设置一个定时器，每30秒刷新一次状态
+    const refreshTimer = setInterval(() => {
+        if (invitationId.value || inviteCode.value) {
+            syncInvitationFromServer()
+        }
+    }, 30000) // 30秒刷新一次
+
+    // 存储定时器引用，以便在组件卸载时清除
+    refreshTimerRef.value = refreshTimer
+})
+
+// 初始化地址信息
+const initAddressInfo = () => {
+    // 从本地存储获取已选择的门店信息
+    try {
+        const storeInfo = uni.getStorageSync('selectedStore')
+        if (storeInfo) {
+            const store =
+                typeof storeInfo === 'string'
+                    ? JSON.parse(storeInfo)
+                    : storeInfo
+            storeAddress.value = {
+                id: store.id || '',
+                name: store.name || '',
+                address: store.address || '',
+                distance: store.distance || ''
+            }
+        } else {
+            // 不设置默认值，保持门店信息为空
+            storeAddress.value = {
+                id: '',
+                name: '',
+                address: '',
+                distance: ''
+            }
+        }
+    } catch (error) {
+        // 不设置默认值，保持门店信息为空
+        storeAddress.value = {
+            id: '',
+            name: '',
+            address: '',
+            distance: ''
+        }
+    }
+
+    // 检查网络状态
+    checkNetworkAndGetAddress()
+}
+
+// 检查网络状态并获取地址
+const checkNetworkAndGetAddress = () => {
+    uni.getNetworkType({
+        success: (res) => {
+            if (res.networkType === 'none') {
+                tryUseLocalAddress()
+            } else {
+                // 如果选择了外卖配送，获取用户默认地址
+                if (deliveryType.value === 'delivery') {
+                    getUserDefaultAddress()
+                }
+            }
+        },
+        fail: () => {
+            // 如果选择了外卖配送，获取用户默认地址
+            if (deliveryType.value === 'delivery') {
+                getUserDefaultAddress()
+            }
+        }
+    })
+}
+
+// 获取用户默认地址
+const getUserDefaultAddress = () => {
+    // 获取用户ID
+    const userId = userData.userId
+
+    if (!userId) {
+        userAddress.value = {
+            address: '请先登录并设置收货地址',
+            name: '',
+            phone: ''
+        }
+        return
+    }
+
+    // 先尝试从本地存储获取缓存的地址
+    try {
+        const cachedAddress = uni.getStorageSync('userDefaultAddress')
+        if (cachedAddress) {
+            const addressObj =
+                typeof cachedAddress === 'string'
+                    ? JSON.parse(cachedAddress)
+                    : cachedAddress
+        }
+    } catch (err) {
+        // 忽略本地缓存错误
+    }
+
+    // 构建请求URL
+    const requestUrl = `http://localhost:8082/api/user/default-address?userId=${userId}`
+
+    // 设置请求超时时间
+    const timeout = setTimeout(() => {
+        tryUseLocalAddress()
+    }, 5000)
+
+    // 从后端获取用户默认地址
+    uni.request({
+        url: requestUrl,
+        method: 'GET',
+        success: (res) => {
+            clearTimeout(timeout)
+
+            if (
+                res.data &&
+                res.data.code === 200 &&
+                res.data.data &&
+                res.data.data.address
+            ) {
+                const addressData = res.data.data.address
+
+                userAddress.value = {
+                    id: addressData.id || '',
+                    name: addressData.name || userData.nickname || '用户',
+                    phone: addressData.phone || userData.phone || '',
+                    address: addressData.address || '请设置默认收货地址'
+                }
+
+                // 缓存到本地存储
+                uni.setStorageSync(
+                    'userDefaultAddress',
+                    JSON.stringify(userAddress.value)
+                )
+            } else {
+                // 尝试使用本地存储的地址
+                if (!tryUseLocalAddress()) {
+                    userAddress.value = {
+                        address: '请设置默认收货地址',
+                        name: userData.nickname || '用户',
+                        phone: userData.phone || ''
+                    }
+                }
+            }
+        },
+        fail: () => {
+            clearTimeout(timeout)
+
+            // 尝试使用本地存储的地址
+            if (!tryUseLocalAddress()) {
+                userAddress.value = {
+                    address: '获取地址失败，请重试',
+                    name: userData.nickname || '用户',
+                    phone: userData.phone || ''
+                }
+            }
+        }
+    })
+}
+
+// 尝试使用本地存储的地址
+const tryUseLocalAddress = () => {
+    try {
+        const cachedAddress = uni.getStorageSync('userDefaultAddress')
+        if (cachedAddress) {
+            const addressObj =
+                typeof cachedAddress === 'string'
+                    ? JSON.parse(cachedAddress)
+                    : cachedAddress
+            userAddress.value = addressObj
+            return true
+        }
+    } catch (err) {
+        // 忽略错误
+    }
+
+    // 假设API请求失败，使用默认模拟数据
+    if (process.env.NODE_ENV === 'development') {
+        userAddress.value = {
+            id: 'mock-address-001',
+            name: userData.nickname || '测试用户',
+            phone: '13800138000',
+            address: '杭州市西湖区西溪路600号古墩路口'
+        }
+        return true
+    }
+
+    return false
+}
+
+// 选择配送方式
+const selectDelivery = (type) => {
+    deliveryType.value = type
+
+    // 如果选择外卖配送，获取用户默认地址
+    if (type === 'delivery') {
+        checkNetworkAndGetAddress()
+    }
+}
+
+// 选择地址
+const selectAddress = () => {
+    // 检查用户是否登录
+    if (!userData.userId) {
+        toast('请先登录后再选择地址', 'none', 2000)
+        setTimeout(() => {
+            uni.navigateTo({
+                url: '/pages/login/login'
+            })
+        }, 1500)
+        return
+    }
+
+    // 跳转到地址选择页面
+    uni.navigateTo({
+        url: '/pages/address/address-list?select=true'
+    })
+
+    // 监听地址选择结果
+    uni.$once('addressSelected', (address) => {
+        if (address) {
+            userAddress.value = address
+        }
+    })
 }
 
 // 支付
@@ -713,16 +1033,33 @@ const payOrder = async () => {
         return
     }
 
+    // 如果选择了外卖配送但未设置地址，提示用户
+    if (deliveryType.value === 'delivery' && !userAddress.value) {
+        toast('请先选择收货地址', 'none')
+        return
+    }
+
     // 显示加载提示
     toast('正在处理支付...', 'loading')
 
     try {
-        // 假设我们已经获取了用户的默认地址，或者可以添加一个选择地址的步骤
-        const orderAddress = '默认配送地址' // 这里应该替换为实际的地址信息
+        // 准备订单地址信息
+        let orderAddress = storeAddress.value.address
+        let deliveryInfo = {
+            type: deliveryType.value,
+            storeAddress: storeAddress.value.address
+        }
+
+        // 如果是外卖配送，添加用户地址
+        if (deliveryType.value === 'delivery') {
+            orderAddress = userAddress.value.address
+            deliveryInfo.userAddress = userAddress.value
+        }
 
         // 调用API完成邀请并创建订单
         const orderResult = await completeInvitation(invitationId.value, {
-            orderAddress: orderAddress
+            orderAddress: orderAddress,
+            deliveryInfo: deliveryInfo
         })
 
         if (orderResult && orderResult.orderId) {
@@ -741,38 +1078,10 @@ const payOrder = async () => {
             toast('订单创建失败，请重试', 'none')
         }
     } catch (error) {
-        console.error('支付处理失败:', error)
+        // 捕获错误但不中断流程
         toast('支付处理失败，请重试', 'none')
     }
 }
-
-// 页面加载时
-onMounted(() => {
-    // 初始化用户数据
-    initUserData()
-
-    // 获取默认商品信息（ID为1的奶茶双人套餐）
-    fetchProductInfo(1)
-
-    // 从URL和本地存储恢复状态
-    restoreInvitationState()
-
-    // 如果有邀请ID或邀请码，立即检查一次状态
-    if (invitationId.value || inviteCode.value) {
-        syncInvitationFromServer()
-    }
-
-    // 设置一个定时器，每30秒刷新一次状态
-    const refreshTimer = setInterval(() => {
-        if (invitationId.value || inviteCode.value) {
-            console.log('定时刷新邀请状态...')
-            syncInvitationFromServer()
-        }
-    }, 30000) // 30秒刷新一次
-
-    // 存储定时器引用，以便在组件卸载时清除
-    refreshTimerRef.value = refreshTimer
-})
 
 // 保存刷新定时器引用
 const refreshTimerRef = ref(null)
@@ -825,7 +1134,6 @@ const saveInvitationState = () => {
         createTime: Date.now() // 记录保存时间
     }
 
-    console.log('保存邀请状态:', stateData)
     uni.setStorageSync('togetherDrinkState', stateData)
 }
 
@@ -845,7 +1153,6 @@ const restoreInvitationState = async () => {
 
         // 如果URL中有邀请码，直接使用
         if (code && code.length === 8) {
-            console.log('从URL参数获取邀请码:', code)
             inputCode.value = code
             // 自动加入
             setTimeout(() => {
@@ -857,8 +1164,6 @@ const restoreInvitationState = async () => {
         // 2. 从本地存储恢复
         const savedState = uni.getStorageSync('togetherDrinkState')
         if (savedState) {
-            console.log('从本地存储恢复状态:', savedState)
-
             // 检查过期时间
             if (savedState.expireTime) {
                 const now = Date.now()
@@ -866,7 +1171,6 @@ const restoreInvitationState = async () => {
 
                 // 如果已经过期，清除状态并返回
                 if (now >= expireTs) {
-                    console.log('邀请已过期，重置状态')
                     uni.removeStorageSync('togetherDrinkState')
                     toast('之前的邀请已过期', 'none', 1500)
                     return
@@ -876,17 +1180,12 @@ const restoreInvitationState = async () => {
                 const remainingMs = expireTs - now
                 countdown.value = Math.floor(remainingMs / 1000)
                 expireTime.value = savedState.expireTime
-
-                console.log(
-                    `恢复倒计时: ${countdown.value}秒, 过期时间: ${expireTime.value}`
-                )
             }
 
             // 恢复基本数据
             state.value = savedState.state
             // 处理后端返回的 created 状态，映射为前端的 waiting 状态
             if (state.value === 'created') {
-                console.log('将 created 状态映射为 waiting 状态')
                 state.value = 'waiting'
             }
             inviteCode.value = savedState.inviteCode
@@ -923,7 +1222,7 @@ const restoreInvitationState = async () => {
             await syncInvitationFromServer(savedState)
         }
     } catch (error) {
-        console.error('恢复状态失败:', error)
+        // 捕获错误但不中断流程
     }
 }
 
@@ -935,7 +1234,6 @@ const syncInvitationFromServer = async (savedState = null) => {
             return
         }
 
-        console.log('开始从服务器同步邀请信息...')
         let invitationData = null
 
         // 1. 获取最新的邀请信息
@@ -943,7 +1241,6 @@ const syncInvitationFromServer = async (savedState = null) => {
             // 优先使用邀请ID获取
             if (invitationId.value) {
                 const response = await getInvitationById(invitationId.value)
-                console.log('通过ID获取邀请响应:', response)
                 if (response && response.data && response.data.invitation) {
                     invitationData = response.data.invitation
                 } else if (
@@ -960,7 +1257,6 @@ const syncInvitationFromServer = async (savedState = null) => {
                 } else if (response && response.data) {
                     invitationData = response.data
                 } else if (response && response.status === 404) {
-                    console.log('邀请不存在，可能已被删除')
                     // 重置状态
                     state.value = 'initial'
                     inviteCode.value = ''
@@ -974,7 +1270,6 @@ const syncInvitationFromServer = async (savedState = null) => {
             // 如果通过ID获取失败，尝试通过邀请码获取
             if (!invitationData && inviteCode.value) {
                 const response = await getInvitationByCode(inviteCode.value)
-                console.log('通过邀请码获取响应:', response)
                 if (response && response.data && response.data.invitation) {
                     invitationData = response.data.invitation
                 } else if (
@@ -991,7 +1286,6 @@ const syncInvitationFromServer = async (savedState = null) => {
                 } else if (response && response.data) {
                     invitationData = response.data
                 } else if (response && response.status === 404) {
-                    console.log('邀请码无效，可能已过期或被删除')
                     // 重置状态
                     state.value = 'initial'
                     inviteCode.value = ''
@@ -1004,18 +1298,14 @@ const syncInvitationFromServer = async (savedState = null) => {
 
             // 没有获取到有效数据，退出
             if (!invitationData) {
-                console.log('未能获取到有效的邀请数据')
                 if (state.value !== 'initial') {
                     // 尝试再次查询，避免网络波动导致的临时失败
-                    console.log('将在5秒后重试...')
                     setTimeout(() => {
                         syncInvitationFromServer()
                     }, 5000)
                 }
                 return
             }
-
-            console.log('获取到邀请数据:', invitationData)
 
             // 2. 更新邀请状态和UI
             updateInvitationData(invitationData)
@@ -1026,10 +1316,10 @@ const syncInvitationFromServer = async (savedState = null) => {
             // 4. 保存最新状态到本地
             saveInvitationState()
         } catch (error) {
-            console.error('同步邀请信息失败:', error)
+            // 捕获错误但继续执行
         }
     } catch (error) {
-        console.error('整体同步过程异常:', error)
+        // 捕获错误但不中断流程
     }
 }
 
@@ -1050,7 +1340,6 @@ const updateInvitationData = (invitationData) => {
 
         // 检查是否已取消
         if (invitationData.status === 'cancelled') {
-            console.log('检测到邀请已被取消，重置状态')
             toast('邀请已被取消', 'none', 1500)
             // 重置到初始状态
             state.value = 'initial'
@@ -1068,16 +1357,10 @@ const updateInvitationData = (invitationData) => {
 
         // 更新状态
         if (invitationData.status && invitationData.status !== state.value) {
-            console.log(
-                `邀请状态已更新: ${state.value} -> ${invitationData.status}`
-            )
-
             // 处理各种状态转换
             if (invitationData.status === 'created') {
-                console.log('将服务器的created状态映射为waiting状态')
                 state.value = 'waiting'
             } else if (invitationData.status === 'joined') {
-                console.log('邀请已被加入')
                 state.value = 'joined'
 
                 // 如果当前用户是创建者，显示提示
@@ -1101,7 +1384,6 @@ const updateInvitationData = (invitationData) => {
             invitationData.status === 'joined'
         ) {
             // 特殊情况：页面刷新时，状态可能已经是joined
-            console.log('恢复joined状态')
             state.value = 'joined'
 
             // 延迟后准备支付
@@ -1136,7 +1418,7 @@ const updateInvitationData = (invitationData) => {
             }
         }
     } catch (error) {
-        console.error('更新邀请基本数据出错:', error)
+        // 捕获错误但不中断流程
     }
 }
 
@@ -1147,27 +1429,15 @@ const updateUsersData = async (invitationData) => {
     const creatorId = invitationData.creatorId
     const participantId = invitationData.participantId
 
-    console.log(
-        '当前用户:',
-        currentUserId,
-        '创建者:',
-        creatorId,
-        '参与者:',
-        participantId
-    )
-
     // 检查状态是否为joined或ready，并且已有参与者ID
     if (
         (state.value === 'joined' || state.value === 'ready') &&
         participantId
     ) {
-        console.log('已加入状态，需要更新参与者信息')
-
         // 如果当前用户是创建者，需要获取参与者信息作为伙伴
         if (currentUserId === creatorId) {
             try {
                 const response = await getUserProfile(participantId)
-                console.log('参与者资料响应:', response)
 
                 // 尝试从各种可能的响应结构中提取用户数据
                 let userData = null
@@ -1177,7 +1447,6 @@ const updateUsersData = async (invitationData) => {
                     typeof response.data === 'object'
                 ) {
                     userData = response.data
-                    console.log('从response.data提取参与者数据:', userData)
 
                     // 设置伙伴信息
                     if (userData.data && userData.data.nickname) {
@@ -1197,18 +1466,15 @@ const updateUsersData = async (invitationData) => {
                                 '/static/images/avatar-default.png'
                         }
                     }
-
-                    console.log('已更新伙伴信息(参与者):', partnerInfo.value)
                 }
             } catch (error) {
-                console.error('获取参与者信息失败:', error)
+                // 捕获错误但继续执行
             }
         }
         // 如果当前用户是参与者，需要获取创建者信息作为伙伴
         else if (currentUserId === participantId) {
             try {
                 const response = await getUserProfile(creatorId)
-                console.log('创建者资料响应:', response)
 
                 // 尝试从各种可能的响应结构中提取用户数据
                 let userData = null
@@ -1218,7 +1484,6 @@ const updateUsersData = async (invitationData) => {
                     typeof response.data === 'object'
                 ) {
                     userData = response.data
-                    console.log('从response.data提取创建者数据:', userData)
 
                     // 设置伙伴信息
                     if (userData.data && userData.data.nickname) {
@@ -1238,11 +1503,9 @@ const updateUsersData = async (invitationData) => {
                                 '/static/images/avatar-default.png'
                         }
                     }
-
-                    console.log('已更新伙伴信息(创建者):', partnerInfo.value)
                 }
             } catch (error) {
-                console.error('获取创建者信息失败:', error)
+                // 捕获错误但继续执行
             }
         }
     }
@@ -1297,6 +1560,169 @@ const refreshStatus = () => {
                 font-size: 36rpx;
                 color: #ff4d4f;
                 font-weight: bold;
+            }
+        }
+    }
+
+    .delivery-area {
+        background-color: #fff;
+        border-radius: 12rpx;
+        padding: 20rpx;
+        margin-bottom: 20rpx;
+
+        .delivery-title {
+            font-size: 32rpx;
+            font-weight: bold;
+            margin-bottom: 20rpx;
+        }
+
+        .delivery-options {
+            display: flex;
+            justify-content: space-around;
+            padding: 20rpx 0;
+
+            .delivery-option {
+                display: flex;
+                align-items: center;
+                width: 45%;
+                height: 80rpx;
+                padding: 0 20rpx;
+                border-radius: 8rpx;
+                background-color: #f5f5f5;
+                border: 2rpx solid transparent;
+
+                uni-icons {
+                    margin-right: 20rpx;
+                }
+
+                text {
+                    font-size: 28rpx;
+                    color: #333;
+                }
+
+                &.active {
+                    background-color: #e6f7ff;
+                    border-color: #1890ff;
+
+                    text {
+                        color: #1890ff;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+
+        // 地址显示区域
+        .address-info {
+            margin-top: 20rpx;
+
+            // 门店地址
+            .store-address {
+                margin-bottom: 20rpx;
+                border-radius: 8rpx;
+                padding: 20rpx;
+                background-color: #f8f8f8;
+
+                .address-label {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 15rpx;
+
+                    uni-icons {
+                        margin-right: 10rpx;
+                    }
+
+                    text {
+                        font-size: 28rpx;
+                        font-weight: bold;
+                        color: #333;
+                    }
+                }
+
+                .address-content {
+                    margin-left: 30rpx;
+
+                    .store-name {
+                        font-size: 30rpx;
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 10rpx;
+                    }
+
+                    .store-full-address {
+                        font-size: 28rpx;
+                        color: #666;
+                        margin-bottom: 6rpx;
+                        line-height: 1.4;
+                    }
+
+                    .store-distance {
+                        font-size: 24rpx;
+                        color: #999;
+                    }
+                }
+            }
+
+            // 外卖配送地址
+            .user-address {
+                margin-top: 20rpx;
+                border-radius: 8rpx;
+                padding: 20rpx;
+                background-color: #f8f8f8;
+
+                .address-label {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 15rpx;
+
+                    uni-icons {
+                        margin-right: 10rpx;
+                    }
+
+                    text {
+                        font-size: 28rpx;
+                        font-weight: bold;
+                        color: #333;
+                    }
+                }
+
+                .address-content {
+                    margin-left: 30rpx;
+                    font-size: 28rpx;
+                    color: #333;
+                    line-height: 1.4;
+
+                    .address-detail {
+                        margin-top: 10rpx;
+                        display: flex;
+                        justify-content: space-between;
+
+                        text {
+                            font-size: 26rpx;
+                            color: #666;
+                        }
+                    }
+                }
+
+                .no-address {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 20rpx;
+                    border: 1rpx dashed #ddd;
+                    border-radius: 8rpx;
+                    margin: 20rpx 0 10rpx;
+                    background-color: #fff;
+
+                    text {
+                        font-size: 28rpx;
+                        color: #1890ff;
+                    }
+
+                    uni-icons {
+                        margin-left: 10rpx;
+                    }
+                }
             }
         }
     }
@@ -1387,6 +1813,7 @@ const refreshStatus = () => {
                 height: 80rpx;
                 line-height: 80rpx;
                 font-size: 30rpx;
+                margin-top: 30rpx;
 
                 &.primary {
                     background-color: #1890ff;
@@ -1492,7 +1919,6 @@ const refreshStatus = () => {
             .action-buttons {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 20rpx;
 
                 .action-button {
                     width: 48%;
@@ -1590,5 +2016,8 @@ const refreshStatus = () => {
             }
         }
     }
+}
+.action-button.cancel {
+    margin-top: 20rpx;
 }
 </style> 
