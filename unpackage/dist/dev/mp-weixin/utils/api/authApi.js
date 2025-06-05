@@ -7,10 +7,8 @@ const saveUserToStorage = (userData, token) => {
     };
     common_vendor.index.setStorageSync("userInfo", userMinimalInfo);
     common_vendor.index.setStorageSync("token", token);
-    common_vendor.index.__f__("log", "at utils/api/authApi.js:62", "用户ID和token已保存到本地存储");
     return true;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/authApi.js:65", "保存用户数据失败:", error);
     return false;
   }
 };
@@ -26,7 +24,6 @@ const getUserFromStorage = () => {
       token
     };
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/authApi.js:85", "获取用户数据失败:", error);
     return null;
   }
 };

@@ -1,0 +1,220 @@
+
+.profile-header {
+  position: relative;
+  width: 100%;
+}
+.header-background {
+  width: 100%;
+  height: 340rpx;
+  overflow: hidden;
+  position: relative;
+}
+.background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+/* 右上角修改背景按钮 */
+.edit-btn-corner {
+  position: absolute;
+  top: 30rpx;
+  right: 30rpx;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 25rpx;
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+  color: #333;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.15);
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
+}
+.edit-btn-corner:active {
+  background-color: rgba(240, 240, 240, 0.95);
+  transform: scale(0.97);
+}
+.user-info {
+  position: relative;
+  padding: 80rpx 30rpx 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  border-top-left-radius: 30rpx;
+  border-top-right-radius: 30rpx;
+}
+.avatar-container {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 80rpx;
+  border: 4rpx solid #fff;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  position: absolute;
+  top: -80rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  background-color: #fff;
+}
+.avatar {
+  width: 100%;
+  height: 100%;
+}
+.user-details {
+  width: 100%;
+  display: flex;
+  margin-top: 20rpx;
+  flex-direction: column;
+  align-items: center;
+}
+.username {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+.signature-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 60rpx;
+  line-height: 1.4;
+}
+.signature {
+  font-size: 26rpx;
+  color: #666;
+  text-align: center;
+}
+.edit-bio-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-left: 10rpx;
+}
+.follow-btn {
+  width: 140rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26rpx;
+  margin-top: 10rpx;
+  transition: all 0.3s;
+  background-color: #1296db;
+  color: #fff;
+  box-shadow: 0 2rpx 6rpx rgba(18, 150, 219, 0.2);
+}
+.follow-btn:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+.followed {
+  background-color: #f5f5f5;
+  color: #666;
+  border: 1rpx solid #eee;
+  box-shadow: none;
+}
+
+/* 编辑资料按钮 */
+.profile-edit-btn {
+  margin-top: 20rpx;
+  padding: 6rpx 24rpx;
+  background-color: #f5f5f5;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  color: #666;
+  border: 1rpx solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-edit-btn:active {
+  background-color: #ebebeb;
+}
+
+/* 编辑简介弹窗 - 黑白主题 */
+.bio-popup-content {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  width: 330px;
+  max-width: 600rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+.bio-popup-header {
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.bio-popup-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #000000;
+  text-align: center;
+  display: block;
+}
+.bio-popup-body {
+  padding: 30rpx;
+}
+.bio-textarea {
+  width: 100%;
+  height: 200rpx;
+  padding: 20rpx;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #333333;
+  background-color: #fafafa;
+  box-sizing: border-box;
+}
+.bio-count {
+  font-size: 24rpx;
+  color: #999999;
+  margin-top: 16rpx;
+  text-align: right;
+  display: block;
+}
+.bio-popup-footer {
+  display: flex;
+  border-top: 1rpx solid #f0f0f0;
+}
+.bio-btn {
+  flex: 1;
+  height: 90rpx;
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 0;
+}
+.bio-btn-cancel {
+  background-color: #ffffff;
+  color: #666666;
+  border-right: 1rpx solid #f0f0f0;
+}
+.bio-btn-confirm {
+  background-color: #000000;
+  color: #ffffff;
+}
+.bio-btn-cancel:active {
+  background-color: #f5f5f5;
+}
+.bio-btn-confirm:active {
+  background-color: #333333;
+}

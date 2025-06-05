@@ -6982,9 +6982,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.220.142,127.0.0.1";
+  const hosts = "198.18.0.1,192.168.254.142,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_Mh_4hS";
+  const id = "mp-weixin_bgd7A6";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -7929,6 +7929,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onBackPress = /* @__PURE__ */ createHook(ON_BACK_PRESS);
+const onPullDownRefresh = /* @__PURE__ */ createHook(ON_PULL_DOWN_REFRESH);
 exports._export_sfc = _export_sfc;
 exports.computed = computed;
 exports.createSSRApp = createSSRApp;
@@ -7941,6 +7942,7 @@ exports.o = o;
 exports.onBackPress = onBackPress;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onPullDownRefresh = onPullDownRefresh;
 exports.onShow = onShow;
 exports.onUnmounted = onUnmounted;
 exports.p = p;
@@ -7952,5 +7954,4 @@ exports.sr = sr;
 exports.t = t;
 exports.unref = unref;
 exports.watch = watch;
-exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

@@ -51,6 +51,8 @@ const API_PATHS = {
   // 更新用户信息
   USER_AVATAR_UPLOAD: "/api/user/upload-avatar",
   // 上传用户头像
+  USER_BACKGROUND_UPLOAD: "/api/user/upload-background",
+  // 上传用户背景图片
   USER_UPDATE_PHONE: "/api/user/update-phone",
   // 更新用户手机号
   USER_DEFAULT_ADDRESS: "/api/user/default-address",

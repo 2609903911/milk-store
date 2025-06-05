@@ -387,7 +387,6 @@ const _sfc_main = {
       } else {
         selectedItemId.value = medal.id;
       }
-      common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:897", "当前选中徽章ID:", selectedItemId.value);
     };
     const handleMedalClick = (medal, type) => {
       selectedMedal.value = medal;
@@ -439,7 +438,6 @@ const _sfc_main = {
           }
         );
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("log", "at pages/order-medal/order-medal.vue:968", "点亮勋章响应:", response);
         if (response && response.data.code === 200) {
           common_vendor.index.showToast({
             title: "徽章点亮成功",
@@ -477,7 +475,6 @@ const _sfc_main = {
         }
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/order-medal/order-medal.vue:1012", "点亮徽章失败:", error);
         common_vendor.index.showToast({
           title: "网络错误，请重试",
           icon: "none"
@@ -491,7 +488,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       var _a2, _b2, _c2;
       return common_vendor.e({
-        a: common_assets._imports_0$7,
+        a: common_assets._imports_0$8,
         b: common_vendor.p({
           type: "left",
           size: "24",

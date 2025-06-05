@@ -1,0 +1,1 @@
+<view class="submit-button-container data-v-da2bc594"><button class="submit-btn data-v-da2bc594" disabled="{{b}}" loading="{{c}}" bindtap="{{d}}">{{a}}</button></view>

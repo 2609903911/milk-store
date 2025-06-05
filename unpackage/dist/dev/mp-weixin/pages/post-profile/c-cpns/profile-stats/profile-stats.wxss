@@ -1,0 +1,32 @@
+
+.profile-stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 30rpx 0;
+  background-color: #fff;
+  margin: 20rpx 0;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.stats-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+.stats-label {
+  font-size: 24rpx;
+  color: #999;
+}
+.stats-divider {
+  width: 1rpx;
+  height: 40rpx;
+  background-color: #eee;
+}

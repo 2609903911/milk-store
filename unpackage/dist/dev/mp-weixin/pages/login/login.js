@@ -67,10 +67,6 @@ const _sfc_main = {
       return true;
     },
     async getVerificationCode() {
-      common_vendor.index.__f__("log", "at pages/login/login.vue:155", "点击获取验证码按钮");
-      common_vendor.index.__f__("log", "at pages/login/login.vue:156", "当前手机号:", this.phone);
-      common_vendor.index.__f__("log", "at pages/login/login.vue:157", "当前isCounting状态:", this.isCounting);
-      common_vendor.index.__f__("log", "at pages/login/login.vue:158", "当前countdown值:", this.countdown);
       if (!this.validatePhone()) {
         return;
       }
@@ -78,20 +74,14 @@ const _sfc_main = {
         common_vendor.index.showLoading({
           title: "发送中..."
         });
-        common_vendor.index.__f__("log", "at pages/login/login.vue:171", "直接测试倒计时功能");
-        setTimeout(() => {
-          this.startCountdown();
-        }, 500);
         const url = `http://localhost:8082/api/auth/code/send?phone=${encodeURIComponent(
           this.phone
         )}&type=login`;
-        common_vendor.index.__f__("log", "at pages/login/login.vue:181", "发送验证码请求:", url);
         common_vendor.index.request({
           url,
           method: "POST",
           success: (res) => {
             var _a;
-            common_vendor.index.__f__("log", "at pages/login/login.vue:188", "验证码响应:", JSON.stringify(res.data));
             common_vendor.index.hideLoading();
             if (res.statusCode >= 200 && res.statusCode < 300) {
               if (res.data.code === 200) {
@@ -99,17 +89,7 @@ const _sfc_main = {
                   title: "验证码已发送",
                   icon: "success"
                 });
-                if (res.data.data && res.data.data.code) {
-                  common_vendor.index.__f__(
-                    "log",
-                    "at pages/login/login.vue:200",
-                    "测试验证码:",
-                    res.data.data.code
-                  );
-                }
-                common_vendor.index.__f__("log", "at pages/login/login.vue:207", "即将调用倒计时方法...");
                 this.startCountdown();
-                common_vendor.index.__f__("log", "at pages/login/login.vue:209", "倒计时方法调用完成");
               } else {
                 common_vendor.index.showToast({
                   title: res.data.message || "验证码发送失败",
@@ -124,7 +104,6 @@ const _sfc_main = {
             }
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/login/login.vue:224", "请求失败:", err);
             common_vendor.index.hideLoading();
             common_vendor.index.showToast({
               title: "网络错误，请稍后重试",
@@ -142,14 +121,8 @@ const _sfc_main = {
     },
     startCountdown() {
       this.$nextTick(() => {
-        common_vendor.index.__f__("log", "at pages/login/login.vue:244", "开始倒计时...");
-        if (this.timer) {
-          clearInterval(this.timer);
-          this.timer = null;
-        }
         this.isCounting = true;
         this.countdown = 60;
-        common_vendor.index.__f__("log", "at pages/login/login.vue:254", "设置状态完成:", this.isCounting, this.countdown);
         this.timer = setInterval(() => {
           if (this.countdown > 0) {
             this.countdown -= 1;
@@ -158,7 +131,6 @@ const _sfc_main = {
               clearInterval(this.timer);
               this.timer = null;
               this.isCounting = false;
-              common_vendor.index.__f__("log", "at pages/login/login.vue:265", "倒计时结束，状态重置");
             }
           }
         }, 1e3);
@@ -175,7 +147,6 @@ const _sfc_main = {
         const url = `http://localhost:8082/api/auth/login/code?phone=${encodeURIComponent(
           this.phone
         )}&code=${encodeURIComponent(this.code)}`;
-        common_vendor.index.__f__("log", "at pages/login/login.vue:292", "发送登录请求:", url);
         common_vendor.index.request({
           url,
           method: "POST",
@@ -192,15 +163,12 @@ const _sfc_main = {
                   title: "登录成功",
                   icon: "success"
                 });
-                common_vendor.index.__f__("log", "at pages/login/login.vue:320", "1.5秒后跳转到首页...");
                 setTimeout(() => {
                   common_vendor.index.switchTab({
                     url: "/pages/home/home",
                     success: function() {
-                      common_vendor.index.__f__("log", "at pages/login/login.vue:325", "跳转成功");
                     },
                     fail: function(err) {
-                      common_vendor.index.__f__("error", "at pages/login/login.vue:328", "跳转失败:", err);
                       common_vendor.index.reLaunch({
                         url: "/pages/home/home"
                       });
@@ -221,7 +189,6 @@ const _sfc_main = {
             }
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/login/login.vue:351", "请求失败:", err);
             common_vendor.index.hideLoading();
             common_vendor.index.showToast({
               title: "网络错误，请稍后重试",
@@ -255,10 +222,8 @@ const _sfc_main = {
       common_vendor.index.switchTab({
         url: "/pages/home/home",
         success: function() {
-          common_vendor.index.__f__("log", "at pages/login/login.vue:390", "跳转成功");
         },
         fail: function(err) {
-          common_vendor.index.__f__("error", "at pages/login/login.vue:393", "跳转失败:", err);
           common_vendor.index.reLaunch({
             url: "/pages/home/home"
           });

@@ -1,5 +1,4 @@
 "use strict";
-const common_vendor = require("../common/vendor.js");
 require("./userState.js");
 const getAIConfig = () => {
   return {
@@ -17,17 +16,15 @@ const getAIRequestConfig = async () => {
     method: "POST",
     header: {
       "Content-Type": "application/json",
-      "Accept": "application/json"
+      Accept: "application/json"
     },
     timeout: 3e4,
     // 设置30秒超时
     withCredentials: true,
     success: (res) => {
-      common_vendor.index.__f__("log", "at utils/aiConfigService.js:37", "请求成功:", res);
       return res;
     },
     fail: (err) => {
-      common_vendor.index.__f__("error", "at utils/aiConfigService.js:41", "请求失败:", err);
       throw err;
     }
   };

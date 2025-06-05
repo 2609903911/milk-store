@@ -132,7 +132,6 @@ const _sfc_main = {
             loadingText: "提交中..."
           }
         );
-        common_vendor.index.__f__("log", "at pages/components/phone-update.vue:248", response);
         if (response && (response.code === 200 || response.data && response.data.code === 200)) {
           common_vendor.index.showToast({
             title: "手机号修改成功",

@@ -6,21 +6,27 @@
         <id property="userId" column="user_id"/>
         <result property="nickname" column="nickname"/>
         <result property="avatar" column="avatar"/>
+        <result property="backgroundImage" column="background_image"/>
         <result property="phone" column="phone"/>
         <result property="gender" column="gender"/>
+        <result property="bio" column="bio"/>
         <result property="birthday" column="birthday"/>
         <result property="pandaCoins" column="panda_coins"/>
         <result property="lightningStars" column="lightning_stars"/>
         <result property="memberLevel" column="member_level"/>
         <result property="createTime" column="create_time"/>
         <result property="lastLoginTime" column="last_login_time"/>
+        <result property="followingCount" column="following_count"/>
+        <result property="followersCount" column="followers_count"/>
+        <result property="likesReceivedCount" column="likes_received_count"/>
     </resultMap>
 
     <!-- 根据用户ID查询用户信息 -->
     <select id="findById" resultMap="UserResultMap">
         SELECT 
-            user_id, nickname, avatar, phone, gender, birthday, 
-            panda_coins, lightning_stars, member_level, create_time, last_login_time
+            user_id, nickname, avatar, background_image, phone, gender, bio, birthday, 
+            panda_coins, lightning_stars, member_level, create_time, last_login_time, 
+            following_count, followers_count, likes_received_count
         FROM 
             users
         WHERE 
@@ -30,8 +36,9 @@
     <!-- 根据手机号查询用户信息 -->
     <select id="findByPhone" resultMap="UserResultMap">
         SELECT 
-            user_id, nickname, avatar, phone, gender, birthday, 
-            panda_coins, lightning_stars, member_level, create_time, last_login_time
+            user_id, nickname, avatar, background_image, phone, gender, bio, birthday, 
+            panda_coins, lightning_stars, member_level, create_time, last_login_time, 
+            following_count, followers_count, likes_received_count
         FROM 
             users
         WHERE 
@@ -41,11 +48,13 @@
     <!-- 新增用户 -->
     <insert id="insert" parameterType="com.milkstore.entity.User">
         INSERT INTO users (
-            user_id, nickname, avatar, phone, gender, 
-            panda_coins, lightning_stars, member_level
+            user_id, nickname, avatar, background_image, phone, gender, bio,
+            panda_coins, lightning_stars, member_level, following_count, 
+            followers_count, likes_received_count
         ) VALUES (
-            #{userId}, #{nickname}, #{avatar}, #{phone}, #{gender}, 
-            #{pandaCoins}, #{lightningStars}, #{memberLevel}
+            #{userId}, #{nickname}, #{avatar}, #{backgroundImage}, #{phone}, #{gender}, #{bio},
+            #{pandaCoins}, #{lightningStars}, #{memberLevel}, #{followingCount}, 
+            #{followersCount}, #{likesReceivedCount}
         )
     </insert>
     
@@ -55,7 +64,9 @@
         SET 
             nickname = #{nickname},
             avatar = #{avatar},
+            background_image = #{backgroundImage},
             gender = #{gender},
+            bio = #{bio},
             birthday = #{birthday}
         WHERE 
             user_id = #{userId}

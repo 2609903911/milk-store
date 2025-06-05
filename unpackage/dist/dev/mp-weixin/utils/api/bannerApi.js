@@ -1,5 +1,4 @@
 "use strict";
-const common_vendor = require("../../common/vendor.js");
 const utils_api_request = require("./request.js");
 const utils_api_config = require("./config.js");
 const fetchBanners = async () => {
@@ -19,7 +18,6 @@ const fetchBanners = async () => {
       throw new Error(response.message || "获取轮播图数据失败");
     }
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/api/bannerApi.js:28", "获取轮播图数据失败:", error);
     throw error;
   }
 };

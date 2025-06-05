@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "发布帖子",
+  "navigationStyle": "default",
+  "usingComponents": {
+    "title-input": "./c-cpns/title-input/title-input",
+    "content-input": "./c-cpns/content-input/content-input",
+    "image-uploader": "./c-cpns/image-uploader/image-uploader",
+    "product-selector": "./c-cpns/product-selector/product-selector",
+    "submit-button": "./c-cpns/submit-button/submit-button"
+  }
+}

@@ -1,5 +1,4 @@
 "use strict";
-const common_vendor = require("../common/vendor.js");
 const mockApi = {
   /**
    * 创建订单
@@ -28,7 +27,6 @@ const mockApi = {
       updateTime: Date.now()
     };
     this.saveOrderToStorage(order);
-    common_vendor.index.__f__("log", "at utils/mockApi.js:38", "Mock API - 创建订单成功:", order);
     return order;
   },
   /**
@@ -40,7 +38,6 @@ const mockApi = {
     const allOrders = this.getAllOrdersFromStorage();
     const userOrders = allOrders.filter((order) => order.userId === userId);
     userOrders.sort((a, b) => b.createTime - a.createTime);
-    common_vendor.index.__f__("log", "at utils/mockApi.js:57", "Mock API - 获取用户订单:", userOrders.length, "条记录");
     return userOrders;
   },
   /**
@@ -51,7 +48,6 @@ const mockApi = {
   getOrderById(orderId) {
     const allOrders = this.getAllOrdersFromStorage();
     const order = allOrders.find((order2) => order2.orderId === orderId);
-    common_vendor.index.__f__("log", "at utils/mockApi.js:73", "Mock API - 获取订单详情:", order ? "成功" : "未找到");
     return order || null;
   },
   /**
@@ -61,15 +57,15 @@ const mockApi = {
    */
   cancelOrder(orderId) {
     const allOrders = this.getAllOrdersFromStorage();
-    const orderIndex = allOrders.findIndex((order) => order.orderId === orderId);
+    const orderIndex = allOrders.findIndex(
+      (order) => order.orderId === orderId
+    );
     if (orderIndex !== -1) {
       allOrders[orderIndex].orderStatus = "cancelled";
       allOrders[orderIndex].updateTime = Date.now();
       this.saveAllOrdersToStorage(allOrders);
-      common_vendor.index.__f__("log", "at utils/mockApi.js:97", "Mock API - 取消订单成功:", orderId);
       return true;
     }
-    common_vendor.index.__f__("log", "at utils/mockApi.js:101", "Mock API - 取消订单失败: 订单不存在", orderId);
     return false;
   },
   /**
@@ -79,14 +75,14 @@ const mockApi = {
    */
   deleteOrder(orderId) {
     const allOrders = this.getAllOrdersFromStorage();
-    const orderIndex = allOrders.findIndex((order) => order.orderId === orderId);
+    const orderIndex = allOrders.findIndex(
+      (order) => order.orderId === orderId
+    );
     if (orderIndex !== -1) {
       allOrders.splice(orderIndex, 1);
       this.saveAllOrdersToStorage(allOrders);
-      common_vendor.index.__f__("log", "at utils/mockApi.js:124", "Mock API - 删除订单成功:", orderId);
       return true;
     }
-    common_vendor.index.__f__("log", "at utils/mockApi.js:128", "Mock API - 删除订单失败: 订单不存在", orderId);
     return false;
   },
   /**
@@ -107,7 +103,6 @@ const mockApi = {
       const ordersStr = localStorage.getItem("milkstore_orders");
       return ordersStr ? JSON.parse(ordersStr) : [];
     } catch (error) {
-      common_vendor.index.__f__("error", "at utils/mockApi.js:156", "解析订单数据失败:", error);
       return [];
     }
   },
@@ -119,7 +114,6 @@ const mockApi = {
     try {
       localStorage.setItem("milkstore_orders", JSON.stringify(orders));
     } catch (error) {
-      common_vendor.index.__f__("error", "at utils/mockApi.js:169", "保存订单数据失败:", error);
     }
   },
   /**
@@ -129,16 +123,16 @@ const mockApi = {
    */
   payOrder(orderId) {
     const allOrders = this.getAllOrdersFromStorage();
-    const orderIndex = allOrders.findIndex((order) => order.orderId === orderId);
+    const orderIndex = allOrders.findIndex(
+      (order) => order.orderId === orderId
+    );
     if (orderIndex !== -1) {
       allOrders[orderIndex].orderStatus = "paid";
       allOrders[orderIndex].updateTime = Date.now();
       allOrders[orderIndex].payTime = Date.now();
       this.saveAllOrdersToStorage(allOrders);
-      common_vendor.index.__f__("log", "at utils/mockApi.js:194", "Mock API - 支付订单成功:", orderId);
       return true;
     }
-    common_vendor.index.__f__("log", "at utils/mockApi.js:198", "Mock API - 支付订单失败: 订单不存在", orderId);
     return false;
   },
   /**
@@ -148,16 +142,16 @@ const mockApi = {
    */
   completeOrder(orderId) {
     const allOrders = this.getAllOrdersFromStorage();
-    const orderIndex = allOrders.findIndex((order) => order.orderId === orderId);
+    const orderIndex = allOrders.findIndex(
+      (order) => order.orderId === orderId
+    );
     if (orderIndex !== -1) {
       allOrders[orderIndex].orderStatus = "completed";
       allOrders[orderIndex].updateTime = Date.now();
       allOrders[orderIndex].completeTime = Date.now();
       this.saveAllOrdersToStorage(allOrders);
-      common_vendor.index.__f__("log", "at utils/mockApi.js:223", "Mock API - 完成订单成功:", orderId);
       return true;
     }
-    common_vendor.index.__f__("log", "at utils/mockApi.js:227", "Mock API - 完成订单失败: 订单不存在", orderId);
     return false;
   }
 };

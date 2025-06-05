@@ -1,6 +1,8 @@
 {
   "navigationBarTitleText": "一起喝",
   "navigationStyle": "default",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
   "usingComponents": {
     "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
   }

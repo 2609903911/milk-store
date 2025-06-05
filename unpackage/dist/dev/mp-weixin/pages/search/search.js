@@ -38,7 +38,6 @@ const _sfc_main = {
         const results = await utils_api_productApi.searchProductsByName(searchText.value);
         searchResults.value = results;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/search/search.vue:148", "搜索产品失败:", error);
         common_vendor.index.showToast({
           title: "搜索失败，请重试",
           icon: "none"
@@ -78,12 +77,6 @@ const _sfc_main = {
     };
     const handleAddToCart = (orderItem) => {
       if (!orderItem) {
-        common_vendor.index.__f__(
-          "log",
-          "at pages/search/search.vue:201",
-          "接收到空订单项，将使用selectedProduct创建购物车项",
-          selectedProduct.value
-        );
         const standardizedItem = {
           id: selectedProduct.value.id,
           name: selectedProduct.value.name || "",
@@ -125,7 +118,6 @@ const _sfc_main = {
         });
         return;
       }
-      common_vendor.index.__f__("log", "at pages/search/search.vue:276", "接收到完整的orderItem:", orderItem);
       common_vendor.index.showToast({
         title: "已加入购物车",
         icon: "success"
@@ -163,7 +155,7 @@ const _sfc_main = {
       }, hasSearched.value ? common_vendor.e({
         j: searchResults.value.length === 0 && !isLoading.value
       }, searchResults.value.length === 0 && !isLoading.value ? {
-        k: common_assets._imports_0$10
+        k: common_assets._imports_0$11
       } : {}, {
         l: isLoading.value
       }, isLoading.value ? {} : {}, {

@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 确保不忽略Railway配置文件
+!Procfile
+!system.properties

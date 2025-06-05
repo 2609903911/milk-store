@@ -1,0 +1,1 @@
+<view class="title-input-container data-v-795d44c1"><view class="title-label data-v-795d44c1">标题</view><input class="title-field data-v-795d44c1" type="text" placeholder="请输入帖子标题" maxlength="50" bindinput="{{a}}" value="{{b}}"/><view class="title-counter data-v-795d44c1">{{c}}/50</view></view>

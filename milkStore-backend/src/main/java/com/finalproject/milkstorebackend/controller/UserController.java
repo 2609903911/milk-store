@@ -69,14 +69,19 @@ public class UserController {
             userData.put("userId", user.getUserId());
             userData.put("nickname", user.getNickname());
             userData.put("avatar", user.getAvatar());
+            userData.put("backgroundImage", user.getBackgroundImage());
             userData.put("phone", user.getPhone());
             userData.put("gender", user.getGender());
+            userData.put("bio", user.getBio());
             userData.put("birthday", user.getBirthday());
             userData.put("pandaCoins", user.getPandaCoins());
             userData.put("lightningStars", user.getLightningStars());
             userData.put("memberLevel", user.getMemberLevel());
             userData.put("createTime", user.getCreateTime());
             userData.put("lastLoginTime", user.getLastLoginTime());
+            userData.put("followingCount", user.getFollowingCount());
+            userData.put("followersCount", user.getFollowersCount());
+            userData.put("likesReceivedCount", user.getLikesReceivedCount());
             userData.put("medals", medals);
             userData.put("coupons", userCoupons);
             userData.put("addresses", new ArrayList<>()); // 暂时返回空地址列表

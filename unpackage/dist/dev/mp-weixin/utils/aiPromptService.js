@@ -1,5 +1,4 @@
 "use strict";
-const common_vendor = require("../common/vendor.js");
 const utils_userState = require("./userState.js");
 const utils_productService = require("./productService.js");
 const generateSystemPrompt = async () => {
@@ -21,7 +20,6 @@ const generateSystemPrompt = async () => {
       });
     }
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/aiPromptService.js:36", "获取产品数据失败:", error);
     productsInfo = [];
   }
   let prompt = `你是熊猫奶茶店的AI助手，负责回答用户关于奶茶产品、优惠活动、门店信息等问题。

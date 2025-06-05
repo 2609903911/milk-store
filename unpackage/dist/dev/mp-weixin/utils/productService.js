@@ -1,5 +1,5 @@
 "use strict";
-const common_vendor = require("../common/vendor.js");
+require("../common/vendor.js");
 require("./userState.js");
 const utils_api_productApi = require("./api/productApi.js");
 const utils_api_categoryApi = require("./api/categoryApi.js");
@@ -23,7 +23,6 @@ const getProductData = async () => {
     );
     return result;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/productService.js:40", "获取产品数据失败:", error);
     throw error;
   }
 };

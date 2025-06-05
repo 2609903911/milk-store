@@ -1,0 +1,1 @@
+<view class="profile-tabs"><view class="{{['tab-item', b && 'active']}}" bindtap="{{c}}"><text>发布</text><view wx:if="{{a}}" class="tab-indicator"></view></view><view class="{{['tab-item', e && 'active']}}" bindtap="{{f}}"><text>喜欢</text><view wx:if="{{d}}" class="tab-indicator"></view></view></view>

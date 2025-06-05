@@ -144,7 +144,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$6,
+        a: common_assets._imports_0$7,
         b: common_vendor.p({
           type: "left",
           size: "24",
@@ -152,7 +152,7 @@ const _sfc_main = {
         }),
         c: common_vendor.o(goBack),
         d: common_vendor.t(getStatusText(orderStatus.value)),
-        e: common_assets._imports_1$3,
+        e: common_assets._imports_1$4,
         f: common_vendor.o(navigateToPandaStore),
         g: common_vendor.o(reorderItems),
         h: common_vendor.t(storeName.value),

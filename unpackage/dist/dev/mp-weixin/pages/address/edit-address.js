@@ -98,7 +98,6 @@ const _sfc_main = {
         const result = await utils_api_request.get(`/api/user/address/${addressId.value}`, {
           userId: utils_userState.userState.userId
         });
-        common_vendor.index.__f__("log", "at pages/address/edit-address.vue:214", "获取到的地址详情:", result);
         if (result.code === 200 && result.data) {
           formData.value = {
             contactName: result.data.contactName,
@@ -114,7 +113,6 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/address/edit-address.vue:232", "获取地址详情失败:", error);
         common_vendor.index.showToast({
           title: "获取地址详情失败，请重试",
           icon: "none"
@@ -163,14 +161,10 @@ const _sfc_main = {
         };
         let result;
         if (isEdit.value) {
-          result = await utils_api_request.put(
-            `/api/user/address/${addressId.value}`,
-            submitData
-          );
+          result = await utils_api_request.put(`/api/user/address/${addressId.value}`, submitData);
         } else {
           result = await utils_api_request.post("/api/user/address", submitData);
         }
-        common_vendor.index.__f__("log", "at pages/address/edit-address.vue:311", "保存地址结果:", result);
         safeHideLoading();
         if (result.code === 200) {
           common_vendor.index.showToast({
@@ -189,7 +183,6 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/address/edit-address.vue:333", "保存地址失败:", error);
         safeHideLoading();
         common_vendor.index.showToast({
           title: "保存失败，请重试",
@@ -209,7 +202,6 @@ const _sfc_main = {
                 url: `/api/user/address/${addressId.value}?userId=${utils_userState.userState.userId}`,
                 method: "DELETE"
               });
-              common_vendor.index.__f__("log", "at pages/address/edit-address.vue:359", "删除地址结果:", result);
               safeHideLoading();
               if (result.code === 200) {
                 common_vendor.index.showToast({
@@ -228,7 +220,6 @@ const _sfc_main = {
                 });
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/address/edit-address.vue:381", "删除地址失败:", error);
               safeHideLoading();
               common_vendor.index.showToast({
                 title: "删除失败，请重试",

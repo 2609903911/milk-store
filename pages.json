@@ -1,183 +1,221 @@
 {
-    "pages" : [
-        {
-            "path" : "pages/login/login",
-            "style" : {
-                "navigationBarTitleText" : "授权登录",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/home/home",
-            "style" : {
-                "navigationBarTitleText" : "首页",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/order/order",
-            "style" : {
-                "navigationBarTitleText" : "",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/my-orders/my-orders",
-            "style" : {
-                "navigationBarTitleText" : "订单"
-            }
-        },
-        {
-            "path" : "pages/profile/profile",
-            "style" : {
-                "navigationBarTitleText" : "我的",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/order-confirm/order-confirm",
-            "style" : {
-                "navigationBarTitleText" : "确认订单"
-            }
-        },
-        {
-            "path" : "pages/map/map",
-            "style" : {
-                "navigationBarTitleText" : "选择门店"
-            }
-        },
-        {
-            "path" : "pages/map-city/map-city",
-            "style" : {
-                "navigationBarTitleText" : "选择城市"
-            }
-        },
-        {
-            "path" : "pages/order-detail/order-detail",
-            "style" : {
-                "navigationBarTitleText" : "订单详情",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/order-medal/order-medal",
-            "style" : {
-                "navigationBarTitleText" : "勋章墙",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/coupons/coupons",
-            "style" : {
-                "navigationBarTitleText" : "我的优惠券"
-            }
-        },
-        {
-            "path" : "pages/panda-store/panda-store",
-            "style" : {
-                "navigationBarTitleText" : "熊猫币商城",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/personal-data/personal-data",
-            "style" : {
-                "navigationBarTitleText" : "个人资料"
-            }
-        },
-        {
-            "path" : "pages/search/search",
-            "style" : {
-                "navigationBarTitleText" : "搜索"
-            }
-        },
-        {
-            "path" : "pages/ai-chat/index",
-            "style" : {
-                "navigationBarTitleText" : "胖达管家"
-            }
-        },
-        {
-            "path" : "pages/agreement/user-agreement",
-            "style" : {
-                "navigationBarTitleText" : "用户协议",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/agreement/privacy-policy",
-            "style" : {
-                "navigationBarTitleText" : "隐私政策",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/address/address",
-            "style" : {
-                "navigationBarTitleText" : "收货地址",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/address/edit-address",
-            "style" : {
-                "navigationBarTitleText" : "编辑地址",
-                "navigationStyle" : "custom"
-            }
-        },
-        {
-            "path" : "pages/together-drink/together-drink",
-            "style" : {
-                "navigationBarTitleText" : "一起喝",
-                "navigationStyle" : "default"
-            }
-        }
-    ],
-    "globalStyle" : {
-        "navigationBarTextStyle" : "black",
-        "navigationBarTitleText" : "奶茶店",
-        "navigationBarBackgroundColor" : "#F8F8F8",
-        "backgroundColor" : "#F8F8F8"
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "授权登录",
+        "navigationStyle": "custom"
+      }
     },
-    "tabBar" : {
-        "color" : "#7A7E83",
-        "selectedColor" : "#1296db",
-        "borderStyle" : "black",
-        "backgroundColor" : "#ffffff",
-        "list" : [
-            {
-                "pagePath" : "pages/home/home",
-                "iconPath" : "/static/tabbar/home.png",
-                "selectedIconPath" : "/static/tabbar/home-active.png",
-                "text" : "首页"
-            },
-            {
-                "pagePath" : "pages/order/order",
-                "iconPath" : "/static/tabbar/order.png",
-                "selectedIconPath" : "/static/tabbar/order-active.png",
-                "text" : "点单"
-            },
-            {
-                "pagePath" : "pages/my-orders/my-orders",
-                "iconPath" : "/static/tabbar/my-orders.png",
-                "selectedIconPath" : "/static/tabbar/my-orders-active.png",
-                "text" : "订单"
-            },
-            {
-                "pagePath" : "pages/profile/profile",
-                "iconPath" : "/static/tabbar/profile.png",
-                "selectedIconPath" : "/static/tabbar/profile-active.png",
-                "text" : "我的"
-            }
-        ]
+    {
+      "path": "pages/home/home",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationStyle": "custom"
+      }
     },
-    "easycom" : {
-        "autoscan" : true,
-        "custom" : {
-            "^uni-(.*)" : "@/uni_modules/uni-$1/components/uni-$1/uni-$1.vue",
-            "shop-detail" : "@/pages/components/shop-detail.vue",
-            "order-cart" : "@/pages/components/order-cart.vue"
-        }
+    {
+      "path": "pages/order/order",
+      "style": {
+        "navigationBarTitleText": "",
+        "navigationStyle": "custom"
+      }
     },
-    "uniIdRouter" : {}
+    {
+      "path": "pages/my-orders/my-orders",
+      "style": {
+        "navigationBarTitleText": "订单"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/community/community",
+      "style": {
+        "navigationBarTitleText": "社区",
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark"
+      }
+    },
+    {
+      "path": "pages/post-detail/post-detail",
+      "style": {
+        "navigationBarTitleText": "帖子详情",
+        "navigationStyle": "default"
+      }
+    },
+    {
+      "path": "pages/post-create/post-create",
+      "style": {
+        "navigationBarTitleText": "发布帖子",
+        "navigationStyle": "default"
+      }
+    },
+    {
+      "path": "pages/post-profile/post-profile",
+      "style": {
+        "navigationBarTitleText": "用户主页",
+        "navigationStyle": "default"
+      }
+    },
+    {
+      "path": "pages/order-confirm/order-confirm",
+      "style": {
+        "navigationBarTitleText": "确认订单"
+      }
+    },
+    {
+      "path": "pages/map/map",
+      "style": {
+        "navigationBarTitleText": "选择门店"
+      }
+    },
+    {
+      "path": "pages/map-city/map-city",
+      "style": {
+        "navigationBarTitleText": "选择城市"
+      }
+    },
+    {
+      "path": "pages/order-detail/order-detail",
+      "style": {
+        "navigationBarTitleText": "订单详情",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/order-medal/order-medal",
+      "style": {
+        "navigationBarTitleText": "勋章墙",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/coupons/coupons",
+      "style": {
+        "navigationBarTitleText": "我的优惠券"
+      }
+    },
+    {
+      "path": "pages/panda-store/panda-store",
+      "style": {
+        "navigationBarTitleText": "熊猫币商城",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/personal-data/personal-data",
+      "style": {
+        "navigationBarTitleText": "个人资料"
+      }
+    },
+    {
+      "path": "pages/search/search",
+      "style": {
+        "navigationBarTitleText": "搜索"
+      }
+    },
+    {
+      "path": "pages/ai-chat/index",
+      "style": {
+        "navigationBarTitleText": "Panda管家"
+      }
+    },
+    {
+      "path": "pages/agreement/user-agreement",
+      "style": {
+        "navigationBarTitleText": "用户协议",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/agreement/privacy-policy",
+      "style": {
+        "navigationBarTitleText": "隐私政策",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/address/address",
+      "style": {
+        "navigationBarTitleText": "收货地址",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/address/edit-address",
+      "style": {
+        "navigationBarTitleText": "编辑地址",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/together-drink/together-drink",
+      "style": {
+        "navigationBarTitleText": "一起喝",
+        "navigationStyle": "default",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "奶茶店",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#1296db",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "iconPath": "/static/tabbar/home.png",
+        "selectedIconPath": "/static/tabbar/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/order/order",
+        "iconPath": "/static/tabbar/order.png",
+        "selectedIconPath": "/static/tabbar/order-active.png",
+        "text": "点单"
+      },
+      {
+        "pagePath": "pages/community/community",
+        "iconPath": "/static/tabbar/community.png",
+        "selectedIconPath": "/static/tabbar/community-active.png",
+        "text": "广场"
+      },
+      {
+        "pagePath": "pages/my-orders/my-orders",
+        "iconPath": "/static/tabbar/my-orders.png",
+        "selectedIconPath": "/static/tabbar/my-orders-active.png",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "iconPath": "/static/tabbar/profile.png",
+        "selectedIconPath": "/static/tabbar/profile-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^uni-(.*)": "@/uni_modules/uni-$1/components/uni-$1/uni-$1.vue",
+      "shop-detail": "@/pages/components/shop-detail.vue",
+      "order-cart": "@/pages/components/order-cart.vue"
+    }
+  },
+  "uniIdRouter": {}
 }

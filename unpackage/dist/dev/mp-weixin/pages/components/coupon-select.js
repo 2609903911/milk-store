@@ -81,7 +81,6 @@ const _sfc_main = {
           "0"
         )}-${String(date.getDate()).padStart(2, "0")}`;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/components/coupon-select.vue:248", "日期格式化错误:", error);
         return "日期错误";
       }
     };
@@ -156,7 +155,7 @@ const _sfc_main = {
         }),
         e: availableCoupons.value.length === 0
       }, availableCoupons.value.length === 0 ? {
-        f: common_assets._imports_0$13
+        f: common_assets._imports_0$16
       } : {}, {
         g: !selectedCoupon.value,
         h: common_vendor.o(confirmSelect),

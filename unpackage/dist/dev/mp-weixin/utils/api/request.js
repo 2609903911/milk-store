@@ -10,20 +10,18 @@ const request = (options) => {
       header: options.header || {},
       timeout: options.timeout || utils_api_config.TIMEOUT,
       success: (res) => {
-        var _a;
+        var _a, _b;
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
         } else {
-          common_vendor.index.__f__("error", "at utils/api/request.js:24", `请求失败: ${res.statusCode}`, res.data);
           reject({
             statusCode: res.statusCode,
-            message: ((_a = res.data) == null ? void 0 : _a.message) || "请求失败",
+            message: ((_a = res.data) == null ? void 0 : _a.message) || ((_b = res.data) == null ? void 0 : _b.error) || "请求失败",
             data: res.data
           });
         }
       },
       fail: (err) => {
-        common_vendor.index.__f__("error", "at utils/api/request.js:34", "请求异常:", err);
         reject({
           statusCode: -1,
           message: err.errMsg || "网络异常",
@@ -48,12 +46,20 @@ const get = (url, params = {}, options = {}) => {
   });
 };
 const post = (url, data = {}, options = {}) => {
-  return request({
+  if (data.userId !== void 0 && data.userId !== null) {
+    data.userId = String(data.userId);
+  }
+  const requestOptions = {
     url,
     method: utils_api_config.REQUEST_METHODS.POST,
     data,
     ...options
-  });
+  };
+  if (options.userId && !data.userId) {
+    const separator = url.includes("?") ? "&" : "?";
+    requestOptions.url = `${url}${separator}userId=${options.userId}`;
+  }
+  return request(requestOptions);
 };
 const put = (url, data = {}, options = {}) => {
   return request({
@@ -63,6 +69,21 @@ const put = (url, data = {}, options = {}) => {
     ...options
   });
 };
+const del = (url, params = {}, options = {}) => {
+  let requestUrl = url;
+  const queryParams = Object.keys(params).map((key) => {
+    return `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
+  }).join("&");
+  if (queryParams) {
+    requestUrl += (url.includes("?") ? "&" : "?") + queryParams;
+  }
+  return request({
+    url: requestUrl,
+    method: utils_api_config.REQUEST_METHODS.DELETE,
+    ...options
+  });
+};
+exports.del = del;
 exports.get = get;
 exports.post = post;
 exports.put = put;

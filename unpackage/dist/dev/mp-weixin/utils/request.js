@@ -16,11 +16,6 @@ const isXHRSupported = () => {
 const request = (options) => {
   return new Promise((resolve, reject) => {
     const url = options.url.startsWith("http") ? options.url : BASE_URL + options.url;
-    common_vendor.index.__f__("log", "at utils/request.js:48", "【请求开始】", {
-      url,
-      method: options.method || "GET",
-      data: options.data
-    });
     if (options.loading !== false) {
       common_vendor.index.showLoading({
         title: options.loadingText || "加载中",
@@ -31,7 +26,9 @@ const request = (options) => {
       "Content-Type": "application/json",
       ...options.header,
       // 合并自定义请求头
-      ...common_vendor.index.getStorageSync("token") && { "Authorization": `Bearer ${common_vendor.index.getStorageSync("token")}` }
+      ...common_vendor.index.getStorageSync("token") && {
+        Authorization: `Bearer ${common_vendor.index.getStorageSync("token")}`
+      }
     };
     const useXHR = isXHRSupported();
     if (useXHR) {
@@ -151,12 +148,6 @@ const request = (options) => {
           common_vendor.index.showToast({
             title: "服务器异常，请稍后重试",
             icon: "none"
-          });
-          common_vendor.index.__f__("error", "at utils/request.js:216", "【请求错误】服务器返回500错误:", {
-            url,
-            method: options.method || "GET",
-            requestData: options.data,
-            response: res.data
           });
           reject(new Error("服务器异常"));
         } else {

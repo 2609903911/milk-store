@@ -11,13 +11,10 @@ const initUserState = async () => {
         delete userState[key];
       });
       userState.userId = storedUserInfo.userId;
-      common_vendor.index.__f__("log", "at utils/userState.js:34", "已从本地存储加载用户ID");
     } else {
-      common_vendor.index.__f__("log", "at utils/userState.js:36", "未找到用户信息，使用默认值");
     }
     return true;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userState.js:40", "初始化用户状态失败", error);
     return false;
   }
 };
@@ -29,7 +26,6 @@ const updateUserState = (newInfo) => {
     Object.assign(userState, newInfo);
     return true;
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userState.js:62", "更新用户状态失败", error);
     return false;
   }
 };

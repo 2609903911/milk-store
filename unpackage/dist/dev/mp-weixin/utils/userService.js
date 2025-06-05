@@ -1,8 +1,9 @@
 "use strict";
-const common_vendor = require("../common/vendor.js");
+require("../common/vendor.js");
 const utils_api_authApi = require("./api/authApi.js");
 const utils_userModel = require("./userModel.js");
 const utils_userState = require("./userState.js");
+const utils_api_request = require("./api/request.js");
 const generateUserId = () => {
   return "user_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
 };
@@ -25,7 +26,6 @@ const registerUser = (userInfo = {}) => {
     utils_userState.updateUserState(newUser);
     return { success: true, userInfo: newUser };
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userService.js:49", "用户注册失败", error);
     return { success: false, message: "注册过程中发生错误" };
   }
 };
@@ -44,9 +44,37 @@ const loginUser = (phone, code = "000000") => {
     utils_userState.updateUserState({ userId: userInfo.userId });
     return { success: true, userInfo };
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userService.js:88", "用户登录失败", error);
     return { success: false, message: "登录过程中发生错误" };
   }
 };
+const updateUserBio = async (bio, userId) => {
+  try {
+    const currentUser = utils_api_authApi.getUserFromStorage();
+    if (!currentUser || !currentUser.userId) {
+      return { success: false, message: "用户未登录" };
+    }
+    const targetUserId = userId || currentUser.userId;
+    const response = await utils_api_request.post("/api/user/update-bio", {
+      userId: targetUserId,
+      bio
+    });
+    if (response && response.code === 200) {
+      utils_userState.updateUserState({ bio });
+      return {
+        success: true,
+        message: "简介更新成功",
+        data: { bio }
+      };
+    } else {
+      return {
+        success: false,
+        message: (response == null ? void 0 : response.message) || "简介更新失败"
+      };
+    }
+  } catch (error) {
+    return { success: false, message: "更新简介过程中发生错误" };
+  }
+};
 exports.loginUser = loginUser;
+exports.updateUserBio = updateUserBio;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/userService.js.map

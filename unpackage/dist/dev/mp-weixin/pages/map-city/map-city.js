@@ -35,7 +35,6 @@ const _sfc_main = {
     const fetchCityData = async () => {
       isLoading.value = true;
       try {
-        common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:96", "开始获取城市数据...");
         const cityData = await utils_api_cityApi.fetchAllCities();
         hotCities.value = cityData.hotCities || [];
         const citiesByLetter = cityData.cityMap || {};
@@ -45,22 +44,13 @@ const _sfc_main = {
         Object.keys(citiesByLetter).forEach((letter) => {
           cityMap[letter] = citiesByLetter[letter];
         });
-        common_vendor.index.__f__(
-          "log",
-          "at pages/map-city/map-city.vue:115",
-          "城市数据处理完成，共有热门城市：",
-          hotCities.value.length,
-          "个"
-        );
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/map-city/map-city.vue:121", "城市数据请求异常:", error);
         loadLocalCityData();
       } finally {
         isLoading.value = false;
       }
     };
     const loadLocalCityData = () => {
-      common_vendor.index.__f__("log", "at pages/map-city/map-city.vue:131", "加载本地备用城市数据");
       hotCities.value = [
         {
           name: "北京",

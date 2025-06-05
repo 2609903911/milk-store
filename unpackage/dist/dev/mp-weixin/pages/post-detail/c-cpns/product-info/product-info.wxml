@@ -1,0 +1,1 @@
+<view wx:if="{{a}}" class="product-info"><view class="product-content" bindtap="{{e}}"><image class="product-image" src="{{b}}" mode="aspectFill"></image><view class="product-details"><text class="product-name">{{c}}</text><text class="product-price">¥{{d}}</text></view></view></view>

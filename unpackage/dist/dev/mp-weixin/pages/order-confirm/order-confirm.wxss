@@ -1,280 +1,280 @@
 
 .scroll-container.data-v-e7689724 {
-    height: 100vh;
-    width: 100%;
+  height: 100vh;
+  width: 100%;
 }
 .order-confirm.data-v-e7689724 {
-    padding-bottom: 120rpx;
-    background-color: #f5f5f5;
-    min-height: 100vh;
+  padding-bottom: 120rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
 }
 
 /* 商店信息 */
 .shop-info.data-v-e7689724 {
-    background-color: #fff;
-    padding: 30rpx;
-    margin-bottom: 20rpx;
-    border-radius: 10rpx;
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
 }
 .shop-name-container.data-v-e7689724 {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15rpx;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
 }
 .tag.data-v-e7689724 {
-    background-color: #333;
-    color: #fff;
-    font-size: 24rpx;
-    padding: 4rpx 10rpx;
-    border-radius: 4rpx;
-    margin-right: 10rpx;
+  background-color: #333;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 4rpx;
+  margin-right: 10rpx;
 }
 .shop-name.data-v-e7689724 {
-    font-size: 32rpx;
-    font-weight: 500;
-    color: #333;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
 }
 .shop-distance.data-v-e7689724 {
-    font-size: 26rpx;
-    color: #666;
-    text-align: right;
-    margin-bottom: 10rpx;
+  font-size: 26rpx;
+  color: #666;
+  text-align: right;
+  margin-bottom: 10rpx;
 }
 .shop-address.data-v-e7689724 {
-    font-size: 28rpx;
-    color: #666;
-    margin-bottom: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
 }
 .shop-phone.data-v-e7689724 {
-    display: flex;
-    align-items: center;
-    font-size: 28rpx;
-    color: #666;
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #666;
 }
 .phone-number.data-v-e7689724 {
-    margin: 0 20rpx;
-    color: #333;
+  margin: 0 20rpx;
+  color: #333;
 }
 .copy-icon.data-v-e7689724 {
-    color: #999;
+  color: #999;
 }
 
 /* 收件人信息 */
 .recipient-info.data-v-e7689724 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 28rpx;
-    color: #666;
-    margin-top: 15rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 15rpx;
 }
 .recipient-info .phone-number.data-v-e7689724 {
-    color: #333;
-    margin-left: 20rpx;
+  color: #333;
+  margin-left: 20rpx;
 }
 
 /* 订单商品列表 */
 .order-items.data-v-e7689724 {
-    background-color: #fff;
-    padding: 30rpx;
-    margin-bottom: 20rpx;
-    border-radius: 10rpx;
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
 }
 .order-title.data-v-e7689724 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30rpx;
-    font-size: 30rpx;
-    color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+  font-size: 30rpx;
+  color: #333;
 }
 .drink-category.data-v-e7689724 {
-    font-size: 24rpx;
-    color: #999;
-    background-color: #f0f0f0;
-    padding: 4rpx 12rpx;
-    border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+  background-color: #f0f0f0;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
 }
 .product-list.data-v-e7689724 {
-    padding-bottom: 10rpx;
+  padding-bottom: 10rpx;
 }
 .product-item.data-v-e7689724 {
-    display: flex;
-    align-items: center;
-    padding: 20rpx 0;
-    border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1px solid #f5f5f5;
 }
 .product-item.data-v-e7689724:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 .product-image.data-v-e7689724 {
-    width: 140rpx;
-    height: 140rpx;
-    border-radius: 8rpx;
-    margin-right: 20rpx;
-    box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-    object-fit: cover;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 8rpx;
+  margin-right: 20rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  object-fit: cover;
 }
 .product-info.data-v-e7689724 {
-    flex: 1;
+  flex: 1;
 }
 .product-name.data-v-e7689724 {
-    font-size: 28rpx;
-    color: #333;
-    margin-bottom: 10rpx;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 10rpx;
 }
 .product-specs.data-v-e7689724 {
-    font-size: 24rpx;
-    color: #999;
-    margin-bottom: 10rpx;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
 }
 .product-quantity.data-v-e7689724 {
-    font-size: 24rpx;
-    color: #666;
+  font-size: 24rpx;
+  color: #666;
 }
 .product-price.data-v-e7689724 {
-    font-size: 30rpx;
-    color: #333;
-    font-weight: 500;
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
 }
 
 /* 价格详情 */
 .price-detail.data-v-e7689724 {
-    background-color: #fff;
-    padding: 30rpx;
-    margin-bottom: 20rpx;
-    border-radius: 10rpx;
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
 }
 .price-title.data-v-e7689724 {
-    font-size: 30rpx;
-    color: #333;
-    margin-bottom: 30rpx;
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 30rpx;
 }
 .coupon-section.data-v-e7689724 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20rpx 0;
-    border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1px solid #f5f5f5;
 }
 .coupon-tag.data-v-e7689724 {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 .coupon-icon.data-v-e7689724 {
-    width: 40rpx;
-    height: 40rpx;
-    margin-right: 10rpx;
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 10rpx;
 }
 .coupon-action.data-v-e7689724 {
-    color: #ff6a6a;
-    display: flex;
-    align-items: center;
-    font-size: 28rpx;
+  color: #ff6a6a;
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
 }
 .selected-coupon.data-v-e7689724 {
-    color: #006de7;
+  color: #006de7;
 }
 .discount-amount.data-v-e7689724 {
-    color: #ff6a6a;
-    margin-left: 10rpx;
+  color: #ff6a6a;
+  margin-left: 10rpx;
 }
 .arrow.data-v-e7689724 {
-    margin-left: 10rpx;
+  margin-left: 10rpx;
 }
 .total-section.data-v-e7689724 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 30rpx 0 10rpx;
-    font-size: 28rpx;
-    color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 0 10rpx;
+  font-size: 28rpx;
+  color: #333;
 }
 .total-price.data-v-e7689724 {
-    font-size: 36rpx;
-    font-weight: bold;
+  font-size: 36rpx;
+  font-weight: bold;
 }
 
 /* 集杯活动 */
 .cup-collection.data-v-e7689724 {
-    background-color: #fff;
-    padding: 30rpx;
-    margin-bottom: 20rpx;
-    border-radius: 10rpx;
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
 }
 .collection-title.data-v-e7689724 {
-    font-size: 30rpx;
-    color: #333;
-    margin-bottom: 20rpx;
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 20rpx;
 }
 .collection-item.data-v-e7689724 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 28rpx;
-    color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 28rpx;
+  color: #666;
 }
 .collection-count.data-v-e7689724 {
-    color: #0066cc;
+  color: #0066cc;
 }
 
 /* 支付方式 */
 .payment-method.data-v-e7689724 {
-    background-color: #fff;
-    padding: 30rpx;
-    margin-bottom: 20rpx;
-    border-radius: 10rpx;
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
 }
 .payment-title.data-v-e7689724 {
-    font-size: 30rpx;
-    color: #333;
-    margin-bottom: 20rpx;
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 20rpx;
 }
 .payment-option.data-v-e7689724 {
-    display: flex;
-    align-items: center;
-    padding: 20rpx 0;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
 }
 .payment-icon.data-v-e7689724 {
-    width: 44rpx;
-    height: 44rpx;
-    margin-right: 20rpx;
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 20rpx;
 }
 .check-icon.data-v-e7689724 {
-    margin-left: auto;
-    color: #0066cc;
-    font-size: 32rpx;
+  margin-left: auto;
+  color: #0066cc;
+  font-size: 32rpx;
 }
 
 /* 底部支付栏 */
 .payment-bar.data-v-e7689724 {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100rpx;
-    background-color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30rpx;
-    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-    z-index: 999;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100rpx;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 999;
 }
 .payment-amount.data-v-e7689724 {
-    font-size: 28rpx;
-    color: #333;
+  font-size: 28rpx;
+  color: #333;
 }
 .amount.data-v-e7689724 {
-    font-size: 36rpx;
-    font-weight: bold;
-    color: #333;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
 }
 .pay-button.data-v-e7689724 {
-    background-color: #2a88e6;
-    color: #fff;
-    font-size: 32rpx;
-    padding: 15rpx 60rpx;
-    border-radius: 20rpx;
-    margin-right: 40rpx;
+  background-color: #2a88e6;
+  color: #fff;
+  font-size: 32rpx;
+  padding: 15rpx 60rpx;
+  border-radius: 20rpx;
+  margin-right: 40rpx;
 }

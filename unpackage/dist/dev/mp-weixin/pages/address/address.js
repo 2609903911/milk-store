@@ -36,7 +36,6 @@ const _sfc_main = {
         const result = await utils_api_request.get(`/api/user/addresses`, {
           userId: utils_userState.userState.userId
         });
-        common_vendor.index.__f__("log", "at pages/address/address.vue:120", "获取到的地址数据:", result);
         if (result.code === 200 && result.data) {
           const formattedData = result.data.map((item) => {
             return {
@@ -44,7 +43,6 @@ const _sfc_main = {
               formattedPhone: formatPhone(item.phone)
             };
           });
-          common_vendor.index.__f__("log", "at pages/address/address.vue:131", "格式化后的地址数据:", formattedData);
           addressList.value = formattedData;
           const defaultAddr = result.data.find((item) => item.isDefault);
           if (defaultAddr) {
@@ -57,7 +55,6 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/address/address.vue:147", "获取地址列表失败:", error);
         common_vendor.index.showToast({
           title: "获取地址失败，请重试",
           icon: "none"
@@ -133,7 +130,7 @@ const _sfc_main = {
             b: common_vendor.t(item.contactName),
             c: common_vendor.t(item.gender === "male" ? "(先生)" : item.gender === "female" ? "(女士)" : ""),
             d: common_vendor.t(item.formattedPhone),
-            e: "06cd66b5-3-" + i0,
+            e: "33773ade-3-" + i0,
             f: common_vendor.o(($event) => editAddress(item), index),
             g: index
           };
@@ -143,7 +140,7 @@ const _sfc_main = {
           size: "20"
         })
       } : !loading.value ? {
-        l: common_assets._imports_0$12
+        l: common_assets._imports_0$13
       } : {}, {
         h: addressList.value.length > 0,
         k: !loading.value,

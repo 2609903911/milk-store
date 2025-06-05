@@ -243,9 +243,9 @@ const _sfc_main = {
           size: "24"
         }),
         b: common_vendor.o(goBack),
-        c: common_assets._imports_0$8,
+        c: common_assets._imports_0$9,
         d: common_vendor.o((...args) => _ctx.showEarnCoinsPopup && _ctx.showEarnCoinsPopup(...args)),
-        e: common_assets._imports_1$3,
+        e: common_assets._imports_1$4,
         f: common_vendor.t(common_vendor.unref(utils_userData.userData).pandaCoins),
         g: common_vendor.p({
           type: "",
@@ -289,7 +289,7 @@ const _sfc_main = {
             t: common_vendor.n(getCouponColorClass(coupon.type))
           });
         }),
-        j: common_assets._imports_1$3,
+        j: common_assets._imports_1$4,
         k: couponList.value.length === 0
       }, couponList.value.length === 0 ? {
         l: common_assets._imports_2$3

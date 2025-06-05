@@ -16,9 +16,8 @@ const _sfc_main = {
       });
     };
     const goToMall = () => {
-      common_vendor.index.showToast({
-        title: "正在前往熊猫币商城",
-        icon: "none"
+      common_vendor.index.navigateTo({
+        url: "/pages/panda-store/panda-store"
       });
     };
     const navigateToCoupons = () => {
@@ -40,7 +39,11 @@ const _sfc_main = {
         icon: "../../static/images/service/medal.png",
         action: "medal"
       },
-      { name: "熊猫币商城", icon: "../../static/images/service/store.png" },
+      {
+        name: "熊猫币商城",
+        icon: "../../static/images/service/store.png",
+        action: "pandaStore"
+      },
       { name: "加盟申请", icon: "../../static/images/service/franchise.png" },
       { name: "联系客服", icon: "../../static/images/service/contact.png" },
       {
@@ -64,13 +67,18 @@ const _sfc_main = {
         });
         return;
       }
+      if (item && item.action === "pandaStore") {
+        common_vendor.index.navigateTo({
+          url: "/pages/panda-store/panda-store"
+        });
+        return;
+      }
       common_vendor.index.showToast({
         title: `您点击了${serviceName}`,
         icon: "none"
       });
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/profile/profile.vue:259", "头像加载失败，使用默认头像");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

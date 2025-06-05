@@ -36,7 +36,6 @@ const _sfc_main = {
       expiredCoupons.value = userCoupons.filter(
         (coupon) => coupon.status === "expired" || coupon.endTime && new Date(coupon.endTime) < /* @__PURE__ */ new Date()
       );
-      common_vendor.index.__f__("log", "at pages/coupons/coupons.vue:451", "有效优惠券:", validCoupons.value);
     };
     const switchTab = (index) => {
       currentTab.value = index;

@@ -1,0 +1,82 @@
+
+.post-card {
+  width: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+}
+.post-image {
+  width: 100%;
+  height: 400rpx; /* 设置默认高度 */
+  max-height: 500rpx; /* 设置最大高度 */
+  object-fit: cover; /* 保持比例裁剪 */
+  display: block;
+}
+
+/* 各种尺寸类设置不同的默认高度 */
+.size-small .post-image {
+  height: 280rpx;
+}
+.size-medium .post-image {
+  height: 380rpx;
+}
+.size-large .post-image {
+  height: 480rpx;
+}
+.post-content {
+  padding: 20rpx;
+}
+.post-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  line-height: 1.4;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.post-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* 允许在小屏幕上换行 */
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0; /* 防止内容溢出 */
+}
+.user-avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  flex-shrink: 0; /* 防止头像被挤压 */
+}
+.user-nickname {
+  font-size: 24rpx;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.like-count {
+  display: flex;
+  align-items: center;
+  margin-left: 10rpx;
+  flex-shrink: 0; /* 防止点赞部分被挤压 */
+}
+.like-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+.like-number {
+  font-size: 24rpx;
+  color: #666;
+}

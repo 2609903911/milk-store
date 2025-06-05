@@ -11,19 +11,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class DeepSeekConfig {
     
-    @Value("${deepseek.api.url}")
+    @Value("${deepseek.api.url:https://api.deepseek.com/v1}")
     private String apiUrl;
     
-    @Value("${deepseek.api.key}")
+    @Value("${deepseek.api.key:default-key}")
     private String apiKey;
     
-    @Value("${deepseek.api.model}")
+    @Value("${deepseek.api.model:deepseek-chat}")
     private String model;
     
-    @Value("${deepseek.api.max-tokens}")
+    @Value("${deepseek.api.max-tokens:2000}")
     private Integer maxTokens;
     
-    @Value("${deepseek.api.temperature}")
+    @Value("${deepseek.api.temperature:0.7}")
     private Double temperature;
     
     /**

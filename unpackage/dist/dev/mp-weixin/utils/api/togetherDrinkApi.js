@@ -1,17 +1,13 @@
 "use strict";
-const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../request.js");
 const createInvitation = (data) => {
-  common_vendor.index.__f__("log", "at utils/api/togetherDrinkApi.js:16", "【创建邀请】请求数据:", JSON.stringify(data, null, 2));
   return utils_request.request({
     url: "/api/together-drink/invitations",
     method: "POST",
     data
   }).then((response) => {
-    common_vendor.index.__f__("log", "at utils/api/togetherDrinkApi.js:22", "【创建邀请】成功响应:", JSON.stringify(response, null, 2));
     return response;
   }).catch((error) => {
-    common_vendor.index.__f__("error", "at utils/api/togetherDrinkApi.js:25", "【创建邀请】错误响应:", error);
     throw error;
   });
 };
@@ -28,7 +24,6 @@ const getInvitationByCode = (inviteCode) => {
   });
 };
 const joinInvitation = (invitationId, data) => {
-  common_vendor.index.__f__("log", "at utils/api/togetherDrinkApi.js:62", "【加入邀请】开始请求，邀请ID:", invitationId, "请求数据:", JSON.stringify(data));
   return utils_request.request({
     url: `/api/together-drink/invitations/${invitationId}/join`,
     method: "POST",
@@ -36,10 +31,8 @@ const joinInvitation = (invitationId, data) => {
     loading: true,
     loadingText: "正在加入邀请..."
   }).then((response) => {
-    common_vendor.index.__f__("log", "at utils/api/togetherDrinkApi.js:70", "【加入邀请】成功响应:", JSON.stringify(response));
     return response;
   }).catch((error) => {
-    common_vendor.index.__f__("error", "at utils/api/togetherDrinkApi.js:73", "【加入邀请】请求失败:", error);
     throw error;
   });
 };

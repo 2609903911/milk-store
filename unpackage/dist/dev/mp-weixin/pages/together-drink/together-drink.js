@@ -53,6 +53,8 @@ const _sfc_main = {
       distance: ""
     });
     const userAddress = common_vendor.ref(null);
+    common_vendor.ref(false);
+    const isInitialized = common_vendor.ref(false);
     const fetchProductInfo = async (productId = 1) => {
       try {
         const productData = await utils_api_productApi.fetchProductById(productId);
@@ -116,9 +118,7 @@ const _sfc_main = {
               const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
               let tempCode = "";
               for (let i = 0; i < 8; i++) {
-                tempCode += chars.charAt(
-                  Math.floor(Math.random() * chars.length)
-                );
+                tempCode += chars.charAt(Math.floor(Math.random() * chars.length));
               }
               inviteCode.value = tempCode;
             }
@@ -256,15 +256,9 @@ const _sfc_main = {
           userId: utils_userData.userData.userId
         };
         try {
-          const joinResponse = await utils_api_togetherDrinkApi.joinInvitation(
-            invitationId.value,
-            joinData
-          );
+          const joinResponse = await utils_api_togetherDrinkApi.joinInvitation(invitationId.value, joinData);
           if (joinResponse.data && joinResponse.data.code === 500) {
-            utils_uniUtils.toast(
-              joinResponse.data.message || "邀请不存在或已不可加入",
-              "none"
-            );
+            utils_uniUtils.toast(joinResponse.data.message || "邀请不存在或已不可加入", "none");
             return;
           }
           if (joinResponse.data && joinResponse.data.code !== 200) {
@@ -346,7 +340,52 @@ const _sfc_main = {
         }
       }, 3e4);
       refreshTimerRef.value = refreshTimer;
+      isInitialized.value = true;
     });
+    const refreshTimerRef = common_vendor.ref(null);
+    common_vendor.onUnmounted(() => {
+      if (countdownTimer.value) {
+        clearInterval(countdownTimer.value);
+      }
+      if (refreshTimerRef.value) {
+        clearInterval(refreshTimerRef.value);
+      }
+    });
+    common_vendor.onShow(() => {
+      if (isInitialized.value) {
+        refreshData();
+      }
+    });
+    common_vendor.onPullDownRefresh(() => {
+      refreshData().then(() => {
+        common_vendor.index.stopPullDownRefresh();
+      });
+    });
+    const refreshData = async () => {
+      try {
+        common_vendor.index.showLoading({
+          title: "刷新中...",
+          mask: true
+        });
+        await syncInvitationFromServer();
+        common_vendor.index.hideLoading();
+        utils_uniUtils.toast("已刷新最新状态", "success", 1500);
+        return Promise.resolve();
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/together-drink/together-drink.vue:804", "刷新数据失败:", error);
+        common_vendor.index.hideLoading();
+        return Promise.reject(error);
+      }
+    };
+    const refreshStatus = async () => {
+      common_vendor.index.showLoading({
+        title: "刷新中...",
+        mask: true
+      });
+      await syncInvitationFromServer();
+      common_vendor.index.hideLoading();
+      utils_uniUtils.toast("已刷新最新状态", "success", 1500);
+    };
     const initAddressInfo = () => {
       try {
         const storeInfo = common_vendor.index.getStorageSync("selectedStore");
@@ -543,15 +582,6 @@ const _sfc_main = {
         utils_uniUtils.toast("支付处理失败，请重试", "none");
       }
     };
-    const refreshTimerRef = common_vendor.ref(null);
-    common_vendor.onUnmounted(() => {
-      if (countdownTimer.value) {
-        clearInterval(countdownTimer.value);
-      }
-      if (refreshTimerRef.value) {
-        clearInterval(refreshTimerRef.value);
-      }
-    });
     const saveInvitationState = () => {
       if (state.value === "initial") {
         common_vendor.index.removeStorageSync("togetherDrinkState");
@@ -819,9 +849,6 @@ const _sfc_main = {
           }
         }
       }
-    };
-    const refreshStatus = () => {
-      syncInvitationFromServer();
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

@@ -4,6 +4,14 @@ const common_assets = require("../../common/assets.js");
 const utils_userData = require("../../utils/userData.js");
 require("../../utils/userState.js");
 const utils_api_bannerApi = require("../../utils/api/bannerApi.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "home",
   setup(__props) {
@@ -90,9 +98,19 @@ const _sfc_main = {
         url: "/pages/panda-store/panda-store"
       });
     };
+    const navigateToPost = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/post-profile/post-profile"
+      });
+    };
     const navigateToTogetherDrink = () => {
       common_vendor.index.navigateTo({
         url: "/pages/together-drink/together-drink"
+      });
+    };
+    const navigateToAiChat = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/ai-chat/index"
       });
     };
     return (_ctx, _cache) => {
@@ -120,34 +138,42 @@ const _sfc_main = {
                 b: idx
               };
             }),
-            d: common_vendor.o(navigateToOrder, index),
-            e: index
+            d: "07e72d3c-0-" + i0,
+            e: common_vendor.o(navigateToOrder, index),
+            f: index
           };
         }),
-        c: common_vendor.o(swiperChange),
-        d: common_vendor.o(navigateToOrder),
-        e: common_vendor.f(bannerList.value, (item, index, i0) => {
+        c: common_vendor.p({
+          type: "arrowright",
+          size: "16",
+          color: "#fff"
+        }),
+        d: common_vendor.o(swiperChange),
+        e: common_vendor.o(navigateToOrder),
+        f: common_vendor.f(bannerList.value, (item, index, i0) => {
           return {
             a: index,
             b: currentSwiper.value === index ? 1 : ""
           };
         }),
-        f: common_vendor.unref(utils_userData.userData).avatar || "/static/images/avatar.png",
-        g: common_vendor.o(handleAvatarError),
-        h: common_vendor.t(common_vendor.unref(utils_userData.userData).nickname),
-        i: common_vendor.t(common_vendor.unref(utils_userData.userData).coupons ? common_vendor.unref(utils_userData.userData).coupons.filter((coupon) => coupon.status === "valid").length : 0),
-        j: common_vendor.o(navigateToCoupons),
-        k: common_assets._imports_0$2,
-        l: common_vendor.o(navigateToOrder),
-        m: common_assets._imports_1,
-        n: common_assets._imports_2,
-        o: common_vendor.o(navigateToPandaStore),
-        p: common_assets._imports_3,
-        q: common_assets._imports_4,
-        r: common_vendor.o(navigateToTogetherDrink),
-        s: common_assets._imports_5,
-        t: common_assets._imports_6,
-        v: common_vendor.f(newsImages.value, (item, index, i0) => {
+        g: common_vendor.unref(utils_userData.userData).avatar || "/static/images/avatar.png",
+        h: common_vendor.o(handleAvatarError),
+        i: common_vendor.t(common_vendor.unref(utils_userData.userData).nickname),
+        j: common_vendor.t(common_vendor.unref(utils_userData.userData).coupons ? common_vendor.unref(utils_userData.userData).coupons.filter((coupon) => coupon.status === "valid").length : 0),
+        k: common_vendor.o(navigateToCoupons),
+        l: common_assets._imports_0$2,
+        m: common_vendor.o(navigateToOrder),
+        n: common_assets._imports_1,
+        o: common_assets._imports_2,
+        p: common_vendor.o(navigateToPandaStore),
+        q: common_assets._imports_3,
+        r: common_vendor.o(navigateToPost),
+        s: common_assets._imports_4,
+        t: common_vendor.o(navigateToTogetherDrink),
+        v: common_assets._imports_5,
+        w: common_vendor.o(navigateToAiChat),
+        x: common_assets._imports_6,
+        y: common_vendor.f(newsImages.value, (item, index, i0) => {
           return {
             a: item,
             b: index

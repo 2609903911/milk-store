@@ -134,14 +134,19 @@ public class AuthController {
             userData.put("userId", user.getUserId());
             userData.put("nickname", user.getNickname());
             userData.put("avatar", user.getAvatar());
+            userData.put("backgroundImage", user.getBackgroundImage());
             userData.put("phone", user.getPhone());
             userData.put("gender", user.getGender());
+            userData.put("bio", user.getBio());
             userData.put("birthday", user.getBirthday());
             userData.put("pandaCoins", user.getPandaCoins());
             userData.put("lightningStars", user.getLightningStars());
             userData.put("memberLevel", user.getMemberLevel());
             userData.put("createTime", user.getCreateTime());
             userData.put("lastLoginTime", user.getLastLoginTime());
+            userData.put("followingCount", user.getFollowingCount());
+            userData.put("followersCount", user.getFollowersCount());
+            userData.put("likesReceivedCount", user.getLikesReceivedCount());
             userData.put("medals", medals);
             userData.put("coupons", userCoupons);
             userData.put("addresses", new ArrayList<>()); // 返回空地址列表
@@ -204,6 +209,14 @@ public class AuthController {
                 existingUser.setAvatar((String) userData.get("avatar"));
             }
             
+            if (userData.containsKey("backgroundImage")) {
+                existingUser.setBackgroundImage((String) userData.get("backgroundImage"));
+            }
+            
+            if (userData.containsKey("bio")) {
+                existingUser.setBio((String) userData.get("bio"));
+            }
+            
             // 3. 更新用户信息到数据库
             int rows = userMapper.updateUser(existingUser);
             
@@ -213,12 +226,17 @@ public class AuthController {
                 updatedUserData.put("userId", existingUser.getUserId());
                 updatedUserData.put("nickname", existingUser.getNickname());
                 updatedUserData.put("avatar", existingUser.getAvatar());
+                updatedUserData.put("backgroundImage", existingUser.getBackgroundImage());
                 updatedUserData.put("phone", existingUser.getPhone());
                 updatedUserData.put("gender", existingUser.getGender());
+                updatedUserData.put("bio", existingUser.getBio());
                 updatedUserData.put("birthday", existingUser.getBirthday());
                 updatedUserData.put("pandaCoins", existingUser.getPandaCoins());
                 updatedUserData.put("lightningStars", existingUser.getLightningStars());
                 updatedUserData.put("memberLevel", existingUser.getMemberLevel());
+                updatedUserData.put("followingCount", existingUser.getFollowingCount());
+                updatedUserData.put("followersCount", existingUser.getFollowersCount());
+                updatedUserData.put("likesReceivedCount", existingUser.getLikesReceivedCount());
                 
                 return Result.success("用户信息更新成功", updatedUserData);
             } else {
@@ -251,14 +269,19 @@ public class AuthController {
             userData.put("userId", user.getUserId());
             userData.put("nickname", user.getNickname());
             userData.put("avatar", user.getAvatar());
+            userData.put("backgroundImage", user.getBackgroundImage());
             userData.put("phone", user.getPhone());
             userData.put("gender", user.getGender());
+            userData.put("bio", user.getBio());
             userData.put("birthday", user.getBirthday());
             userData.put("pandaCoins", user.getPandaCoins());
             userData.put("lightningStars", user.getLightningStars());
             userData.put("memberLevel", user.getMemberLevel());
             userData.put("createTime", user.getCreateTime());
             userData.put("lastLoginTime", user.getLastLoginTime());
+            userData.put("followingCount", user.getFollowingCount());
+            userData.put("followersCount", user.getFollowersCount());
+            userData.put("likesReceivedCount", user.getLikesReceivedCount());
             
             return Result.success("获取用户信息成功", userData);
         } catch (Exception e) {
@@ -279,11 +302,17 @@ public class AuthController {
         user.setNickname("用户" + phone.substring(phone.length() - 4));
         user.setPhone(phone);
         user.setGender("unknown"); // 使用表中的enum值
+        user.setBio("这个人很懒，还没有填写简介"); // 设置默认简介
         user.setPandaCoins(0);
         user.setLightningStars(0);
         user.setMemberLevel(1);
+        user.setFollowingCount(0); // 设置默认关注数为0
+        user.setFollowersCount(0); // 设置默认粉丝数为0
+        user.setLikesReceivedCount(0); // 设置默认获赞数为0
         // 设置默认头像
         user.setAvatar("/static/images/avatar.png");
+        // 设置默认背景图
+        user.setBackgroundImage("/static/images/default_background.jpg");
         // 设置创建时间和最后登录时间
         Date now = new Date();
         user.setCreateTime(now);
@@ -389,22 +418,17 @@ public class AuthController {
             @RequestParam("avatarFile") MultipartFile avatarFile,
             @RequestParam("userId") String userId) {
         try {
-            System.out.println("开始处理头像上传: 用户ID=" + userId);
-            
             if (avatarFile == null || avatarFile.isEmpty()) {
-                System.out.println("上传失败: 头像文件为空");
                 return Result.error(400, "头像文件不能为空");
             }
             
             // 查询用户是否存在
             User existingUser = userMapper.findById(userId);
             if (existingUser == null) {
-                System.out.println("上传失败: 用户不存在，ID=" + userId);
                 return Result.error(404, "用户不存在");
             }
             
             String fileName = avatarFile.getOriginalFilename();
-            System.out.println("原始文件名: " + fileName);
             
             // 获取文件扩展名
             String fileExtension = "";
@@ -419,10 +443,8 @@ public class AuthController {
             String avatarUploadPath = fileUploadPath + "/avatar";
             File uploadDir = new File(avatarUploadPath);
             if (!uploadDir.exists()) {
-                System.out.println("创建目录: " + avatarUploadPath);
                 boolean dirCreated = uploadDir.mkdirs();
                 if (!dirCreated) {
-                    System.out.println("目录创建失败: " + avatarUploadPath);
                     return Result.error(500, "无法创建上传目录");
                 }
             }
@@ -430,29 +452,23 @@ public class AuthController {
             // 生成唯一文件名
             String newFileName = "avatar_" + userId + "_" + System.currentTimeMillis() + fileExtension;
             File targetFile = new File(uploadDir, newFileName);
-            System.out.println("保存文件到: " + targetFile.getAbsolutePath());
             
             // 保存文件
             try {
                 // 使用文件流直接保存
                 avatarFile.transferTo(targetFile);
             } catch (IOException e) {
-                System.out.println("文件保存失败: " + e.getMessage());
                 e.printStackTrace();
                 return Result.error(500, "文件保存失败: " + e.getMessage());
             }
             
             // 检查文件是否成功保存
             if (!targetFile.exists()) {
-                System.out.println("文件保存后检查失败，文件不存在");
                 return Result.error(500, "文件保存失败");
             }
             
-            System.out.println("文件保存成功，大小: " + targetFile.length() + " 字节");
-            
             // 构建正确的访问URL (不含api前缀)
             String avatarUrl = "/uploads/avatar/" + newFileName;
-            System.out.println("头像URL: " + avatarUrl);
             
             // 更新用户头像URL
             existingUser.setAvatar(avatarUrl);
@@ -463,14 +479,11 @@ public class AuthController {
                 Map<String, Object> resultData = new HashMap<>();
                 resultData.put("avatarUrl", avatarUrl);
                 
-                System.out.println("头像上传成功");
                 return Result.success("头像上传成功", resultData);
             } else {
-                System.out.println("用户信息更新失败");
                 return Result.error(500, "用户信息更新失败");
             }
         } catch (Exception e) {
-            System.out.println("上传过程中发生异常: " + e.getMessage());
             e.printStackTrace();
             return Result.error(500, "头像上传失败: " + e.getMessage());
         }
@@ -485,15 +498,11 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<Resource> serveAvatarFile(@PathVariable String filename) {
         try {
-            System.out.println("请求访问头像文件: " + filename);
-            
             // 拼接完整的文件路径 (添加avatar子目录)
             String avatarPath = fileUploadPath + "/avatar";
             File file = new File(avatarPath, filename);
-            System.out.println("完整文件路径: " + file.getAbsolutePath());
             
             if (!file.exists()) {
-                System.out.println("文件不存在: " + file.getAbsolutePath());
                 return ResponseEntity.notFound().build();
             }
             
@@ -503,18 +512,15 @@ public class AuthController {
             if (resource.exists() && resource.isReadable()) {
                 // 确定内容类型
                 String contentType = determineContentType(filename);
-                System.out.println("文件存在，返回内容类型: " + contentType);
                 
                 // 不设置Content-Disposition头，以允许浏览器直接显示图片
                 return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .body(resource);
             } else {
-                System.out.println("文件不可读: " + file.getAbsolutePath());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         } catch (Exception e) {
-            System.out.println("访问文件时发生异常: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -543,6 +549,220 @@ public class AuthController {
             return "image/bmp";
         } else {
             return "application/octet-stream";
+        }
+    }
+    
+    /**
+     * 上传用户背景图
+     * @param backgroundFile 背景图文件
+     * @param userId 用户ID
+     * @return 上传结果
+     */
+    @PostMapping("/user/upload-background")
+    public Result<Object> uploadBackground(
+            @RequestParam("backgroundFile") MultipartFile backgroundFile,
+            @RequestParam("userId") String userId) {
+        try {
+            if (backgroundFile == null || backgroundFile.isEmpty()) {
+                return Result.error(400, "背景图文件不能为空");
+            }
+            
+            // 查询用户是否存在
+            User existingUser = userMapper.findById(userId);
+            if (existingUser == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            String fileName = backgroundFile.getOriginalFilename();
+            
+            // 获取文件扩展名
+            String fileExtension = "";
+            if (fileName != null && fileName.contains(".")) {
+                fileExtension = fileName.substring(fileName.lastIndexOf("."));
+            } else {
+                // 如果没有扩展名，默认使用.jpg
+                fileExtension = ".jpg";
+            }
+            
+            // 创建上传目录 (添加post-background子目录)
+            String backgroundUploadPath = fileUploadPath + "/post-background";
+            File uploadDir = new File(backgroundUploadPath);
+            if (!uploadDir.exists()) {
+                boolean dirCreated = uploadDir.mkdirs();
+                if (!dirCreated) {
+                    return Result.error(500, "无法创建上传目录");
+                }
+            }
+            
+            // 生成唯一文件名
+            String newFileName = "background_" + userId + "_" + System.currentTimeMillis() + fileExtension;
+            File targetFile = new File(uploadDir, newFileName);
+            
+            // 保存文件
+            try {
+                // 使用文件流直接保存
+                backgroundFile.transferTo(targetFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Result.error(500, "文件保存失败: " + e.getMessage());
+            }
+            
+            // 检查文件是否成功保存
+            if (!targetFile.exists()) {
+                return Result.error(500, "文件保存失败");
+            }
+            
+            // 构建正确的访问URL (不含api前缀)
+            String backgroundUrl = "/uploads/post-background/" + newFileName;
+            
+            // 更新用户背景图URL
+            existingUser.setBackgroundImage(backgroundUrl);
+            int rows = userMapper.updateUser(existingUser);
+            
+            if (rows > 0) {
+                // 返回背景图URL
+                Map<String, Object> resultData = new HashMap<>();
+                resultData.put("backgroundUrl", backgroundUrl);
+                
+                return Result.success("背景图上传成功", resultData);
+            } else {
+                return Result.error(500, "用户信息更新失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "背景图上传失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 访问上传的post-background背景图
+     * @param filename 文件名
+     * @return 图片资源
+     */
+    @GetMapping("/uploads/post-background/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> servePostBackgroundFile(@PathVariable String filename) {
+        try {
+            // 拼接完整的文件路径 (添加post-background子目录)
+            String backgroundPath = fileUploadPath + "/post-background";
+            File file = new File(backgroundPath, filename);
+            
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // 将文件转换为资源
+            Resource resource = new FileSystemResource(file);
+            
+            if (resource.exists() && resource.isReadable()) {
+                // 确定内容类型
+                String contentType = determineContentType(filename);
+                
+                // 不设置Content-Disposition头，以允许浏览器直接显示图片
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * 修改用户背景图
+     * @param requestBody 请求体，包含userId和backgroundUrl
+     * @return 修改结果
+     */
+    @PostMapping("/user/update-background")
+    public Result<Object> updateUserBackground(@RequestBody Map<String, Object> requestBody) {
+        try {
+            // 1. 获取参数
+            String userId = (String) requestBody.get("userId");
+            String backgroundUrl = (String) requestBody.get("backgroundUrl");
+            
+            if (userId == null || userId.isEmpty()) {
+                return Result.error(400, "用户ID不能为空");
+            }
+            
+            if (backgroundUrl == null || backgroundUrl.isEmpty()) {
+                return Result.error(400, "背景图URL不能为空");
+            }
+            
+            // 2. 查询用户是否存在
+            User existingUser = userMapper.findById(userId);
+            if (existingUser == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            // 3. 更新用户背景图URL
+            existingUser.setBackgroundImage(backgroundUrl);
+            int rows = userMapper.updateUser(existingUser);
+            
+            if (rows > 0) {
+                // 4. 构建响应数据
+                Map<String, Object> resultData = new HashMap<>();
+                resultData.put("userId", existingUser.getUserId());
+                resultData.put("backgroundUrl", backgroundUrl);
+                
+                return Result.success("背景图更新成功", resultData);
+            } else {
+                return Result.error(500, "背景图更新失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "更新背景图失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 修改用户简介
+     * @param requestBody 请求体，包含userId和bio
+     * @return 修改结果
+     */
+    @PostMapping("/user/update-bio")
+    public Result<Object> updateUserBio(@RequestBody Map<String, Object> requestBody) {
+        try {
+            // 1. 获取参数
+            String userId = (String) requestBody.get("userId");
+            String bio = (String) requestBody.get("bio");
+            
+            if (userId == null || userId.isEmpty()) {
+                return Result.error(400, "用户ID不能为空");
+            }
+            
+            // 验证简介长度
+            if (bio != null && bio.length() > 500) {
+                return Result.error(400, "简介长度不能超过500字符");
+            }
+            
+            // 2. 查询用户是否存在
+            User existingUser = userMapper.findById(userId);
+            if (existingUser == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            // 保存旧简介，用于日志
+            String oldBio = existingUser.getBio();
+            
+            // 3. 更新用户简介
+            int rows = userMapper.updateUserBio(userId, bio);
+            
+            if (rows > 0) {
+                // 4. 构建响应数据
+                Map<String, Object> resultData = new HashMap<>();
+                resultData.put("userId", userId);
+                resultData.put("bio", bio);
+                
+                return Result.success("简介更新成功", resultData);
+            } else {
+                return Result.error(500, "简介更新失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "更新简介失败: " + e.getMessage());
         }
     }
 } 

@@ -23,7 +23,7 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-page.data-v-a8be75a7 {
+.page-container.data-v-a8be75a7 {
   overflow: hidden;
 }
 .popup-container.data-v-a8be75a7 {

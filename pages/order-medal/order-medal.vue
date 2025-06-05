@@ -894,7 +894,6 @@ const selectMedal = (medal, type) => {
         selectedItemId.value = medal.id
     }
 
-    console.log('当前选中徽章ID:', selectedItemId.value)
 }
 
 // 处理徽章点击事件 - 现在只在点击"点亮徽章"按钮时调用
@@ -965,7 +964,6 @@ const confirmActivate = async () => {
 
         uni.hideLoading()
 
-        console.log('点亮勋章响应:', response)
 
         if (response && response.data.code === 200) {
             // 显示成功提示
@@ -1009,7 +1007,6 @@ const confirmActivate = async () => {
         }
     } catch (error) {
         uni.hideLoading()
-        console.error('点亮徽章失败:', error)
         uni.showToast({
             title: '网络错误，请重试',
             icon: 'none'

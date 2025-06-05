@@ -169,7 +169,6 @@ const _sfc_main = /* @__PURE__ */ Object.assign(__default__, {
       { immediate: true }
     );
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/components/shop-detail.vue:446", "微信小程序组件挂载完成");
     });
     return (_ctx, _cache) => {
       return {

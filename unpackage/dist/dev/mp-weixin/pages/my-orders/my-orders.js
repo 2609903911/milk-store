@@ -75,12 +75,28 @@ const _sfc_main = {
     const formatTime = (timestamp) => {
       if (!timestamp)
         return "未知时间";
-      const date = new Date(timestamp);
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const hour = date.getHours();
-      const minute = date.getMinutes().toString().padStart(2, "0");
-      return `${month}月${day}日 ${hour}:${minute}`;
+      try {
+        let date;
+        if (typeof timestamp === "string") {
+          if (timestamp.includes("-")) {
+            timestamp = timestamp.replace(/-/g, "/");
+          }
+          date = new Date(timestamp);
+        } else {
+          date = new Date(timestamp);
+        }
+        if (isNaN(date.getTime())) {
+          return "未知时间";
+        }
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hour = date.getHours();
+        const minute = date.getMinutes().toString().padStart(2, "0");
+        return `${month}月${day}日 ${hour}:${minute}`;
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/my-orders/my-orders.vue:231", "日期格式化错误:", error);
+        return "未知时间";
+      }
     };
     const getStatusText = (status) => {
       const statusMap = {

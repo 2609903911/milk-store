@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "社区",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "post-card": "./c-cpns/post-card/post-card"
+  }
+}

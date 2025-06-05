@@ -1,7 +1,9 @@
 package com.milkstore.service.impl;
 
 import com.milkstore.entity.Order;
+import com.milkstore.entity.User;
 import com.milkstore.mapper.OrderMapper;
+import com.milkstore.mapper.UserMapper;
 import com.milkstore.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     @Transactional
@@ -48,6 +53,20 @@ public class OrderServiceImpl implements OrderService {
             int rows = orderMapper.insert(order);
             
             if (rows > 0) {
+                // 订单创建成功后，增加用户熊猫币
+                String userId = order.getUserId();
+                User user = userMapper.findById(userId);
+                
+                if (user != null) {
+                    // 计算新的熊猫币余额 = 当前余额 + 订单总金额
+                    int currentCoins = user.getPandaCoins();
+                    int addCoins = order.getTotalAmount().intValue();
+                    int newCoins = currentCoins + addCoins;
+                    
+                    // 更新用户熊猫币余额
+                    userMapper.updateCoins(userId, newCoins);
+                }
+                
                 result.put("success", true);
                 result.put("orderId", order.getOrderId());
                 result.put("message", "订单创建成功");
@@ -82,7 +101,29 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public boolean payOrder(String orderId, String paymentMethod) {
-        return orderMapper.updatePayment(orderId, paymentMethod) > 0;
+        // 获取订单信息
+        Order order = orderMapper.findByOrderId(orderId);
+        if (order != null) {
+            // 更新订单支付状态
+            boolean updateSuccess = orderMapper.updatePayment(orderId, paymentMethod) > 0;
+            
+            if (updateSuccess) {
+                // 获取用户信息
+                User user = userMapper.findById(order.getUserId());
+                if (user != null) {
+                    // 计算新的熊猫币余额 = 当前余额 + 实付金额
+                    int currentCoins = user.getPandaCoins();
+                    int addCoins = order.getActualAmount().intValue();
+                    int newCoins = currentCoins + addCoins;
+                    
+                    // 更新用户熊猫币余额
+                    userMapper.updateCoins(order.getUserId(), newCoins);
+                }
+            }
+            
+            return updateSuccess;
+        }
+        return false;
     }
 
     @Override

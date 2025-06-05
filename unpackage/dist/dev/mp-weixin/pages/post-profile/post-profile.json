@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "用户主页",
+  "navigationStyle": "default",
+  "usingComponents": {
+    "profile-header": "./c-cpns/profile-header/profile-header",
+    "profile-stats": "./c-cpns/profile-stats/profile-stats",
+    "profile-tabs": "./c-cpns/profile-tabs/profile-tabs",
+    "profile-posts": "./c-cpns/profile-posts/profile-posts"
+  }
+}

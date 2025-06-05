@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "帖子详情",
+  "navigationStyle": "default",
+  "usingComponents": {
+    "image-swiper": "./c-cpns/image-swiper/image-swiper",
+    "product-info": "./c-cpns/product-info/product-info",
+    "comment-section": "./c-cpns/comment-section/comment-section",
+    "shop-detail": "../components/shop-detail"
+  }
+}

@@ -5,6 +5,10 @@
     "pages/order/order",
     "pages/my-orders/my-orders",
     "pages/profile/profile",
+    "pages/community/community",
+    "pages/post-detail/post-detail",
+    "pages/post-create/post-create",
+    "pages/post-profile/post-profile",
     "pages/order-confirm/order-confirm",
     "pages/map/map",
     "pages/map-city/map-city",
@@ -44,6 +48,12 @@
         "iconPath": "/static/tabbar/order.png",
         "selectedIconPath": "/static/tabbar/order-active.png",
         "text": "点单"
+      },
+      {
+        "pagePath": "pages/community/community",
+        "iconPath": "/static/tabbar/community.png",
+        "selectedIconPath": "/static/tabbar/community-active.png",
+        "text": "广场"
       },
       {
         "pagePath": "pages/my-orders/my-orders",

@@ -82,10 +82,7 @@ const _sfc_main = {
           if (responseData.birthday) {
             const birthdayDate = new Date(responseData.birthday);
             const year = birthdayDate.getFullYear();
-            const month = String(birthdayDate.getMonth() + 1).padStart(
-              2,
-              "0"
-            );
+            const month = String(birthdayDate.getMonth() + 1).padStart(2, "0");
             const day = String(birthdayDate.getDate()).padStart(2, "0");
             formattedBirthday = `${year}-${month}-${day}`;
           }
@@ -248,7 +245,6 @@ const _sfc_main = {
             title: "上传头像中..."
           });
           const fullUploadUrl = utils_api_config.getFullUrl(utils_api_config.API_PATHS.USER_AVATAR_UPLOAD);
-          common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:519", "上传URL:", fullUploadUrl);
           common_vendor.index.uploadFile({
             url: fullUploadUrl,
             // 使用完整URL
@@ -260,11 +256,9 @@ const _sfc_main = {
             success: (uploadRes) => {
               var _a;
               try {
-                common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:531", "上传结果:", uploadRes.data);
                 const result = JSON.parse(uploadRes.data);
                 if (result.code === 200 && ((_a = result.data) == null ? void 0 : _a.avatarUrl)) {
                   let serverAvatarUrl = result.data.avatarUrl;
-                  common_vendor.index.__f__("log", "at pages/personal-data/personal-data.vue:536", "服务器返回的头像URL:", serverAvatarUrl);
                   if (serverAvatarUrl.startsWith("/")) {
                     serverAvatarUrl = utils_api_config.getFullUrl(serverAvatarUrl);
                   }
@@ -285,7 +279,6 @@ const _sfc_main = {
                   });
                 }
               } catch (e) {
-                common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:565", "解析上传结果失败:", e, uploadRes.data);
                 common_vendor.index.showToast({
                   title: "服务器返回数据格式错误",
                   icon: "none"
@@ -293,7 +286,6 @@ const _sfc_main = {
               }
             },
             fail: (err) => {
-              common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:573", "上传失败:", err);
               common_vendor.index.showToast({
                 title: "上传失败，请稍后再试",
                 icon: "none"
@@ -303,11 +295,12 @@ const _sfc_main = {
               common_vendor.index.hideLoading();
             }
           });
+        },
+        fail: (err) => {
         }
       });
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("error", "at pages/personal-data/personal-data.vue:589", "头像加载失败:", userInfo.value.avatar);
       userInfo.value.avatar = "/static/images/avatar.png";
     };
     return (_ctx, _cache) => {
@@ -317,7 +310,7 @@ const _sfc_main = {
         b: userInfo.value.avatar.startsWith("http") ? userInfo.value.avatar : common_vendor.unref(utils_api_config.getFullUrl)(userInfo.value.avatar) || "/static/images/avatar.png",
         c: common_vendor.o(handleAvatarError),
         d: common_vendor.o(chooseAvatar),
-        e: common_assets._imports_0$9,
+        e: common_assets._imports_0$10,
         f: userInfo.value.nickname,
         g: common_vendor.o(($event) => userInfo.value.nickname = $event.detail.value),
         h: common_vendor.t(formatPhone(userInfo.value.phone)),

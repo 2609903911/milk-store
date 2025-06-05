@@ -1,7 +1,7 @@
 // 产品分类API服务
 
-import { get } from './request';
-import { API_PATHS } from './config';
+import { get } from "./request";
+import { API_PATHS } from "./config";
 
 /**
  * 获取所有产品分类
@@ -12,7 +12,6 @@ export const fetchCategories = async () => {
     const response = await get(API_PATHS.CATEGORIES);
     return response || [];
   } catch (error) {
-    console.error('获取产品分类数据失败:', error);
     throw error;
   }
 };
@@ -25,13 +24,12 @@ export const fetchCategories = async () => {
 export const fetchCategoryById = async (id) => {
   try {
     if (!id && id !== 0) {
-      throw new Error('分类ID不能为空');
+      throw new Error("分类ID不能为空");
     }
-    
+
     const response = await get(`${API_PATHS.CATEGORY_BY_ID}/${id}`);
     return response;
   } catch (error) {
-    console.error(`获取分类ID=${id}的数据失败:`, error);
     throw error;
   }
-}; 
+};

@@ -9,6 +9,8 @@ const createDefaultUserData = () => {
     token: "",
     nickname: "游客",
     avatar: "/static/images/avatar.png",
+    backgroundImage: "/static/images/profile-background.jpg",
+    bio: "记录生活的点滴，热爱分享☀",
     phone: "",
     gender: "unknown",
     birthday: null,
@@ -17,6 +19,12 @@ const createDefaultUserData = () => {
     memberLevel: 1,
     createTime: null,
     lastLoginTime: null,
+    followingCount: 0,
+    // 关注数
+    followersCount: 0,
+    // 粉丝数
+    likesReceivedCount: 0,
+    // 获赞数
     medals: [],
     coupons: [],
     addresses: [],
@@ -26,12 +34,13 @@ const createDefaultUserData = () => {
 const userData = common_vendor.reactive(createDefaultUserData());
 const fetchUserDataFromServer = async () => {
   if (!userData.userId) {
-    common_vendor.index.__f__("log", "at utils/userData.js:38", "没有用户ID，无法获取用户数据");
     return false;
   }
   try {
     userData.isLoading = true;
-    const result = await utils_api_request.get(`${utils_api_config.API_PATHS.USER_PROFILE}?userId=${userData.userId}`);
+    const result = await utils_api_request.get(
+      `${utils_api_config.API_PATHS.USER_PROFILE}?userId=${userData.userId}`
+    );
     if (result.code === 200 && result.data) {
       const serverUserData = result.data;
       if (serverUserData.addresses && serverUserData.addresses.length > 0) {
@@ -43,8 +52,15 @@ const fetchUserDataFromServer = async () => {
           userData[key] = serverUserData[key] || userData[key];
         }
       });
+      userData.followingCount = serverUserData.followingCount || 0;
+      userData.followersCount = serverUserData.followersCount || 0;
+      userData.likesReceivedCount = serverUserData.likesReceivedCount || 0;
+      userData.backgroundImage = serverUserData.backgroundImage || "/static/images/profile-background.jpg";
+      userData.bio = serverUserData.bio || "记录生活的点滴，热爱分享☀";
       try {
-        const medalsResult = await utils_api_request.get(`${utils_api_config.API_PATHS.USER_MEDALS}/${userData.userId}`);
+        const medalsResult = await utils_api_request.get(
+          `${utils_api_config.API_PATHS.USER_MEDALS}/${userData.userId}`
+        );
         if (medalsResult.code === 200 && medalsResult.data) {
           userData.medals = medalsResult.data;
         } else {
@@ -52,7 +68,9 @@ const fetchUserDataFromServer = async () => {
       } catch (medalsError) {
       }
       try {
-        const couponsResult = await utils_api_request.get(`${utils_api_config.API_PATHS.USER_COUPONS}/${userData.userId}/with-template`);
+        const couponsResult = await utils_api_request.get(
+          `${utils_api_config.API_PATHS.USER_COUPONS}/${userData.userId}/with-template`
+        );
         if (couponsResult.code === 200 && couponsResult.data) {
           userData.coupons = couponsResult.data;
         } else {
@@ -76,14 +94,11 @@ const initUserData = async () => {
       userData.userId = storedUserData.userId;
       userData.token = storedUserData.token || "";
       await fetchUserDataFromServer();
-      common_vendor.index.__f__("log", "at utils/userData.js:119", "已初始化用户数据");
       return true;
     } else {
-      common_vendor.index.__f__("log", "at utils/userData.js:122", "未找到用户数据，使用默认值");
       return false;
     }
   } catch (error) {
-    common_vendor.index.__f__("error", "at utils/userData.js:126", "初始化用户数据失败", error);
     return false;
   }
 };
